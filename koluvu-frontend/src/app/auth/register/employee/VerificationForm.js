@@ -43,7 +43,7 @@ export default function VerificationForm({
 
         // Send OTP via Django backend for email
         const response = await fetch(
-          "http://127.0.0.1:8000/api/auth/send-otp/",
+          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}/api/auth/send-otp/`,
           {
             method: "POST",
             headers: {
@@ -78,7 +78,7 @@ export default function VerificationForm({
 
         // Send OTP via Django backend for mobile
         const response = await fetch(
-          "http://127.0.0.1:8000/api/auth/send-otp/",
+          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}/api/auth/send-otp/`,
           {
             method: "POST",
             headers: {
@@ -121,7 +121,7 @@ export default function VerificationForm({
       if (verificationType === "email") {
         // Verify email OTP via Django backend
         const response = await fetch(
-          "http://127.0.0.1:8000/api/auth/verify-otp/",
+          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}/api/auth/verify-otp/`,
           {
             method: "POST",
             headers: {
@@ -149,7 +149,7 @@ export default function VerificationForm({
       } else {
         // Verify mobile OTP via Django backend
         const response = await fetch(
-          "http://127.0.0.1:8000/api/auth/verify-otp/",
+          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}/api/auth/verify-otp/`,
           {
             method: "POST",
             headers: {
