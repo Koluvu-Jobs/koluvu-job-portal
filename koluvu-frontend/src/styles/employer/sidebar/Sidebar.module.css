@@ -1,0 +1,540 @@
+/* src/styles/employer/sidebar/Sidebar.module.css */
+
+.sidebarContainer {
+  background: linear-gradient(135deg, #07001a, #00061f);
+  height: 100vh;
+  min-height: 100dvh;
+  width: 320px;
+  position: relative;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.dark .sidebarContainer {
+  background: linear-gradient(135deg, #0b1120, #111827);
+}
+
+.sidebarContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg,
+    rgba(229, 91, 19, 0.08) 0%,
+    rgba(229, 91, 19, 0.04) 50%,
+    rgba(255, 255, 255, 0.02) 100%);
+  pointer-events: none;
+}
+
+.dark .sidebarContainer::before {
+  background: linear-gradient(45deg,
+    rgba(229, 91, 19, 0.06) 0%,
+    rgba(229, 91, 19, 0.03) 50%,
+    rgba(255, 255, 255, 0.01) 100%);
+}
+
+.gradientText {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .gradientText {
+  background: linear-gradient(135deg, #e5e7eb 0%, #f9fafb 100%);
+}
+
+.categoryButton {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 4px;
+}
+
+.dark .categoryButton {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.categoryButton:hover {
+  background: #e55b13;
+  transform: translateX(6px);
+  border-color: #e55b13;
+  box-shadow: none;
+  border-width: 2px;
+  color: #ffffff;
+}
+
+.dark .categoryButton:hover {
+  background: #e55b13;
+}
+
+.menuItem {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  margin-bottom: 2px;
+}
+
+.dark .menuItem {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.menuItem:hover {
+  background: #e55b13;
+  transform: translateX(4px) scale(1.02);
+  box-shadow: none;
+  border-color: #e55b13;
+  border-width: 2px;
+  color: #ffffff;
+}
+
+.dark .menuItem:hover {
+  background: rgba(229, 91, 19, 0.25);
+}
+
+.menuItemActive {
+  background: #e55b13;
+  color: #ffffff;
+  border-color: #e55b13;
+  box-shadow: 0 4px 20px rgba(229, 91, 19, 0.4);
+  position: relative;
+  border-width: 2px;
+}
+
+.menuItemActive::before {
+  content: '';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: #f6a21e;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(246, 162, 30, 0.8);
+}
+
+.dark .menuItemActive {
+  background: #e55b13;
+  border-color: #e55b13;
+}
+
+.profileSection {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.5rem 1rem;
+  flex-shrink: 0;
+}
+
+.dark .profileSection {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.footerSection {
+  background: transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 1rem;
+  flex-shrink: 0;
+}
+
+.dark .footerSection {
+  background: transparent;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Icon Styles */
+.iconBase {
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.iconActive {
+  color: #ffffff;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+}
+
+.iconInactive {
+  color: #d1d5db;
+  transition: all 0.3s ease;
+}
+
+.menuItem:hover .iconInactive {
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+/* Category Icon Container */
+.categoryIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 12px;
+  margin-right: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.categoryButton:hover .categoryIcon {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #e55b13;
+  transform: scale(1.05);
+  border-width: 2px;
+}
+
+.menuItemActive .categoryIcon {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Submenu Item Icon */
+.submenuIcon {
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.menuItem:hover .submenuIcon {
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.menuItemActive .submenuIcon {
+  color: #ffffff;
+}
+
+/* Active Indicator Dot */
+.activeIndicator {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: #f6a21e;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(246, 162, 30, 0.8);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.menuItemActive .activeIndicator {
+  opacity: 1;
+}
+
+/* Chevron Animation */
+.chevron {
+  transition: all 0.3s ease;
+  color: #d1d5db;
+}
+
+.categoryButton:hover .chevron {
+  color: #e55b13;
+}
+
+.chevronActive {
+  color: #f6a21e;
+  transform: rotate(180deg);
+}
+
+/* Badge Styles */
+.badge {
+  background: linear-gradient(135deg, #ef4444 0%, #ec4899 100%);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  margin-left: auto;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Profile Section */
+.profileImage {
+  border: 4px solid rgba(229, 91, 19, 0.3);
+  box-shadow: 0 4px 20px rgba(229, 91, 19, 0.3);
+  transition: all 0.3s ease;
+}
+
+.profileImage:hover {
+  border-color: rgba(229, 91, 19, 0.6);
+  box-shadow: 0 6px 25px rgba(229, 91, 19, 0.4);
+  transform: scale(1.05);
+}
+
+.onlineStatus {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
+}
+
+.premiumBadge {
+  background: linear-gradient(135deg, #f6a21e 0%, #e55b13 100%);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 2px 12px rgba(229, 91, 19, 0.4);
+  font-size: 0.8rem;
+  padding: 0.3rem 0.8rem;
+}
+
+/* Button Styles */
+.settingsButton {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.settingsButton:hover {
+  background: #e55b13;
+  border-color: #e55b13;
+  transform: translateX(4px);
+  border-width: 2px;
+  color: #ffffff;
+}
+
+.signOutButton {
+  background: linear-gradient(135deg, #ef4444 0%, #e11d48 100%);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(225, 29, 72, 0.3);
+}
+
+.signOutButton:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #be123c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.4);
+}
+
+/* Floating Elements */
+.floatingElement1 {
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  width: 80px;
+  height: 80px;
+  background: rgba(229, 91, 19, 0.05);
+  border-radius: 50%;
+  animation: floatElement1 8s ease-in-out infinite;
+}
+
+.floatingElement2 {
+  position: absolute;
+  bottom: 20%;
+  left: 5%;
+  width: 60px;
+  height: 60px;
+  background: rgba(229, 91, 19, 0.03);
+  border-radius: 50%;
+  animation: floatElement2 10s ease-in-out infinite;
+}
+
+@keyframes floatElement1 {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-15px, -15px) rotate(120deg); }
+  66% { transform: translate(15px, 15px) rotate(240deg); }
+}
+
+@keyframes floatElement2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(20px, -20px) scale(1.1); }
+}
+
+/* Close Button */
+.closeBtn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(229, 91, 19, 0.3);
+  transform: rotate(90deg);
+  border-color: rgba(229, 91, 19, 0.5);
+  border-width: 2px;
+}
+
+/* Custom Scrollbar */
+.scrollbarCustom {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(229, 91, 19, 0.5) transparent;
+}
+
+.scrollbarCustom::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbarCustom::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 10px 0;
+}
+
+.scrollbarCustom::-webkit-scrollbar-thumb {
+  background: rgba(229, 91, 19, 0.5);
+  border-radius: 3px;
+}
+
+.scrollbarCustom::-webkit-scrollbar-thumb:hover {
+  background: rgba(229, 91, 19, 0.7);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .sidebarContainer {
+    width: 100vw;
+    max-width: 698px;
+    min-height: 100dvh;
+    height: 100dvh;
+  }
+
+  /* Mobile scrollbar styling */
+  .scrollbarCustom::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  .scrollbarCustom::-webkit-scrollbar-thumb {
+    background: rgba(229, 91, 19, 0.8);
+    border-radius: 6px;
+  }
+
+  .scrollbarCustom::-webkit-scrollbar-thumb:hover {
+    background: rgba(229, 91, 19, 1);
+  }
+  
+  .categoryButton {
+    padding: 1rem;
+    margin-bottom: 2px;
+    font-size: 1rem;
+  }
+  
+  .menuItem {
+    padding: 0.75rem 1rem;
+    margin-bottom: 1px;
+    font-size: 0.95rem;
+  }
+  
+  .profileSection {
+    padding: 1.5rem 1rem;
+  }
+  
+  .premiumBadge {
+    font-size: 0.9rem;
+    padding: 0.4rem 1rem;
+  }
+  
+  /* Ensure all content is visible on mobile when sidebar is open */
+  .sidebarContainer.mobile-open .profileSection h2,
+  .sidebarContainer.mobile-open .profileSection p,
+  .sidebarContainer.mobile-open .premiumBadge,
+  .sidebarContainer.mobile-open .footer-buttons {
+    opacity: 1 !important;
+    height: auto !important;
+    width: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  
+  /* Footer buttons specific mobile styling */
+  .footer-buttons {
+    position: relative;
+    z-index: 10;
+    background: linear-gradient(135deg, #07001a, #00061f);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebarContainer {
+    max-width: 80vw;
+  }
+  
+  .categoryIcon {
+    width: 2rem;
+    height: 2rem;
+    margin-right: 0.5rem;
+  }
+  
+  .iconBase {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+  
+  .profileSection {
+    padding: 1rem;
+  }
+  
+  .profileImage {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .premiumBadge {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+  }
+  
+  /* Ensure logout button is always visible on mobile */
+  .signOutButton {
+    opacity: 1 !important;
+    display: flex !important;
+    visibility: visible !important;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .floatingElement1,
+  .floatingElement2 {
+    animation: none;
+  }
+  
+  .categoryButton,
+  .menuItem,
+  .settingsButton,
+  .signOutButton {
+    transition: none;
+  }
+}
+
+/* Mobile-specific optimizations */
+.mobile-optimized {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Ensure proper scrolling on mobile */
+@media (max-width: 768px) {
+  .sidebarContainer {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebarContainer > div {
+    overflow: visible;
+  }
+  
+  /* Force logout button to be visible */
+  .sidebarContainer:not(.collapsed) .signOutButton span {
+    opacity: 1 !important;
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+/* Desktop view: expand height to content */
+@media (min-width: 769px) {
+  .sidebarContainer {
+    height: auto;
+  }
+}

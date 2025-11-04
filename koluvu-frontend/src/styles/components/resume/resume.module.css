@@ -1,0 +1,238 @@
+/* src/styles/employee/resume-builder.module.css */
+
+.container {
+  background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  padding: 0.5rem;
+}
+
+.titleSection {
+  text-align: center;
+  margin-bottom: 1rem;
+  padding: 0 0.5rem;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+  background: linear-gradient(to right, #3b82f6, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.tabContainer {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.tabButton {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.tabButton:hover {
+  color: #3b82f6;
+}
+
+.tabButton.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+  font-weight: 600;
+}
+
+.section {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.inputField {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.textareaField {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  min-height: 80px;
+  transition: border-color 0.2s;
+  resize: vertical;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.button-primary {
+  background: linear-gradient(to right, #3b82f6, #6366f1);
+  color: white;
+  border: none;
+}
+
+.button-primary:hover {
+  background: linear-gradient(to right, #2563eb, #4f46e5);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
+}
+
+.button-secondary {
+  background: white;
+  color: #3b82f6;
+  border: 1px solid #bfdbfe;
+}
+
+.button-secondary:hover {
+  background: #f8fafc;
+  transform: translateY(-1px);
+  border-color: #93c5fd;
+}
+
+.button-gray {
+  background: white;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.button-gray:hover {
+  background: #f8fafc;
+  color: #475569;
+  transform: translateY(-1px);
+  border-color: #cbd5e1;
+}
+
+.loadingSpinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Template styles */
+.template-option {
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.template-option:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px -3px rgba(0, 0, 0, 0.1);
+}
+
+.template-option.selected {
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .title {
+    font-size: 1rem;
+  }
+  
+  .subtitle {
+    font-size: 0.65rem;
+  }
+  
+  .tabButton {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.65rem;
+  }
+  
+  .section {
+    padding: 0.75rem;
+  }
+  
+  .inputField, .textareaField {
+    font-size: 0.65rem;
+    padding: 0.4rem;
+  }
+  
+  .button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .title {
+    font-size: 0.9rem;
+  }
+  
+  .subtitle {
+    font-size: 0.6rem;
+  }
+  
+  .tabButton {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.6rem;
+  }
+  
+  .section {
+    padding: 0.5rem;
+  }
+  
+  .inputField, .textareaField {
+    font-size: 0.6rem;
+    padding: 0.3rem;
+  }
+  
+  .button {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.6rem;
+  }
+}
+
+@media print {
+  .tabContainer, .formActions {
+    display: none !important;
+  }
+}

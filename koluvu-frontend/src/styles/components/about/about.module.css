@@ -1,0 +1,61 @@
+
+
+/* src/styles/components/about/about.module.css */
+
+.fadeIn {
+  animation: fadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.parallaxBg {
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+  background-image: 
+    linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0.98)),
+    url('/images/about/dots-pattern.svg');
+}
+
+.ctaGlow {
+  position: relative;
+}
+
+.ctaGlow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(37, 99, 235, 0.2) 0%, transparent 70%);
+  z-index: -1;
+  animation: pulse 8s infinite alternate;
+}
+
+.gradientMeshLight {
+  background-image: 
+    radial-gradient(at 10% 20%, rgba(59, 130, 246, 0.05) 0, transparent 30%),
+    radial-gradient(at 90% 80%, rgba(29, 78, 216, 0.05) 0, transparent 30%);
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.7; }
+}
+
+@media (max-width: 768px) {
+  .parallaxBg {
+    background-attachment: scroll;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}

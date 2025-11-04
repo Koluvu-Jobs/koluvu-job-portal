@@ -1,0 +1,202 @@
+/* app/interview-scheduler/interview-scheduler.module.css */
+
+/* Animation for live indicator pulse */
+.pulseIndicator {
+  position: relative;
+}
+
+.pulseIndicator::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: pulse 2s infinite;
+  opacity: 0.7;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Interview type card transitions */
+.interviewTypeCard {
+  transition: all 0.2s ease-in-out;
+  transform-origin: center;
+}
+
+.interviewTypeCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.interviewTypeCard.selected {
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* Time slot transitions */
+.timeSlot {
+  transition: all 0.15s ease;
+}
+
+.timeSlot:hover {
+  transform: translateY(-1px);
+}
+
+.timeSlot.selected {
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+/* Avatar group styling */
+.avatarGroup {
+  display: flex;
+}
+
+.avatarGroup .avatar {
+  transition: transform 0.2s ease;
+  border: 2px solid white;
+  margin-left: -0.75rem;
+}
+
+.avatarGroup .avatar:first-child {
+  margin-left: 0;
+}
+
+.avatarGroup .avatar:hover {
+  transform: translateY(-2px);
+  z-index: 10;
+}
+
+/* Form input focus states */
+.formInput:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+}
+
+/* Button transitions */
+.actionButton {
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover {
+  transform: translateY(-1px);
+}
+
+/* Card hover effects */
+.cardHover {
+  transition: all 0.2s ease;
+}
+
+.cardHover:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Divider with gradient */
+.gradientDivider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.1), transparent);
+}
+
+/* Scrollbar styling for dropdowns */
+.customScrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.customScrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.customScrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+.customScrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Animation for loading state */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingSpinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Custom checkbox styling */
+.customCheckbox {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 1.2em;
+  height: 1.2em;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25em;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.customCheckbox:checked {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.customCheckbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Tag styling */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25em 0.75em;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.tagAvailable {
+  background-color: rgba(72, 187, 120, 0.1);
+  color: #48bb78;
+}
+
+.tagBusy {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .responsiveGrid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  
+  .responsiveStack {
+    flex-direction: column;
+  }
+}

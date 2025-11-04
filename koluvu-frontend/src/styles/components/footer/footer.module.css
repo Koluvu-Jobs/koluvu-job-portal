@@ -1,0 +1,73 @@
+/* src/styles/components/footer/footer.module.css */
+.footer {
+  background-color: #28a745;
+  color: white;
+  padding: 30px 5%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.footerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.footerSection {
+  flex: 1;
+  min-width: 180px;
+}
+
+.footer h3 {
+  border-bottom: 1px solid white;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.footer a,
+.footer p {
+  color: white;
+  text-decoration: none;
+  display: block;
+  margin: 8px 0;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+.footer a:hover {
+  color: #f8f9fa;
+  padding-left: 4px;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.socialLink img {
+  filter: invert(1); /* Makes SVG icons white */
+}
+
+.copyright {
+  text-align: center;
+  background-color: orange;
+  color: white;
+  padding: 12px;
+  font-size: 0.8rem;
+}
+
+/* Media queries related to footer */
+@media screen and (max-width: 480px) {
+  .footer h3 {
+    font-size: 1rem;
+  }
+
+  .footer a,
+  .footer p {
+    font-size: 0.85rem;
+  }
+}

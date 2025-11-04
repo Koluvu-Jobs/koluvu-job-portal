@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ project_name }} — Home</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+        padding: 2rem;
+      }
+      header {
+        margin-bottom: 1rem;
+      }
+      .notice {
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>{{ project_name }}</h1>
+      <p class="notice">
+        This is a lightweight Django homepage for development.
+      </p>
+    </header>
+
+    <section>
+      <p>
+        The backend serves API endpoints under <code>/api/</code>. For the
+        frontend app, open
+        <a href="https://koluvu-job-portal.netlify.app/">frontend</a>.
+      </p>
+      <ul>
+        <li><a href="/admin/">Admin</a></li>
+        <li><a href="/api/companies/">Companies (legacy)</a></li>
+      </ul>
+    </section>
+  </body>
+</html>

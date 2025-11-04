@@ -1,0 +1,247 @@
+/* src/styles/employer/verification/verification.module.css */
+.verificationContainer {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+}
+
+.verificationContent {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.mainTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a73e8;
+  margin-bottom: 1rem;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.priceText {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #34a853;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.subText {
+  font-size: 1rem;
+  color: #5f6368;
+  font-style: italic;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.infoCard {
+  background: #e8f0fe;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #d2e3fc;
+  transition: transform 0.2s;
+}
+
+.infoCard:hover {
+  transform: translateY(-2px);
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a73e8;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cardText {
+  font-size: 1rem;
+  color: #3c4043;
+  line-height: 1.6;
+}
+
+.benefitsSection {
+  margin-bottom: 1.5rem;
+}
+
+.benefitsTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #34a853;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.benefitsList {
+  list-style-type: none;
+  padding-left: 0;
+  color: #3c4043;
+  line-height: 1.6;
+}
+
+.benefitsList li {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.benefitsList li:before {
+  content: "•";
+  color: #34a853;
+  font-weight: bold;
+  font-size: 1.2rem;
+  position: absolute;
+  left: 0;
+  top: -1px;
+}
+
+.benefitsList strong {
+  color: #202124;
+}
+
+.jobSeekerCard {
+  background: #fef7e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #fde293;
+  transition: transform 0.2s;
+}
+
+.jobSeekerCard:hover {
+  transform: translateY(-2px);
+}
+
+.jobSeekerTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f9ab00;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.jobSeekerText {
+  font-style: italic;
+  color: #3c4043;
+}
+
+.lifetimeCard {
+  background: #e6f4ea;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #b6e2c1;
+  transition: transform 0.2s;
+}
+
+.lifetimeCard:hover {
+  transform: translateY(-2px);
+}
+
+.lifetimeTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #34a853;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.lifetimeText {
+  color: #3c4043;
+}
+
+.ctaSection {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.verifyButton {
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  border: none;
+  background: #34a853;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1.1rem;
+  min-width: 250px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 10px rgba(52, 168, 83, 0.3);
+}
+
+.verifyButton:hover {
+  background: #2d9248;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
+}
+
+.verifyButton:active {
+  transform: translateY(0);
+}
+
+.verifyButton:disabled {
+  background: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Loading spinner */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loadingSpinner {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 2px solid white;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+}
+
+@media (max-width: 768px) {
+  .verificationContainer {
+    padding: 1rem;
+  }
+  
+  .verificationContent {
+    padding: 1.5rem;
+  }
+  
+  .mainTitle {
+    font-size: 1.8rem;
+  }
+  
+  .priceText {
+    font-size: 1.3rem;
+  }
+  
+  .verifyButton {
+    min-width: 200px;
+    padding: 0.8rem 1.5rem;
+  }
+}

@@ -1,0 +1,171 @@
+.jobListingsWrapper {
+  background: #f8fafc;
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+.jobListingsBgPrimary {}
+.jobListingsBgSecondary {}
+.jobListingsFloat1 {}
+.jobListingsFloat2 {}
+
+.jobListingsContainer {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.jobListingsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.jobListingsTitleWrapper {}
+.jobListingsTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+.jobListingsTitleUnderline {
+  width: 60px;
+  height: 4px;
+  background: #2563eb;
+  border-radius: 2px;
+  margin-top: 0.5rem;
+}
+
+.jobListingsButton {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+.jobListingsButton:hover {
+  background: #1d4ed8;
+}
+.jobListingsButtonIcon {}
+.rotated { transform: rotate(180deg); }
+
+.jobListingsTableContainer {
+  overflow-x: auto;
+}
+.jobListingsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+.jobListingsTableHeader th {
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+.jobListingsTableCell {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.jobListingsTableRow {
+  transition: background 0.2s;
+}
+.jobListingsTableRow:hover {
+  background: #f3f4f6;
+}
+
+.jobApplicantLink {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.jobApplicantLink:hover {
+  text-decoration: underline;
+}
+
+.jobStatusBadge {
+  display: inline-block;
+  padding: 0.3em 0.8em;
+  border-radius: 1em;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+.jobStatusActive {
+  background: #d1fae5;
+  color: #065f46;
+}
+.jobStatusClosingSoon {
+  background: #fef3c7;
+  color: #92400e;
+}
+.jobStatusClosed {
+  background: #fca5a5;
+  color: #991b1b;
+}
+.jobStatusDraft {
+  background: #e0e7ef;
+  color: #64748b;
+}
+
+.jobActionButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+  margin-right: 0.2rem;
+  font-size: 1.1rem;
+  color: #64748b;
+  transition: color 0.2s;
+}
+.jobActionButtonView:hover {
+  color: #2563eb;
+}
+.jobActionButtonEdit:hover {
+  color: #f59e42;
+}
+.jobActionButtonDelete:hover {
+  color: #ef4444;
+}
+
+.jobListingsPagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+.jobListingsPaginationText {
+  color: #64748b;
+  font-size: 1rem;
+}
+.jobListingsPaginationButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+.jobListingsPaginationButton {
+  background: #f1f5f9;
+  color: #334155;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.jobListingsPaginationButton:hover {
+  background: #e0e7ef;
+}

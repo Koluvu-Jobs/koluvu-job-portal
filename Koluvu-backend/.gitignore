@@ -1,0 +1,5 @@
+# .gitignore
+.env
+.env.local
+*.env
+client_secret_1063632984987-tqkse0fobaph0maqec0iccfrdukfdorp.apps.googleusercontent.com.json

@@ -1,0 +1,66 @@
+/* src/styles/components/jobs/job-card.module.css */
+
+.card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .logoContainer {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: #f3f4f6;
+  }
+  
+  .logo {
+    object-fit: contain;
+    border-radius: 0.5rem;
+  }
+  
+  .companyName {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    cursor: pointer;
+    margin-bottom: 0.25rem;
+  }
+  
+  .location {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  .details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin: 1rem 0;
+    font-size: 0.875rem;
+  }
+  
+  .detailLabel {
+    color: #6b7280;
+    font-weight: 500;
+  }
+  
+  .viewButton {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: #f3f4f6;
+    color: #374151;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
