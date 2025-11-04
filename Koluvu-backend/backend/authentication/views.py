@@ -17,7 +17,14 @@ from authentication.models import SocialAccount, UserSession
 from authentication.serializers import GoogleOAuthSerializer, AuthResponseSerializer, UserSerializer
 from employee_dashboard.models import EmployeeProfile
 from employer_dashboard.models import EmployerProfile
-from backend.partner_dashboard.models import PartnerProfile
+
+# Try to import PartnerProfile, but handle if it fails
+try:
+    from backend.partner_dashboard.models import PartnerProfile
+    PARTNER_PROFILE_AVAILABLE = True
+except ImportError:
+    PartnerProfile = None
+    PARTNER_PROFILE_AVAILABLE = False
 from django.http import HttpResponseRedirect
 import requests as http_requests
 import uuid
@@ -125,7 +132,7 @@ class GoogleOAuthView(APIView):
                         },
                         status=status.HTTP_400_BAD_REQUEST
                     )
-                if PartnerProfile.objects.filter(user=user).exists():
+                if PARTNER_PROFILE_AVAILABLE and PartnerProfile.objects.filter(user=user).exists():
                     logger.warning(f"User {email} already has a partner profile, cannot create employee profile")
                     return Response(
                         {
@@ -144,7 +151,7 @@ class GoogleOAuthView(APIView):
                         },
                         status=status.HTTP_400_BAD_REQUEST
                     )
-                if PartnerProfile.objects.filter(user=user).exists():
+                if PARTNER_PROFILE_AVAILABLE and PartnerProfile.objects.filter(user=user).exists():
                     logger.warning(f"User {email} already has a partner profile, cannot create employer profile")
                     return Response(
                         {
@@ -219,6 +226,11 @@ class GoogleOAuthView(APIView):
                         )
                         logger.info(f"Created new employer profile for user {user.email}")
                 elif user_type == 'partner':
+                    if not PARTNER_PROFILE_AVAILABLE:
+                        return Response(
+                            {'error': 'Partner registration is not available at this time.'},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE
+                        )
                     logger.info(f"Entered partner profile creation block")
                     try:
                         partner_profile = PartnerProfile.objects.get(user=user)
