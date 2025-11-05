@@ -1,0 +1,124 @@
+# ===========================================
+# CONSOLIDATED .GITIGNORE FOR KOLUVU PROJECT
+# ===========================================
+
+# Environment files with sensitive data
+.env
+.env.local
+*.env
+Koluvu AI Job Portal.env
+client_secret_1063632984987-tqkse0fobaph0maqec0iccfrdukfdorp.apps.googleusercontent.com.json
+
+# ===========================================
+# PYTHON/DJANGO (Backend)
+# ===========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ===========================================
+# NODE.JS/NEXT.JS (Frontend)
+# ===========================================
+# dependencies
+node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+.next/
+/out/
+
+# production
+/build
+
+# misc
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# ===========================================
+# DATABASE FILES
+# ===========================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ===========================================
+# LOGS
+# ===========================================
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===========================================
+# TEMPORARY FILES
+# ===========================================
+*.tmp
+*.temp
+temp/
+tmp/
+
+# ===========================================
+# ARCHIVES
+# ===========================================
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.tar
+*.gz
+
+# ===========================================
+# IDE FILES
+# ===========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===========================================
+# OS FILES
+# ===========================================
+.DS_Store
+Thumbs.db
+*.bak
