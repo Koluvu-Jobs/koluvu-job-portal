@@ -10,7 +10,8 @@ env_path = BASE_DIR.parent / '.env.local'  # This will look in koluvu-backend/.e
 load_dotenv(env_path)
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'replace-this-with-a-secure-key')
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+# Set DEBUG to False in production (Render) or when explicitly set
+DEBUG = os.getenv('DEBUG', 'False' if os.getenv('RENDER') else 'True').lower() == 'true'
 ALLOWED_HOSTS = ['*']
 
 # OAuth settings
@@ -116,18 +117,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_LOCAL_NAME', 'koluvu'),
-            'USER': os.getenv('DB_LOCAL_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_LOCAL_PASSWORD', 'mysql'),
-            'HOST': os.getenv('DB_LOCAL_HOST', 'localhost'),
-            'PORT': os.getenv('DB_LOCAL_PORT', '5432'),
-        }
-    }
-else:
+# Check if we're on Render (production) or have production DB settings
+if os.getenv('RENDER') or os.getenv('DB_PROD_HOST') or not DEBUG:
+    # Production database (Neon)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -137,6 +129,18 @@ else:
             'HOST': os.getenv('DB_PROD_HOST', ''),
             'PORT': os.getenv('DB_PROD_PORT', '5432'),
             'OPTIONS': {'sslmode': 'require'},
+        }
+    }
+else:
+    # Local development database
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_LOCAL_NAME', 'koluvu'),
+            'USER': os.getenv('DB_LOCAL_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_LOCAL_PASSWORD', 'mysql'),
+            'HOST': os.getenv('DB_LOCAL_HOST', 'localhost'),
+            'PORT': os.getenv('DB_LOCAL_PORT', '5432'),
         }
     }
 
