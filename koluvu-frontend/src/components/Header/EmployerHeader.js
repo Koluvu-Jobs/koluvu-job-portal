@@ -216,7 +216,9 @@ export const EmployerHeader = ({
         <div className="relative">
           {companyProfile.logo ? (
             <img
-              src={`${companyProfile.logo}?v=${
+              src={`${
+                process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"
+              }${companyProfile.logo}?v=${
                 employerProfile?.updated_at || Date.now()
               }`}
               alt={companyProfile.name}
@@ -232,17 +234,19 @@ export const EmployerHeader = ({
           <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
         </div>
 
-          <div className="hidden md:block text-left">
-          <div className="text-white font-medium text-xs truncate max-w-28">
+        <div className="hidden lg:block text-left min-w-0">
+          <div className="text-white font-medium text-xs truncate max-w-20 xl:max-w-28">
             {companyProfile.name}
           </div>
-          <div className="text-white/70 text-[10px]">{companyProfile.industry}</div>
+          <div className="text-white/70 text-[10px] truncate max-w-20 xl:max-w-28">
+            {companyProfile.industry}
           </div>
+        </div>
 
-          <svg
-            className={`w-3.5 h-3.5 text-white/70 transition-transform duration-200 ${
-              isCompanyMenuOpen ? "rotate-180" : ""
-            }`}
+        <svg
+          className={`w-3.5 h-3.5 text-white/70 transition-transform duration-200 ${
+            isCompanyMenuOpen ? "rotate-180" : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -276,7 +280,10 @@ export const EmployerHeader = ({
             <div className="flex items-center space-x-4">
               {companyProfile.logo ? (
                 <img
-                  src={`${companyProfile.logo}?v=${
+                  src={`${
+                    process.env.NEXT_PUBLIC_BACKEND_URL ||
+                    "http://127.0.0.1:8000"
+                  }${companyProfile.logo}?v=${
                     employerProfile?.updated_at || Date.now()
                   }`}
                   alt={companyProfile.name}
@@ -349,7 +356,9 @@ export const EmployerHeader = ({
               </span>
             </DropdownLink>
 
-            <DropdownLink href="/dashboard/employer/analytics">
+            <DropdownLink
+              href={`/dashboard/employer/${getCurrentUsername()}?tab=analytics`}
+            >
               <span className="flex items-center">
                 <svg
                   className="w-4 h-4 mr-3 text-gray-400"
@@ -368,7 +377,9 @@ export const EmployerHeader = ({
               </span>
             </DropdownLink>
 
-            <DropdownLink href="/dashboard/employer/settings">
+            <DropdownLink
+              href={`/dashboard/employer/${getCurrentUsername()}?tab=settings`}
+            >
               <span className="flex items-center">
                 <svg
                   className="w-4 h-4 mr-3 text-gray-400"
@@ -408,11 +419,15 @@ export const EmployerHeader = ({
         <img
           src={
             employerProfile?.profile_picture_url
-              ? `${employerProfile.profile_picture_url}?v=${
+              ? `${
+                  process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"
+                }${employerProfile.profile_picture_url}?v=${
                   employerProfile.updated_at || Date.now()
                 }`
               : user?.profile_picture
-              ? `${user.profile_picture}?v=${
+              ? `${
+                  process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"
+                }${user.profile_picture}?v=${
                   employerProfile?.updated_at || Date.now()
                 }`
               : user?.google_profile_picture || "/images/default-avatar.png"
@@ -467,7 +482,9 @@ export const EmployerHeader = ({
             </p>
           </div>
 
-          <DropdownLink href="/dashboard/employer/profile">
+          <DropdownLink
+            href={`/dashboard/employer/${getCurrentUsername()}/profile`}
+          >
             <span className="flex items-center">
               <svg
                 className="w-4 h-4 mr-3 text-gray-400"
@@ -486,7 +503,9 @@ export const EmployerHeader = ({
             </span>
           </DropdownLink>
 
-          <DropdownLink href="/dashboard/employer/settings">
+          <DropdownLink
+            href={`/dashboard/employer/${getCurrentUsername()}?tab=settings`}
+          >
             <span className="flex items-center">
               <svg
                 className="w-4 h-4 mr-3 text-gray-400"
@@ -552,108 +571,163 @@ export const EmployerHeader = ({
       ? "linear-gradient(135deg, rgba(250,127,4,0.95) 0%, rgba(230,114,10,0.95) 100%)"
       : "linear-gradient(135deg, #fa7f04 0%, #e6720a 100%)",
     borderBottom: "none",
-    // remove heavy shadow to avoid dark gap under header
     boxShadow: "none",
     backdropFilter: isScrolled ? "blur(20px)" : "blur(10px)",
     WebkitBackdropFilter: isScrolled ? "blur(20px)" : "blur(10px)",
-    minHeight: "56px",
+    height: "64px",
     marginBottom: 0,
   };
 
-  const innerStyles = { minHeight: "56px" };
+  const innerStyles = {
+    height: "64px",
+    display: "flex",
+    alignItems: "center",
+  };
 
   return (
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={headerStyles}
     >
-      {/* pinned logo at left corner */}
-      <div className="absolute left-3 top-0 h-full flex items-center z-50">
-        <Link href="/dashboard/employer" className="flex items-center gap-3">
-          <Image
-            src="/images/koluvu_logo.jpg"
-            alt="Koluvu"
-            width={36}
-            height={36}
-            className="rounded-lg object-cover"
-            priority
-          />
-          <div className="hidden md:block">
-            <div className="text-white font-bold text-lg">Koluvu</div>
+      <div
+        className="max-w-[1400px] mx-auto px-2 sm:px-4 h-full"
+        style={innerStyles}
+      >
+        <div className="flex items-center h-full w-full">
+          {/* Left Section - Logo & Menu Toggle */}
+          <div className="flex items-center gap-2 sm:gap-3 flex-1">
+            {/* Mobile Menu Toggle Button */}
+            {showSidebarToggle && (
+              <button
+                onClick={toggleSidebar}
+                className="lg:hidden p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all flex-shrink-0"
+                aria-label="Toggle menu"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            )}
+
+            {/* Logo */}
+            <Link
+              href={`/dashboard/employer/${getCurrentUsername()}`}
+              className="flex items-center gap-2 flex-shrink-0"
+            >
+              <Image
+                src="/images/koluvu_logo.jpg"
+                alt="Koluvu"
+                width={32}
+                height={32}
+                className="rounded-lg object-cover"
+                priority
+              />
+              <div className="hidden sm:block">
+                <div className="text-white font-bold text-base sm:text-lg">
+                  Koluvu
+                </div>
+              </div>
+            </Link>
           </div>
-        </Link>
-      </div>
-      <div className="max-w-[1400px] mx-auto px-4" style={innerStyles}>
-        <div className="flex justify-between items-center h-full">
-          {/* Left Section - Logo */}
-          <div className="flex items-center gap-4">
-            {/* spacer so center content doesn't overlap the pinned logo */}
-            <div className="w-24 md:w-36" />
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="flex items-center gap-1 text-gray-200">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  {realTimeStats.activeJobs} Active Jobs
+
+          {/* Right Section - Stats, Actions, Notifications & Profile */}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Stats - Moved to right side */}
+            <div className="hidden lg:flex items-center gap-2 mr-3">
+              <div className="flex items-center gap-1 text-xs xl:text-sm">
+                <span className="flex items-center gap-1 text-white/90">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span>{realTimeStats.activeJobs} Active</span>
                 </span>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="flex items-center gap-1 text-gray-200">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  {realTimeStats.todayViews} Views Today
+              <div className="flex items-center gap-1 text-xs xl:text-sm">
+                <span className="flex items-center gap-1 text-white/90">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                  <span>{realTimeStats.todayViews} Views</span>
                 </span>
               </div>
             </div>
-          </div>
 
-          {/* Center Section - Actions */}
-          <div className="flex items-center gap-4 transform translate-y-1">
-            <Link
-              href="/dashboard/employer?tab=post-jobs"
-              className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all flex items-center gap-2 font-medium text-white"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {/* Action Buttons */}
+            <div className="hidden sm:flex items-center gap-2 md:gap-3 mr-2">
+              <Link
+                href={`/dashboard/employer/${getCurrentUsername()}`}
+                className="bg-white/20 hover:bg-white/30 px-2 sm:px-3 lg:px-4 py-2 rounded-lg transition-all flex items-center gap-1 sm:gap-2 font-medium text-white text-xs sm:text-sm lg:text-base"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              <span>Post Job</span>
-            </Link>
-            <Link
-              href="/dashboard/employer?tab=applications"
-              className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all flex items-center gap-2 font-medium text-white"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m0 0V11a1 1 0 011-1h2a1 1 0 011 1v10m3 0a1 1 0 001-1V10M9 21h6"
+                  />
+                </svg>
+                <span className="hidden md:inline">Dashboard</span>
+              </Link>
+              <Link
+                href={`/dashboard/employer/${getCurrentUsername()}?tab=post-jobs`}
+                className="bg-white/20 hover:bg-white/30 px-2 sm:px-3 lg:px-4 py-2 rounded-lg transition-all flex items-center gap-1 sm:gap-2 font-medium text-white text-xs sm:text-sm lg:text-base"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <span>Review Applications</span>
-            </Link>
-          </div>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                <span className="hidden md:inline">Post Job</span>
+              </Link>
+              <Link
+                href={`/dashboard/employer/${getCurrentUsername()}?tab=applications`}
+                className="bg-white/20 hover:bg-white/30 px-2 sm:px-3 lg:px-4 py-2 rounded-lg transition-all flex items-center gap-1 sm:gap-2 font-medium text-white text-xs sm:text-sm lg:text-base relative"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+                <span className="hidden md:inline">Review</span>
+                {realTimeStats.pendingApplications > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                    {realTimeStats.pendingApplications}
+                  </span>
+                )}
+              </Link>
+            </div>
 
-          {/* Right Section - Profile */}
-          <div className="flex items-center gap-4 transform translate-y-1">
+            {/* Profile & Notifications */}
             <NotificationBell />
-            <div className="flex items-center gap-3">
-              <CompanyMenu />
-              <ProfileMenu />
-            </div>
+            <CompanyMenu />
+            <ProfileMenu />
           </div>
         </div>
       </div>

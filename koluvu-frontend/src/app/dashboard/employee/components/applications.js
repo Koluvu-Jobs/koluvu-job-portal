@@ -457,15 +457,6 @@ export default function Applications({ applications, isDarkMode }) {
             </div>
           </div>
 
-          {/* Right Sidebar (hidden on mobile) */}
-          <div className="w-full lg:col-span-4 xl:col-span-3">
-            <RightSidebar
-              isOpen={rightSidebarOpen}
-              onClose={() => setRightSidebarOpen(false)}
-              jobs={relatedJobs}
-              isDarkMode={isDarkMode}
-            />
-          </div>
         </div>
       </div>
 

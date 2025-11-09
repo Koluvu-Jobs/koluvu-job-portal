@@ -36,11 +36,7 @@ const OTPVerification = ({
         ...(type === "email" ? { email } : { phone }),
       };
 
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL ||
-        process.env.NEXT_PUBLIC_API_URL ||
-        "http://127.0.0.1:8000";
-      const response = await fetch(`${backendUrl}/api/auth/send-otp/`, {
+      const response = await fetch("http://127.0.0.1:8000/api/auth/send-otp/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,17 +76,16 @@ const OTPVerification = ({
         ...(type === "email" ? { email } : { phone }),
       };
 
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL ||
-        process.env.NEXT_PUBLIC_API_URL ||
-        "http://127.0.0.1:8000";
-      const response = await fetch(`${backendUrl}/api/auth/verify-otp/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/auth/verify-otp/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await response.json();
 

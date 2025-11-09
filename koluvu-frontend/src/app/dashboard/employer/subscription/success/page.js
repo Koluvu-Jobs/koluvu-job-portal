@@ -34,7 +34,10 @@ const SuccessPage = () => {
   };
 
   const goToDashboard = () => {
-    window.location.href = "/dashboard/employer";
+    const username = userDetails?.username;
+    window.location.href = username
+      ? `/dashboard/employer/${username}`
+      : "/dashboard/employer";
   };
 
   if (!userDetails || !selectedPlan) return <p>Loading...</p>;

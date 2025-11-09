@@ -11,7 +11,7 @@ import {
   FiChevronUp,
   FiEdit2,
 } from "react-icons/fi";
-
+console.log("PostJobPage rendered");
 // Predefined options
 const jobTitleOptions = [
   "Software Engineer",
@@ -240,7 +240,7 @@ function AutocompleteInput({
     </div>
   );
 }
-
+console.log("PostJobPage rendered");
 export default function PostJobPage() {
   const [formData, setFormData] = useState(initialFormData);
   const [step, setStep] = useState(1);

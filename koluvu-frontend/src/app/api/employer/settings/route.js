@@ -6,7 +6,7 @@ const API_BASE_URL =
 
 export async function GET() {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const accessToken = cookieStore.get("access_token");
 
     if (!accessToken) {
@@ -49,7 +49,7 @@ export async function GET() {
 
 export async function PATCH(request) {
   try {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const accessToken = cookieStore.get("access_token");
 
     if (!accessToken) {

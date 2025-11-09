@@ -7,6 +7,8 @@ export default function InterviewFeedbackPage() {
   const getInitialFormState = () => ({
     candidateInfo: {
       name: "",
+      email: "",
+      mobile: "",
       position: "",
       department: "",
       interviewDate: "",
@@ -57,6 +59,8 @@ export default function InterviewFeedbackPage() {
   const calculateFormCompletion = () => {
     const fields = [
       candidateInfo.name,
+      candidateInfo.email,
+      candidateInfo.mobile,
       candidateInfo.position,
       candidateInfo.department,
       candidateInfo.interviewDate,
@@ -98,7 +102,7 @@ export default function InterviewFeedbackPage() {
 
     try {
       const formData = {
-        ...candidateInfo,
+  ...candidateInfo,
         status,
         feedback,
       };
@@ -180,7 +184,35 @@ export default function InterviewFeedbackPage() {
       )}
 
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Candidate Email Address:
+            </label>
+            <input
+              type="email"
+              value={candidateInfo.email}
+              onChange={(e) =>
+                setCandidateInfo({ ...candidateInfo, email: e.target.value })
+              }
+              className="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter candidate email address"
+            />
+          </div>
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Candidate Mobile Number:
+            </label>
+            <input
+              type="tel"
+              value={candidateInfo.mobile}
+              onChange={(e) =>
+                setCandidateInfo({ ...candidateInfo, mobile: e.target.value })
+              }
+              className="w-full border border-gray-300 p-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter candidate mobile number"
+            />
+          </div>
           <div className="bg-gray-50 p-4 rounded-lg">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Candidate Name:

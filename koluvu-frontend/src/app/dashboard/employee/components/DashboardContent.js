@@ -12,8 +12,10 @@ import Messages from "./messages";
 import AppliedJobsModal from "./applied-jobs";
 import { FiBell, FiMessageSquare, FiBriefcase } from "react-icons/fi";
 import styles from "@koluvu/styles/employee/dashboard.module.css";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function DashboardContent() {
+  const { user: authUser, loading } = useAuth();
   const [windowWidth, setWindowWidth] = useState(1024);
   const [isClient, setIsClient] = useState(false);
   const [notificationsCount, setNotificationsCount] = useState(3);
@@ -23,72 +25,109 @@ export default function DashboardContent() {
   const [showMessages, setShowMessages] = useState(false);
   const [showAppliedJobsModal, setShowAppliedJobsModal] = useState(false);
   const [appliedJobs, setAppliedJobs] = useState([]);
+  const [dashboardData, setDashboardData] = useState(null);
 
-  const [user, setUser] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    title: "Senior Software Engineer",
-    company: "Tech Innovations Inc.",
-    status: "Active",
-    profileComplete: 85,
-    profilePicture: "",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
-    presentCTC: "18 LPA",
-    expectedCTC: "25 LPA",
-    workPeriod: "5 years",
-    applications: [
-      {
-        id: 1,
-        title: "Frontend Developer",
-        company: "XYZ Ltd",
-        status: "In Review",
-        appliedDate: "2025-04-15",
-      },
-      {
-        id: 2,
-        title: "Backend Engineer",
-        company: "DEF Inc",
-        status: "Interview Scheduled",
-        appliedDate: "2025-04-10",
-      },
-    ],
-    resume: {
-      summary:
-        "Experienced software engineer with 5+ years of expertise in full-stack development.",
-      experience: [
-        {
-          position: "Senior Software Engineer",
-          company: "Tech Innovations Inc.",
-          duration: "2020 - Present",
-          description:
-            "Lead development of web applications using React and Node.js.",
+  // Create dynamic user data from auth context
+  const user = authUser
+    ? {
+        name:
+          `${authUser.first_name || ""} ${authUser.last_name || ""}`.trim() ||
+          authUser.email?.split("@")[0] ||
+          "User",
+        email: authUser.email || "",
+        title: authUser.employee_profile?.current_designation || "Professional",
+        company: authUser.employee_profile?.current_company || "Your Company",
+        status: authUser.employee_profile?.is_profile_complete
+          ? "Active"
+          : "Incomplete",
+        profileComplete:
+          authUser.employee_profile?.profile_completion_percentage || 60,
+        profilePicture:
+          authUser.employee_profile?.profile_picture ||
+          authUser.google_profile_picture ||
+          "",
+        phone: authUser.employee_profile?.phone_number || "",
+        location: authUser.employee_profile?.location || "",
+        presentCTC: authUser.employee_profile?.current_ctc || "Not specified",
+        expectedCTC: authUser.employee_profile?.expected_ctc || "Not specified",
+        workPeriod:
+          authUser.employee_profile?.total_experience || "Not specified",
+        applications: dashboardData?.applications || [],
+        resume: {
+          summary:
+            authUser.employee_profile?.summary ||
+            "Experienced professional seeking new opportunities.",
+          experience: authUser.employee_profile?.experience || [
+            {
+              position: "Senior Software Engineer",
+              company: "Tech Innovations Inc.",
+              duration: "2020 - Present",
+              description:
+                "Lead development of web applications using React and Node.js.",
+            },
+          ],
+          education: authUser.employee_profile?.education || [
+            {
+              degree: "B.S. Computer Science",
+              university: "University of California",
+              year: "2018",
+            },
+          ],
+          skills: authUser.employee_profile?.skills || [
+            "JavaScript",
+            "React",
+            "Node.js",
+            "TypeScript",
+            "AWS",
+          ],
+          certifications: authUser.employee_profile?.certifications || [
+            "AWS Certified Developer - Associate",
+          ],
         },
-        {
-          position: "Software Developer",
-          company: "Digital Solutions",
-          duration: "2018 - 2020",
-          description:
-            "Developed and maintained frontend components for SaaS platform.",
+        preferences: {
+          jobTypes: authUser.employee_profile?.preferred_job_types || [
+            "Full-time",
+            "Remote",
+          ],
+          locations: authUser.employee_profile?.preferred_locations || [
+            "Remote",
+          ],
+          salaryRange:
+            authUser.employee_profile?.expected_salary || "18 - 25 LPA",
+          industries: authUser.employee_profile?.preferred_industries || [
+            "Technology",
+            "SaaS",
+          ],
         },
-      ],
-      education: [
-        {
-          degree: "B.S. Computer Science",
-          university: "University of California",
-          year: "2018",
+      }
+    : {
+        name: "Guest User",
+        email: "",
+        title: "Professional",
+        company: "Your Company",
+        status: "Incomplete",
+        profileComplete: 0,
+        profilePicture: "",
+        phone: "",
+        location: "",
+        presentCTC: "Not specified",
+        expectedCTC: "Not specified",
+        workPeriod: "Not specified",
+        applications: [],
+        resume: {
+          summary: "",
+          experience: [],
+          education: [],
+          skills: [],
+          certifications: [],
         },
-      ],
-      skills: ["JavaScript", "React", "Node.js", "TypeScript", "AWS"],
-      certifications: ["AWS Certified Developer - Associate"],
-    },
-    preferences: {
-      jobTypes: ["Full-time", "Remote"],
-      locations: ["San Francisco", "Remote"],
-      salaryRange: "18 - 25 LPA",
-      industries: ["Technology", "SaaS"],
-    },
-  });
+        preferences: {
+          jobTypes: [],
+          locations: [],
+          salaryRange: "",
+          industries: [],
+        },
+      };
 
   const recommendedJobs = [
     {
@@ -157,14 +196,6 @@ export default function DashboardContent() {
     setIsClient(true);
     setWindowWidth(window.innerWidth);
 
-    const savedProfilePicture = localStorage.getItem("profilePicture");
-    if (savedProfilePicture) {
-      setUser((prev) => ({
-        ...prev,
-        profilePicture: savedProfilePicture,
-      }));
-    }
-
     const handleResize = () => {
       setWindowWidth(window.innerWidth);
     };
@@ -172,6 +203,32 @@ export default function DashboardContent() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Fetch dashboard data when user is available
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (authUser && !loading) {
+        try {
+          // TODO: Replace with actual API endpoint
+          // const response = await fetch(`/api/dashboard/employee/${authUser.id}`);
+          // const data = await response.json();
+          // setDashboardData(data);
+
+          // For now, set some mock data based on user
+          setDashboardData({
+            applications: user.applications,
+            recentActivity: [],
+            notifications: [],
+            messages: [],
+          });
+        } catch (error) {
+          console.error("Error fetching dashboard data:", error);
+        }
+      }
+    };
+
+    fetchDashboardData();
+  }, [authUser, loading]);
 
   const getVisibleCount = () => {
     if (!isClient) return 1;
@@ -189,10 +246,8 @@ export default function DashboardContent() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const pictureDataUrl = e.target.result;
-      setUser((prev) => ({
-        ...prev,
-        profilePicture: pictureDataUrl,
-      }));
+      // TODO: Update profile picture in backend via API
+      // For now, just store in localStorage for temporary display
       if (isClient) {
         localStorage.setItem("profilePicture", pictureDataUrl);
       }
@@ -215,9 +270,11 @@ export default function DashboardContent() {
         appliedDate: new Date().toISOString().split("T")[0],
       };
 
-      setUser((prev) => ({
+      // TODO: Submit application to backend API
+      // For now, update local state
+      setDashboardData((prev) => ({
         ...prev,
-        applications: [...prev.applications, newApplication],
+        applications: [...(prev?.applications || []), newApplication],
       }));
 
       setAppliedJobs((prev) => [...prev, jobId]);
@@ -225,9 +282,13 @@ export default function DashboardContent() {
   };
 
   const handleWithdrawApplication = (applicationId) => {
-    setUser((prev) => ({
+    // TODO: Withdraw application via backend API
+    // For now, update local state
+    setDashboardData((prev) => ({
       ...prev,
-      applications: prev.applications.filter((app) => app.id !== applicationId),
+      applications: (prev?.applications || []).filter(
+        (app) => app.id !== applicationId
+      ),
     }));
   };
 
@@ -305,15 +366,15 @@ export default function DashboardContent() {
                   </div>
                 </div>
               </div>
-              <div className="mt-4 md:mt-0 flex space-x-4">
+              <div className="mt-4 md:mt-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                 <motion.button
-                  className="relative px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center space-x-2"
+                  className="relative px-3 sm:px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center justify-center space-x-2"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleShowNotifications}
                 >
                   <FiBell className="h-4 w-4" />
-                  <span>Notifications</span>
+                  <span className="hidden sm:inline">Notifications</span>
                   {notificationsCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
                       {notificationsCount}
@@ -321,13 +382,13 @@ export default function DashboardContent() {
                   )}
                 </motion.button>
                 <motion.button
-                  className="relative px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center space-x-2"
+                  className="relative px-3 sm:px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center justify-center space-x-2"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleShowMessages}
                 >
                   <FiMessageSquare className="h-4 w-4" />
-                  <span>Messages</span>
+                  <span className="hidden sm:inline">Messages</span>
                   {messagesCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
                       {messagesCount}
@@ -335,13 +396,18 @@ export default function DashboardContent() {
                   )}
                 </motion.button>
                 <motion.button
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center space-x-2"
+                  className="px-3 sm:px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium flex items-center justify-center space-x-2"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setShowAppliedJobsModal(true)}
                 >
                   <FiBriefcase className="h-4 w-4" />
-                  <span>View Applied Jobs({user.applications.length})</span>
+                  <span className="hidden sm:inline">
+                    View Applied Jobs({user.applications.length})
+                  </span>
+                  <span className="sm:hidden">
+                    Jobs({user.applications.length})
+                  </span>
                 </motion.button>
               </div>
             </div>

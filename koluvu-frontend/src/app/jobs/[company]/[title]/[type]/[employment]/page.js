@@ -132,28 +132,28 @@ export default function JobDetailPage() {
   const parseList = (val) => {
     // Handle null, undefined, or empty values
     if (val === null || val === undefined) return [];
-    
+
     // If already an array, filter empty items
     if (Array.isArray(val)) {
       return val
-        .filter(item => item !== null && item !== undefined)
-        .map(item => String(item).trim())
-        .filter(item => item !== "");
+        .filter((item) => item !== null && item !== undefined)
+        .map((item) => String(item).trim())
+        .filter((item) => item !== "");
     }
 
     // If it's a string, process it
     if (typeof val === "string") {
       // Handle empty string
       if (val.trim() === "") return [];
-      
+
       // First try to parse as JSON
       try {
         const parsed = JSON.parse(val);
         if (Array.isArray(parsed)) {
           return parsed
-            .filter(item => item !== null && item !== undefined)
-            .map(item => String(item).trim())
-            .filter(item => item !== "");
+            .filter((item) => item !== null && item !== undefined)
+            .map((item) => String(item).trim())
+            .filter((item) => item !== "");
         }
       } catch (e) {
         // Not valid JSON, continue with string parsing
@@ -162,23 +162,21 @@ export default function JobDetailPage() {
       // Split by common separators
       // Priority: newlines > commas > semicolons > pipes
       let items;
-      if (val.includes('\n')) {
+      if (val.includes("\n")) {
         items = val.split(/\n+/);
-      } else if (val.includes(',')) {
-        items = val.split(',');
-      } else if (val.includes(';')) {
-        items = val.split(';');
-      } else if (val.includes('|')) {
-        items = val.split('|');
+      } else if (val.includes(",")) {
+        items = val.split(",");
+      } else if (val.includes(";")) {
+        items = val.split(";");
+      } else if (val.includes("|")) {
+        items = val.split("|");
       } else {
         // Single item
         items = [val];
       }
-      
+
       // Clean up items
-      return items
-        .map(s => s.trim())
-        .filter(item => item !== "");
+      return items.map((s) => s.trim()).filter((item) => item !== "");
     }
 
     // For any other type, return empty array
@@ -295,44 +293,43 @@ export default function JobDetailPage() {
     () => parseList(job?.requirements),
     [job?.requirements]
   );
-  
+
   const responsibilities = useMemo(
     () => parseList(job?.responsibilities),
     [job?.responsibilities]
   );
-  
+
   const skills = useMemo(
     () => parseList(job?.skills || job?.skills_required),
     [job?.skills, job?.skills_required]
   );
-  
-  const benefits = useMemo(
-    () => parseList(job?.benefits),
-    [job?.benefits]
-  );
-  
-  const perks = useMemo(
-    () => parseList(job?.perks),
-    [job?.perks]
-  );
-  
+
+  const benefits = useMemo(() => parseList(job?.benefits), [job?.benefits]);
+
+  const perks = useMemo(() => parseList(job?.perks), [job?.perks]);
+
   const faqs = useMemo(
-    () => Array.isArray(job?.faqs) ? job.faqs : [],
+    () => (Array.isArray(job?.faqs) ? job.faqs : []),
     [job?.faqs]
   );
-  
+
   const screeningQuestions = useMemo(
-    () => Array.isArray(job?.screening_questions) ? job.screening_questions : [],
+    () =>
+      Array.isArray(job?.screening_questions) ? job.screening_questions : [],
     [job?.screening_questions]
   );
-  
+
   const hiringProcess = useMemo(
-    () => Array.isArray(job?.hiring_process_stages) ? job.hiring_process_stages : [],
+    () =>
+      Array.isArray(job?.hiring_process_stages)
+        ? job.hiring_process_stages
+        : [],
     [job?.hiring_process_stages]
   );
-  
+
   const languages = useMemo(
-    () => Array.isArray(job?.language_proficiency) ? job.language_proficiency : [],
+    () =>
+      Array.isArray(job?.language_proficiency) ? job.language_proficiency : [],
     [job?.language_proficiency]
   );
 
@@ -576,25 +573,26 @@ export default function JobDetailPage() {
                   </div>
                 </div>
               )}
-              
+
               {/* Fallback message only if NO content exists */}
-              {!job.description?.trim() && 
-               !job.job_brief?.trim() && 
-               responsibilities.length === 0 && 
-               requirements.length === 0 && (
-                <div className="mb-6 bg-gradient-to-br from-gray-50 to-slate-50 p-6 rounded-lg border-2 border-gray-200">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <AlertCircle className="w-6 h-6 text-gray-600" />
-                    Job Details
-                  </h2>
-                  <div className="prose prose-sm max-w-none">
-                    <p className="text-gray-600 leading-relaxed italic">
-                      Detailed job information is being updated. Please contact the employer
-                      for more details about this position.
-                    </p>
+              {!job.description?.trim() &&
+                !job.job_brief?.trim() &&
+                responsibilities.length === 0 &&
+                requirements.length === 0 && (
+                  <div className="mb-6 bg-gradient-to-br from-gray-50 to-slate-50 p-6 rounded-lg border-2 border-gray-200">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <AlertCircle className="w-6 h-6 text-gray-600" />
+                      Job Details
+                    </h2>
+                    <div className="prose prose-sm max-w-none">
+                      <p className="text-gray-600 leading-relaxed italic">
+                        Detailed job information is being updated. Please
+                        contact the employer for more details about this
+                        position.
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Responsibilities */}
               {responsibilities.length > 0 && (

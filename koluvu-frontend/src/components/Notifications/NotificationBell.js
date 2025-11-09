@@ -110,7 +110,7 @@ export default function NotificationBell() {
       {/* Notification Dropdown */}
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-96 origin-top-right rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-300 ease-out backdrop-blur-sm z-50 max-h-96 overflow-hidden"
+          className="fixed sm:absolute right-0 sm:right-0 top-[64px] sm:top-auto sm:mt-2 w-full sm:w-96 max-w-md origin-top-right rounded-none sm:rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-300 ease-out backdrop-blur-sm z-50 max-h-[calc(100vh-64px)] sm:max-h-96 overflow-hidden"
           style={{
             background:
               "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)",
@@ -119,26 +119,28 @@ export default function NotificationBell() {
           }}
         >
           {/* Header */}
-          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Notifications
-              {unreadCount > 0 && (
-                <span className="ml-2 text-sm font-normal text-gray-500">
-                  ({unreadCount} unread)
-                </span>
-              )}
-            </h3>
-            <div className="flex space-x-2">
+          <div className="p-4 sm:p-4 border-b border-gray-200 flex justify-between items-center">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+                Notifications
+                {unreadCount > 0 && (
+                  <span className="ml-2 text-sm font-normal text-gray-500">
+                    ({unreadCount} unread)
+                  </span>
+                )}
+              </h3>
+            </div>
+            <div className="flex space-x-3 ml-3">
               <button
                 onClick={markAllAsRead}
-                className="text-sm text-blue-600 hover:text-blue-800"
+                className="px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-blue-200 hover:border-blue-300"
                 disabled={unreadCount === 0}
               >
                 Mark all read
               </button>
               <button
                 onClick={clearAll}
-                className="text-sm text-red-600 hover:text-red-800"
+                className="px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-red-200 hover:border-red-300"
                 disabled={notifications.length === 0}
               >
                 Clear all
@@ -147,8 +149,8 @@ export default function NotificationBell() {
           </div>
 
           {/* Connection Status */}
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
-            <div className="flex items-center text-sm">
+          <div className="px-3 sm:px-4 py-2 bg-gray-50 border-b border-gray-200">
+            <div className="flex items-center text-xs sm:text-sm">
               <span
                 className={`h-2 w-2 rounded-full mr-2 ${getConnectionStatusColor()}`}
               />
@@ -159,31 +161,33 @@ export default function NotificationBell() {
           </div>
 
           {/* Notifications List */}
-          <div className="overflow-y-auto max-h-64">
+          <div className="overflow-y-auto max-h-[calc(100vh-200px)] sm:max-h-64">
             {notifications.length === 0 ? (
               <div className="p-6 text-center text-gray-500">
                 <BellIcon className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-                <p>No notifications yet</p>
-                <p className="text-sm">You'll see new notifications here</p>
+                <p className="text-sm sm:text-base">No notifications yet</p>
+                <p className="text-xs sm:text-sm">
+                  You'll see new notifications here
+                </p>
               </div>
             ) : (
               notifications.map((notification) => (
                 <div
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
-                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
+                  className={`p-3 sm:p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
                     !notification.read
                       ? "bg-blue-50 border-l-4 border-l-blue-500"
                       : ""
                   }`}
                 >
-                  <div className="flex items-start space-x-3">
-                    <span className="text-2xl flex-shrink-0 mt-1">
+                  <div className="flex items-start space-x-2 sm:space-x-3">
+                    <span className="text-xl sm:text-2xl flex-shrink-0 mt-1">
                       {getNotificationIcon(notification.type)}
                     </span>
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`text-sm ${
+                        className={`text-xs sm:text-sm ${
                           !notification.read
                             ? "font-semibold text-gray-900"
                             : "text-gray-700"
@@ -222,11 +226,21 @@ export default function NotificationBell() {
           {/* Footer */}
           {notifications.length > 5 && (
             <div className="p-3 border-t border-gray-200 text-center">
-              <button className="text-sm text-blue-600 hover:text-blue-800">
+              <button className="text-xs sm:text-sm text-blue-600 hover:text-blue-800">
                 View all notifications
               </button>
             </div>
           )}
+
+          {/* Mobile Close Button */}
+          <div className="sm:hidden p-3 border-t border-gray-200 bg-gray-50">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-full py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
     </div>

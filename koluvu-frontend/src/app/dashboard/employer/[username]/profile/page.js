@@ -116,6 +116,10 @@ const EmployerProfile = () => {
       });
 
       console.log("Profile fetch response status:", response.status);
+      console.log(
+        "Profile fetch response headers:",
+        Object.fromEntries(response.headers.entries())
+      );
 
       if (!response.ok) {
         let errorData = {};
@@ -126,15 +130,26 @@ const EmployerProfile = () => {
         }
 
         console.error("Profile fetch error:", {
+          url: `/api/employer/${urlUsername}/profile`,
           status: response.status,
           statusText: response.statusText,
           errorData,
+          username: urlUsername,
+          hasToken: !!accessToken,
         });
 
         if (response.status === 403) {
           throw new Error("You don't have permission to view this profile");
         } else if (response.status === 404) {
           throw new Error("Profile not found");
+        } else if (response.status === 500) {
+          throw new Error(
+            "Backend server error. Please ensure the Django server is running on port 8000."
+          );
+        } else if (response.status === 0 || !response.status) {
+          throw new Error(
+            "Cannot connect to backend server. Please start the Django development server."
+          );
         }
 
         throw new Error(

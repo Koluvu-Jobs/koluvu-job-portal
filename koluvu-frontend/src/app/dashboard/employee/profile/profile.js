@@ -197,6 +197,21 @@ const Profile = ({
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState("career-objective");
   const [notification, setNotification] = useState(null);
+  const [highlightMissing, setHighlightMissing] = useState(false);
+
+  // Check for highlight parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("highlight") === "missing") {
+      setHighlightMissing(true);
+      // Show notification about missing details
+      setNotification({
+        type: "info",
+        message:
+          "Complete the highlighted fields to improve your profile score!",
+      });
+    }
+  }, []);
 
   // Profile data state
   const [profileData, setProfileData] = useState({
@@ -267,12 +282,9 @@ const Profile = ({
       setLoading(true);
 
       // Fetch main profile data
-      const profileResponse = await fetch(
-        "http://127.0.0.1:8000/api/employee/dashboard/",
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
-      );
+      const profileResponse = await fetch("/api/employee/profile", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
       if (!profileResponse.ok) {
         throw new Error(`Profile API error: ${profileResponse.status}`);
@@ -355,7 +367,9 @@ const Profile = ({
     for (const endpoint of endpoints) {
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/api/employee/${endpoint.url}/`,
+          `${
+            process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"
+          }/api/employee/${endpoint.url}/`,
           { headers: { Authorization: `Bearer ${accessToken}` } }
         );
 
@@ -435,17 +449,14 @@ const Profile = ({
         address: profileData.personalDetails.address,
       };
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/employee/profile/",
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updateData),
-        }
-      );
+      const response = await fetch("/api/employee/profile", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateData),
+      });
 
       if (!response.ok) {
         throw new Error(`Save failed: ${response.status}`);
@@ -722,28 +733,28 @@ const Profile = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
               <button
                 onClick={handleCancel}
-                className="flex items-center space-x-2 px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <X className="w-4 h-4" />
-                <span>Cancel</span>
+                <span className="hidden sm:inline">Cancel</span>
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center space-x-2 px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
               >
                 {saving ? (
                   <>
                     <Loader className="w-4 h-4 animate-spin" />
-                    <span>Saving...</span>
+                    <span className="hidden sm:inline">Saving...</span>
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    <span>Save Changes</span>
+                    <span className="hidden sm:inline">Save Changes</span>
                   </>
                 )}
               </button>

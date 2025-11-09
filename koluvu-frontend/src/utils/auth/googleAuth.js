@@ -62,13 +62,8 @@ export const signInWithGoogle = async (userType = "employee") => {
 
           try {
             // Send credential token to your backend
-            const backendUrl =
-              process.env.NEXT_PUBLIC_BACKEND_URL ||
-              process.env.NEXT_PUBLIC_API_URL ||
-              "http://127.0.0.1:8000";
-            const apiUrl = `${backendUrl}/api/auth/google/`;
-            console.log("Sending credential to backend URL:", apiUrl);
-            const backendResponse = await fetch(apiUrl, {
+            console.log("Sending credential to backend...");
+            const backendResponse = await fetch("/api/auth/google", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",

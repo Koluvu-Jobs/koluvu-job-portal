@@ -67,10 +67,10 @@ export default function EmployeeLayout({ children }) {
           toggleSidebar={toggleSidebar}
         />
         <main
-          className="flex-1 p-4 overflow-auto"
+          className="flex-1 p-2 sm:p-4 lg:p-6 overflow-auto"
           style={{ marginTop: "var(--header-height)" }}
         >
-          {children}
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
       <Footer />

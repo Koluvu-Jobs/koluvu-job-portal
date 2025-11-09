@@ -59,7 +59,7 @@ export async function registerEmployee(formData) {
     );
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}/api/employee/register/`,
+      "http://127.0.0.1:8000/api/employee/register/",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

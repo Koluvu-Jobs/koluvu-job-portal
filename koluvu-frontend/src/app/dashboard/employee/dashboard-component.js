@@ -1,5 +1,4 @@
-﻿// src/app/dashboard/employee/page.js
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -85,6 +84,7 @@ const Dashboard = ({ username, setActiveTab }) => {
     offers: 0,
     profileViews: 0,
   });
+  const [rawStats, setRawStats] = useState(null);
   const [availabilityStatus, setAvailabilityStatus] = useState(
     availabilityOptions[0]
   );
@@ -273,8 +273,7 @@ const Dashboard = ({ username, setActiveTab }) => {
       }
 
       const data = await response.json();
-      console.log("Real dashboard data from Django backend:", data);
-
+      setRawStats(data.stats || data);
       // Update stats with real data from backend
       setStats({
         applications: data.stats?.applications || 0,
@@ -871,38 +870,7 @@ const Dashboard = ({ username, setActiveTab }) => {
               </div>
 
               <div className="grid grid-cols-2 gap-2 md:gap-3 mb-6">
-                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg md:rounded-xl p-3 border border-blue-100 hover:border-blue-200 transition-colors">
-                  <div className="text-xl md:text-2xl font-bold text-blue-400">
-                    {stats.applications}
-                  </div>
-                  <div className="text-xs text-gray-600 font-medium">
-                    Applications
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-cyan-50 to-sky-50 rounded-lg md:rounded-xl p-3 border border-cyan-100 hover:border-cyan-200 transition-colors">
-                  <div className="text-xl md:text-2xl font-bold text-cyan-400">
-                    {stats.interviews}
-                  </div>
-                  <div className="text-xs text-gray-600 font-medium">
-                    Interviews
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-sky-50 to-blue-50 rounded-lg md:rounded-xl p-3 border border-sky-100 hover:border-sky-200 transition-colors">
-                  <div className="text-xl md:text-2xl font-bold text-sky-400">
-                    {stats.offers}
-                  </div>
-                  <div className="text-xs text-gray-600 font-medium">
-                    Offers
-                  </div>
-                </div>
-                <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg md:rounded-xl p-3 border border-indigo-100 hover:border-indigo-200 transition-colors">
-                  <div className="text-xl md:text-2xl font-bold text-indigo-400">
-                    {stats.profileViews}
-                  </div>
-                  <div className="text-xs text-gray-600 font-medium">
-                    Profile Views
-                  </div>
-                </div>
+                {/* Removed Applications, Interviews, Offers, and Profile Views boxes as requested */}
               </div>
 
               <div className="mb-6">
@@ -1099,57 +1067,52 @@ const Dashboard = ({ username, setActiveTab }) => {
         <div className="lg:col-span-2">
           {/* Overview Cards Section */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Briefcase className="w-5 h-5 text-blue-600" />
+            {[
+              {
+                label: "Applications",
+                value: stats?.applications || 0,
+                icon: <Briefcase className="w-5 h-5 text-blue-600" />,
+                bg: "bg-blue-100",
+                sub: "Total submitted",
+              },
+              {
+                label: "Interviews",
+                value: stats?.interviews || 0,
+                icon: <CheckCircle className="w-5 h-5 text-green-600" />,
+                bg: "bg-green-100",
+                sub: "Scheduled",
+              },
+              {
+                label: "Notifications",
+                value: announcements?.length || 0,
+                icon: <Bell className="w-5 h-5 text-purple-600" />,
+                bg: "bg-purple-100",
+                sub: "Unread updates",
+              },
+              {
+                label: "Profile Views",
+                value: stats?.profileViews || 0,
+                icon: <Eye className="w-5 h-5 text-orange-600" />,
+                bg: "bg-orange-100",
+                sub: "This month",
+              },
+            ].map((card, idx) => (
+              <div
+                key={card.label}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`p-2 rounded-lg ${card.bg}`}>{card.icon}</div>
+                  <span className="text-2xl font-bold text-gray-900">
+                    {card.value}
+                  </span>
                 </div>
-                <span className="text-2xl font-bold text-gray-900">
-                  {stats?.applications || 0}
-                </span>
+                <p className="text-gray-600 text-sm font-medium">
+                  {card.label}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">{card.sub}</p>
               </div>
-              <p className="text-gray-600 text-sm font-medium">Applications</p>
-              <p className="text-xs text-gray-500 mt-1">Total submitted</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                </div>
-                <span className="text-2xl font-bold text-gray-900">
-                  {stats?.interviews || 0}
-                </span>
-              </div>
-              <p className="text-gray-600 text-sm font-medium">Interviews</p>
-              <p className="text-xs text-gray-500 mt-1">Scheduled</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Bell className="w-5 h-5 text-purple-600" />
-                </div>
-                <span className="text-2xl font-bold text-gray-900">
-                  {announcements?.length || 0}
-                </span>
-              </div>
-              <p className="text-gray-600 text-sm font-medium">Notifications</p>
-              <p className="text-xs text-gray-500 mt-1">Unread updates</p>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-2">
-                <div className="p-2 bg-orange-100 rounded-lg">
-                  <Eye className="w-5 h-5 text-orange-600" />
-                </div>
-                <span className="text-2xl font-bold text-gray-900">
-                  {stats?.profileViews || 0}
-                </span>
-              </div>
-              <p className="text-gray-600 text-sm font-medium">Profile Views</p>
-              <p className="text-xs text-gray-500 mt-1">This month</p>
-            </div>
+            ))}
           </div>
 
           {/* Quick Actions Bar */}
@@ -1210,66 +1173,73 @@ const Dashboard = ({ username, setActiveTab }) => {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100 flex flex-col h-full">
+          <div
+            className="bg-white rounded-2xl shadow-lg p-12 mb-24 border border-gray-100"
+            style={{ padding: "62px" }}
+          >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-                <Bell className="w-6 h-6 md:w-7 md:h-7 mr-3 text-blue-400 flex-shrink-0" />
-                <span>Announcements</span>
-              </h2>
-              <div className="text-sm text-gray-500 font-medium">
-                Live activity feed
+              <div className="flex items-center gap-3">
+                <Bell className="w-7 h-7 text-blue-500" />
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                  Announcements
+                </h2>
               </div>
+              <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-semibold hover:bg-blue-200 transition">
+                View All
+              </button>
             </div>
-
-            <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-              {announcements.map((announcement) => (
-                <div
-                  key={announcement.id}
-                  onClick={() => handleAnnouncementNavigation(announcement)}
-                  onKeyDown={(e) => handleAnnouncementKeyDown(e, announcement)}
-                  role="button"
-                  tabIndex={0}
-                  className={`flex items-start space-x-3 p-4 rounded-xl transition-all duration-200 cursor-pointer border ${
-                    announcement.unread
-                      ? "bg-blue-50 border-blue-200 hover:border-blue-300 hover:shadow-md"
-                      : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-md"
-                  }`}
-                >
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold flex-shrink-0 shadow-md text-sm md:text-base">
-                    {announcement.avatar}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-semibold text-gray-800 text-sm md:text-base">
-                        {announcement.user}
-                      </span>
-                      <span className="text-xs text-gray-500 flex items-center flex-shrink-0 ml-2">
-                        <Clock className="w-3 h-3 mr-1" />
-                        {formatTimeAgo(announcement.time)}
-                      </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {announcements.length === 0 ? (
+                <div className="col-span-full text-center text-gray-500 py-8">
+                  No announcements available.
+                </div>
+              ) : (
+                announcements.map((announcement) => (
+                  <div
+                    key={announcement.id}
+                    className="bg-gradient-to-br from-blue-50 via-white to-cyan-50 border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col gap-2"
+                    onClick={() => handleAnnouncementNavigation(announcement)}
+                    onKeyDown={(e) =>
+                      handleAnnouncementKeyDown(e, announcement)
+                    }
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold text-lg">
+                        {announcement.avatar}
+                      </div>
+                      <div>
+                        <span className="font-semibold text-gray-800 text-sm">
+                          {announcement.user}
+                        </span>
+                        <span className="ml-2 text-xs text-gray-400">
+                          {formatTimeAgo(announcement.time)}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-gray-700 text-xs md:text-sm leading-relaxed mb-2.5">
+                    <div className="text-gray-700 text-sm mb-2">
                       {announcement.message}
-                    </p>
-                    <div className="flex items-center space-x-2">
+                    </div>
+                    <div className="flex items-center gap-2 mt-auto">
                       <span
-                        className={`text-xs px-2.5 py-1 rounded-full font-semibold transition-colors ${
+                        className={`text-xs px-2 py-1 rounded-full font-semibold ${
                           announcement.priority === "high"
-                            ? "bg-cyan-100 text-cyan-600"
+                            ? "bg-red-100 text-red-600"
                             : announcement.priority === "medium"
-                            ? "bg-blue-100 text-blue-600"
+                            ? "bg-yellow-100 text-yellow-700"
                             : "bg-gray-100 text-gray-600"
                         }`}
                       >
                         {announcement.type}
                       </span>
                       {announcement.unread && (
-                        <span className="w-2 h-2 bg-blue-400 rounded-full flex-shrink-0"></span>
+                        <span className="w-2 h-2 bg-blue-400 rounded-full"></span>
                       )}
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -1281,59 +1251,31 @@ const Dashboard = ({ username, setActiveTab }) => {
             <Briefcase className="w-8 h-8 md:w-9 md:h-9 mr-3 text-blue-400 flex-shrink-0" />
             <span>Job Tracks</span>
           </h2>
-          <div className="relative">
+          <div className="flex gap-3 flex-wrap mt-2">
             <button
-              onClick={handleJobsOptionsClick}
-              className="flex items-center space-x-2 px-4 sm:px-5 md:px-6 py-2.5 md:py-3 bg-gradient-to-r from-blue-400 to-cyan-400 text-white rounded-xl font-semibold text-sm md:text-base hover:from-blue-500 hover:to-cyan-500 hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95 whitespace-nowrap flex-shrink-0"
+              onClick={() => handleViewAll("all")}
+              className="px-5 py-2 bg-gradient-to-r from-blue-400 to-cyan-400 text-white rounded-xl font-semibold text-sm hover:from-blue-500 hover:to-cyan-500 transition"
             >
-              <span>Options</span>
+              View All Jobs
             </button>
-            {showJobsOptions && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-10">
-                <button
-                  onClick={() => {
-                    handleViewAll("all");
-                    setShowJobsOptions(false);
-                  }}
-                  className="w-full text-left px-4 py-3 hover:bg-blue-50 text-gray-700 font-medium text-sm border-b border-gray-100 first:rounded-t-xl transition-colors"
-                >
-                  View All Jobs
-                </button>
-                <button
-                  onClick={() => {
-                    handleViewAll("applied");
-                    setShowJobsOptions(false);
-                  }}
-                  className="w-full text-left px-4 py-3 hover:bg-blue-50 text-gray-700 font-medium text-sm border-b border-gray-100 transition-colors"
-                >
-                  Applied Jobs
-                </button>
-                <button
-                  onClick={() => {
-                    handleViewAll("location");
-                    setShowJobsOptions(false);
-                  }}
-                  className="w-full text-left px-4 py-3 hover:bg-blue-50 text-gray-700 font-medium text-sm border-b border-gray-100 transition-colors"
-                >
-                  Location Based
-                </button>
-                <button
-                  onClick={() => {
-                    handleViewAll("preferences");
-                    setShowJobsOptions(false);
-                  }}
-                  className="w-full text-left px-4 py-3 hover:bg-blue-50 text-gray-700 font-medium text-sm border-b border-gray-100 transition-colors"
-                >
-                  Job Preferences
-                </button>
-                <button
-                  onClick={() => setShowJobsOptions(false)}
-                  className="w-full text-left px-4 py-3 hover:bg-blue-50 text-gray-700 font-medium text-sm rounded-b-xl transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            )}
+            <button
+              onClick={() => handleViewAll("applied")}
+              className="px-5 py-2 bg-blue-100 text-blue-700 rounded-xl font-semibold text-sm hover:bg-blue-200 transition"
+            >
+              Applied Jobs
+            </button>
+            <button
+              onClick={() => handleViewAll("location")}
+              className="px-5 py-2 bg-cyan-100 text-cyan-700 rounded-xl font-semibold text-sm hover:bg-cyan-200 transition"
+            >
+              Location Based
+            </button>
+            <button
+              onClick={() => handleViewAll("preferences")}
+              className="px-5 py-2 bg-sky-100 text-sky-700 rounded-xl font-semibold text-sm hover:bg-sky-200 transition"
+            >
+              Job Preferences
+            </button>
           </div>
         </div>
 

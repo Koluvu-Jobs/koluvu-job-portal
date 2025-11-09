@@ -717,14 +717,6 @@ export default function Applications() {
             </div>
           </div>
 
-          <div className="w-full lg:w-1/3">
-            <RightSidebar
-              isOpen={rightSidebarOpen}
-              onClose={() => setRightSidebarOpen(false)}
-              jobs={relatedJobs}
-              isDarkMode={isDarkMode}
-            />
-          </div>
         </div>
       </div>
 

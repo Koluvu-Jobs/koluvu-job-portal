@@ -15,6 +15,7 @@ export const EmployeeHeader = ({
   toggleTheme,
   toggleSidebar,
   showSidebarToggle = false,
+  isSidebarOpen = false,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
@@ -24,6 +25,8 @@ export const EmployeeHeader = ({
   const [profileProgress, setProfileProgress] = useState(0);
   const [appliedJobsCount, setAppliedJobsCount] = useState(0);
   const [savedJobsCount, setSavedJobsCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchInProgress, setSearchInProgress] = useState(false);
 
   const { user, logout, accessToken } = useAuth();
   const { profile: employeeProfile } = useEmployeeProfile();
@@ -144,12 +147,12 @@ export const EmployeeHeader = ({
 
   // Enhanced Job Search Component
   const JobSearchComponent = () => (
-    <div className="flex-1 max-w-2xl mx-6" ref={jobSearchRef}>
+    <div className="w-full" ref={jobSearchRef}>
       <div className="relative">
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <svg
-              className="h-5 w-5 text-white/70"
+              className="h-4 w-4 lg:h-5 lg:w-5 text-white/70"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -167,14 +170,14 @@ export const EmployeeHeader = ({
             value={jobSearchQuery}
             onChange={(e) => setJobSearchQuery(e.target.value)}
             onFocus={() => setIsJobSearchOpen(true)}
-            placeholder="🔍 Search your dream job, company, or skill..."
-            className="w-full pl-12 pr-16 py-3 rounded-2xl bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/30 transition-all duration-300 text-sm backdrop-blur-md"
+            placeholder="Search jobs, companies..."
+            className="w-full pl-10 lg:pl-12 pr-14 lg:pr-16 py-2 lg:py-3 rounded-xl lg:rounded-2xl bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/30 transition-all duration-300 text-sm backdrop-blur-md"
             style={{
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
             }}
           />
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center space-x-2">
+          <div className="absolute inset-y-0 right-0 pr-2 lg:pr-3 flex items-center">
             <button
               onClick={() => {
                 if (jobSearchQuery.trim()) {
@@ -183,9 +186,22 @@ export const EmployeeHeader = ({
                   )}`;
                 }
               }}
-              className="bg-white text-orange-600 px-4 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 hover:scale-105 border border-orange-200 hover:bg-orange-50"
+              className="bg-white text-orange-600 px-2 lg:px-4 py-1 lg:py-1.5 rounded-lg lg:rounded-xl text-xs font-medium transition-all duration-200 hover:scale-105 border border-orange-200 hover:bg-orange-50"
             >
-              Search
+              <span className="hidden lg:inline">Search</span>
+              <svg
+                className="w-4 h-4 lg:hidden"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
             </button>
           </div>
         </div>
@@ -269,10 +285,10 @@ export const EmployeeHeader = ({
 
   // Quick Actions for Employee
   const QuickActions = () => (
-    <div className="hidden lg:flex items-center space-x-3">
+    <div className="hidden xl:flex items-center space-x-2">
       <a
         href={`/dashboard/employee/${username}`}
-        className="flex items-center space-x-2 bg-white text-orange-600 px-4 py-2.5 rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg border border-orange-200 hover:bg-orange-50"
+        className="flex items-center space-x-1 lg:space-x-2 bg-white text-orange-600 px-2 lg:px-4 py-2 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:scale-105 shadow-lg border border-orange-200 hover:bg-orange-50 text-xs lg:text-sm"
       >
         <svg
           className="w-4 h-4"
@@ -293,12 +309,12 @@ export const EmployeeHeader = ({
             d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"
           />
         </svg>
-        <span>Dashboard</span>
+        <span className="hidden lg:inline">Dashboard</span>
       </a>
 
       <a
         href="/jobs"
-        className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-300 hover:scale-105 backdrop-blur-md border border-white/30"
+        className="flex items-center space-x-1 lg:space-x-2 bg-white/20 hover:bg-white/30 text-white px-2 lg:px-4 py-2 rounded-lg lg:rounded-xl font-medium transition-all duration-300 hover:scale-105 backdrop-blur-md border border-white/30 text-xs lg:text-sm"
       >
         <svg
           className="w-4 h-4"
@@ -313,27 +329,7 @@ export const EmployeeHeader = ({
             d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
           />
         </svg>
-        <span>Browse Jobs</span>
-      </a>
-
-      <a
-        href="/resume-builder"
-        className="flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-300 hover:scale-105 backdrop-blur-md border border-white/30"
-      >
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
-        <span>Resume</span>
+        <span className="hidden lg:inline">Jobs</span>
       </a>
     </div>
   );
@@ -369,7 +365,24 @@ export const EmployeeHeader = ({
   const ProfileMenu = () => (
     <div className="relative" ref={profileRef}>
       <button
-        onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+        onClick={() => {
+          // If opening the profile menu on small screens and the sidebar is open, close the sidebar first
+          const isOpening = !isProfileMenuOpen;
+          if (
+            isOpening &&
+            typeof window !== "undefined" &&
+            window.innerWidth < 1024
+          ) {
+            if (isSidebarOpen && typeof toggleSidebar === "function") {
+              try {
+                toggleSidebar();
+              } catch (e) {
+                // ignore
+              }
+            }
+          }
+          setIsProfileMenuOpen(!isProfileMenuOpen);
+        }}
         className="flex items-center space-x-2 bg-white/20 backdrop-blur-md rounded-xl p-2 border border-white/30 hover:bg-white/30 transition-all duration-300 hover:scale-105 group min-w-0"
       >
         <div className="relative">
@@ -398,11 +411,11 @@ export const EmployeeHeader = ({
           )}
         </div>
 
-        <div className="hidden md:block text-left min-w-0">
-          <div className="text-white font-semibold text-xs truncate max-w-[80px]">
+        <div className="hidden lg:block text-left min-w-0">
+          <div className="text-white font-semibold text-xs truncate max-w-[60px] xl:max-w-[80px]">
             {employeeData.name}
           </div>
-          <div className="text-white/70 text-[10px] truncate max-w-[80px]">
+          <div className="text-white/70 text-[10px] truncate max-w-[60px] xl:max-w-[80px]">
             {employeeData.title}
           </div>
         </div>
@@ -426,16 +439,18 @@ export const EmployeeHeader = ({
 
       {/* Profile Menu Dropdown */}
       <div
-        className={`absolute right-0 mt-2 w-80 origin-top-right rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-300 ease-out backdrop-blur-sm ${
+        className={`fixed sm:absolute right-0 sm:mt-2 w-full sm:w-80 origin-top rounded-none sm:rounded-2xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-300 ease-out backdrop-blur-sm ${
           isProfileMenuOpen
-            ? "scale-100 opacity-100 transform translate-y-0"
-            : "scale-95 opacity-0 pointer-events-none transform -translate-y-2"
+            ? "scale-100 opacity-100 transform translate-y-0 top-[64px] sm:top-auto"
+            : "scale-95 opacity-0 pointer-events-none transform -translate-y-2 top-[64px] sm:top-auto"
         }`}
         style={{
           background:
-            "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%)",
+            "linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.98) 100%)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
+          maxHeight: isProfileMenuOpen ? "calc(100vh - 64px)" : "0px",
+          overflowY: "auto",
         }}
       >
         <div className="py-3">
@@ -479,7 +494,14 @@ export const EmployeeHeader = ({
             </div>
 
             {profileProgress < 100 && (
-              <div className="mt-4 p-3 bg-orange-50 rounded-xl border border-orange-200">
+              <button
+                onClick={() => {
+                  const username =
+                    user?.username || user?.email?.split("@")[0] || "profile";
+                  window.location.href = `/dashboard/employee/${username}?tab=profile&highlight=missing`;
+                }}
+                className="mt-4 p-3 bg-orange-50 rounded-xl border border-orange-200 hover:bg-orange-100 transition-colors cursor-pointer w-full text-left"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-orange-800">
                     Complete your profile
@@ -495,9 +517,10 @@ export const EmployeeHeader = ({
                   ></div>
                 </div>
                 <p className="text-xs text-orange-700 mt-1">
-                  Complete profiles get 3x more views!
+                  Complete profiles get 3x more views! Click to fix missing
+                  details.
                 </p>
-              </div>
+              </button>
             )}
           </div>
 
@@ -525,10 +548,11 @@ export const EmployeeHeader = ({
 
           {/* Menu Items */}
           <div className="py-2">
-            <DropdownLink href={`/dashboard/employee/${username}?tab=profile`}>
-              <span className="flex items-center">
+            {/* Quick Actions Section - Visible on Mobile */}
+            <div className="px-4 py-3 mb-2 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl md:hidden">
+              <h4 className="text-xs font-semibold text-orange-800 mb-3 uppercase tracking-wider flex items-center">
                 <svg
-                  className="w-4 h-4 mr-3 text-gray-400"
+                  className="w-4 h-4 mr-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -537,63 +561,174 @@ export const EmployeeHeader = ({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
                   />
                 </svg>
-                My Profile
-              </span>
-            </DropdownLink>
+                Quick Actions
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <DropdownLink
+                  href={`/dashboard/employee/${username}`}
+                  className="!p-0 group"
+                >
+                  <div className="flex flex-col items-center p-3 bg-white rounded-xl border border-orange-100 hover:bg-orange-50 active:scale-95 transition-all duration-200 shadow-sm hover:shadow-md">
+                    <svg
+                      className="w-6 h-6 text-orange-600 mb-1.5 transform transition-transform group-hover:scale-110"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                      />
+                    </svg>
+                    <span className="text-xs font-medium text-orange-900">
+                      Dashboard
+                    </span>
+                  </div>
+                </DropdownLink>
 
-            <DropdownLink
-              href={`/dashboard/employee/${username}?tab=applications`}
-            >
-              <span className="flex items-center">
-                <svg
-                  className="w-4 h-4 mr-3 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                My Applications
-                {appliedJobsCount > 0 && (
-                  <span className="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                    {appliedJobsCount}
-                  </span>
-                )}
-              </span>
-            </DropdownLink>
+                <DropdownLink href="/jobs" className="!p-0">
+                  <div className="flex flex-col items-center p-3 bg-white rounded-xl border border-orange-100 hover:bg-orange-50 transition-all duration-200">
+                    <svg
+                      className="w-5 h-5 text-orange-600 mb-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <span className="text-xs font-medium text-orange-900">
+                      Browse Jobs
+                    </span>
+                  </div>
+                </DropdownLink>
 
-            <DropdownLink href={`/dashboard/employee/${username}/settings`}>
-              <span className="flex items-center">
-                <svg
-                  className="w-4 h-4 mr-3 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                Settings
-              </span>
-            </DropdownLink>
+                <DropdownLink href="/resume-builder" className="!p-0">
+                  <div className="flex flex-col items-center p-3 bg-white rounded-xl border border-orange-100 hover:bg-orange-50 transition-all duration-200">
+                    <svg
+                      className="w-5 h-5 text-orange-600 mb-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <span className="text-xs font-medium text-orange-900">
+                      Resume
+                    </span>
+                  </div>
+                </DropdownLink>
+
+                <DropdownLink href="/search" className="!p-0">
+                  <div className="flex flex-col items-center p-3 bg-white rounded-xl border border-orange-100 hover:bg-orange-50 transition-all duration-200">
+                    <svg
+                      className="w-5 h-5 text-orange-600 mb-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                    <span className="text-xs font-medium text-orange-900">
+                      Search
+                    </span>
+                  </div>
+                </DropdownLink>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-100 pt-2">
+              <DropdownLink
+                href={`/dashboard/employee/${username}?tab=profile`}
+              >
+                <span className="flex items-center">
+                  <svg
+                    className="w-4 h-4 mr-3 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                  My Profile
+                </span>
+              </DropdownLink>
+
+              <DropdownLink
+                href={`/dashboard/employee/${username}?tab=applications`}
+              >
+                <span className="flex items-center">
+                  <svg
+                    className="w-4 h-4 mr-3 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  My Applications
+                  {appliedJobsCount > 0 && (
+                    <span className="ml-auto bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                      {appliedJobsCount}
+                    </span>
+                  )}
+                </span>
+              </DropdownLink>
+
+              <DropdownLink href={`/dashboard/employee/${username}/settings`}>
+                <span className="flex items-center">
+                  <svg
+                    className="w-4 h-4 mr-3 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  Settings
+                </span>
+              </DropdownLink>
+            </div>
           </div>
 
           <div className="border-t border-gray-100 pt-2">
@@ -637,19 +772,17 @@ export const EmployeeHeader = ({
     background: isScrolled
       ? "linear-gradient(135deg, rgba(250, 127, 4, 0.95) 0%, rgba(230, 114, 10, 0.95) 100%)"
       : "linear-gradient(135deg, #fa7f04 0%, #e6720a 100%)",
-    borderBottom: "1px solid rgba(255, 255, 255, 0.12)", // thinner border
-    boxShadow: isScrolled ? "0 6px 18px rgba(250, 127, 4, 0.18)" : "none",
+    borderBottom: "none",
+    boxShadow: "none",
     backdropFilter: isScrolled ? "blur(20px)" : "blur(10px)",
     WebkitBackdropFilter: isScrolled ? "blur(20px)" : "blur(10px)",
-    minHeight: "56px", // slightly reduced height
-    marginTop: 0, // remove any gap above
-    paddingTop: 0,
+    height: "64px",
   };
 
   const innerContainerStyles = {
-    minHeight: "56px", // match header height
-    paddingTop: 0,
-    paddingBottom: 0,
+    height: "64px",
+    display: "flex",
+    alignItems: "center",
   };
 
   return (
@@ -657,13 +790,16 @@ export const EmployeeHeader = ({
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
       style={headerStyles}
     >
-      <nav className={styles.navWrapper}>
-        <div className={styles.navInner} style={innerContainerStyles}>
-          <div className={`${styles.logoContainer} gap-3`}>
+      <nav className="w-full">
+        <div
+          className="max-w-[1400px] mx-auto px-2 sm:px-4 flex items-center justify-between"
+          style={innerContainerStyles}
+        >
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             {showSidebarToggle && toggleSidebar && (
               <button
                 onClick={toggleSidebar}
-                className="lg:hidden relative inline-flex items-center justify-center p-2.5 rounded-2xl text-white hover:bg-white/20 focus:outline-none transition-all duration-300 hover:scale-110 active:scale-95 backdrop-blur-sm border border-white/20"
+                className="lg:hidden relative inline-flex items-center justify-center p-2 rounded-xl text-white hover:bg-white/20 focus:outline-none transition-all duration-300 hover:scale-110 active:scale-95 backdrop-blur-sm border border-white/20"
                 style={{
                   background:
                     "linear-gradient(45deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.15))",
@@ -690,23 +826,27 @@ export const EmployeeHeader = ({
 
             <Link
               href={`/dashboard/employee/${username}`}
-              className={styles.logoLink}
+              className="flex items-center gap-2 flex-shrink-0"
             >
               <Image
                 src="/images/koluvu_logo.jpg"
                 alt="Koluvu"
                 width={32}
                 height={32}
-                className={styles.logoImage}
+                className="rounded-lg object-cover"
                 priority
               />
-              <span className={styles.logoText}>Koluvu</span>
+              <span className="hidden sm:block text-white font-bold text-base lg:text-lg">
+                Koluvu
+              </span>
             </Link>
           </div>
 
-          <JobSearchComponent />
+          <div className="hidden md:block flex-1 max-w-md lg:max-w-2xl mx-4">
+            <JobSearchComponent />
+          </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
             <QuickActions />
             <NotificationBell />
             <ProfileMenu />
@@ -715,21 +855,21 @@ export const EmployeeHeader = ({
       </nav>
 
       <div
-        className={`lg:hidden bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 overflow-hidden transition-all duration-500 ease-in-out backdrop-blur-sm ${
+        className={`lg:hidden fixed inset-x-0 top-[64px] bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 overflow-hidden transition-all duration-500 ease-in-out backdrop-blur-sm shadow-xl z-40 ${
           isMobileMenuOpen
-            ? "max-h-screen opacity-100 border-t border-white/20"
-            : "max-h-0 opacity-0"
+            ? "max-h-[calc(100vh-64px)] opacity-100 border-t border-white/20"
+            : "max-h-0 opacity-0 pointer-events-none"
         }`}
       >
-        <div className="px-6 py-6 space-y-4">
-          <div className="mb-6">
+        <div className="px-4 py-4 space-y-4 overflow-y-auto max-h-[calc(100vh-64px)]">
+          <div className="mb-4">
             <div className="relative">
               <input
                 type="text"
                 value={jobSearchQuery}
                 onChange={(e) => setJobSearchQuery(e.target.value)}
                 placeholder="🔍 Search jobs, companies..."
-                className="w-full pl-4 pr-20 py-3 rounded-2xl bg-white/30 border border-white/40 text-white placeholder-white/80 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-md"
+                className="w-full pl-4 pr-24 py-3.5 rounded-2xl bg-white/30 border border-white/40 text-white placeholder-white/80 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-md text-base"
               />
               <button
                 onClick={() => {
@@ -739,7 +879,7 @@ export const EmployeeHeader = ({
                     )}`;
                   }
                 }}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-orange-600 px-4 py-1.5 rounded-xl text-sm font-medium border border-orange-200 hover:bg-orange-50"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white text-orange-600 px-4 py-2 rounded-xl text-sm font-medium border border-orange-200 hover:bg-orange-50 transition-all duration-200 active:scale-95 shadow-md"
               >
                 Search
               </button>
@@ -747,95 +887,203 @@ export const EmployeeHeader = ({
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center border border-white/30">
-              <div className="text-xl font-bold text-white">
-                {appliedJobsCount}
+            <div
+              onClick={() =>
+                (window.location.href = `/dashboard/employee/${username}?tab=applications`)
+              }
+              className="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center border border-white/30 cursor-pointer hover:bg-white/30 transition-all duration-200 active:scale-95"
+            >
+              <div className="flex flex-col items-center">
+                <div className="text-2xl font-bold text-white mb-1">
+                  {appliedJobsCount}
+                </div>
+                <div className="text-xs text-white/90 font-medium flex items-center">
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  Applications
+                </div>
               </div>
-              <div className="text-xs text-white/80">Applications</div>
             </div>
-            <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center border border-white/30">
-              <div className="text-xl font-bold text-white">
-                {savedJobsCount}
+            <div
+              onClick={() =>
+                (window.location.href = `/dashboard/employee/${username}?tab=saved`)
+              }
+              className="bg-white/20 backdrop-blur-md rounded-xl p-4 text-center border border-white/30 cursor-pointer hover:bg-white/30 transition-all duration-200 active:scale-95"
+            >
+              <div className="flex flex-col items-center">
+                <div className="text-2xl font-bold text-white mb-1">
+                  {savedJobsCount}
+                </div>
+                <div className="text-xs text-white/90 font-medium flex items-center">
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                  Saved Jobs
+                </div>
               </div>
-              <div className="text-xs text-white/80">Saved Jobs</div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <MobileNavLink
-              href="/jobs"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <span className="flex items-center">
-                <svg
-                  className="w-5 h-5 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                  />
-                </svg>
-                Browse Jobs
-              </span>
-            </MobileNavLink>
-
-            <MobileNavLink
-              href={`/dashboard/employee/${username}?tab=applications`}
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <span className="flex items-center">
-                <svg
-                  className="w-5 h-5 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                My Applications
-                {appliedJobsCount > 0 && (
-                  <span className="ml-auto bg-white/30 text-white text-xs px-2 py-1 rounded-full">
-                    {appliedJobsCount}
-                  </span>
+          {/* Search Bar for Mobile */}
+          <div className="relative mb-6">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <svg
+                className="h-5 w-5 text-white/70"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <input
+              type="text"
+              value={jobSearchQuery}
+              onChange={(e) => setJobSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && jobSearchQuery.trim()) {
+                  window.location.href = `/jobs?search=${encodeURIComponent(
+                    jobSearchQuery
+                  )}`;
+                  setIsMobileMenuOpen(false);
+                }
+              }}
+              placeholder="Search jobs, companies..."
+              className="w-full pl-12 pr-24 py-3.5 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 backdrop-blur-md text-base"
+            />
+            <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
+              <button
+                onClick={async () => {
+                  if (jobSearchQuery.trim()) {
+                    try {
+                      setSearchInProgress(true);
+                      setIsMobileMenuOpen(false);
+                      await new Promise((resolve) => setTimeout(resolve, 300)); // Smooth transition
+                      window.location.href = `/jobs?search=${encodeURIComponent(
+                        jobSearchQuery
+                      )}`;
+                    } catch (error) {
+                      console.error("Search error:", error);
+                    } finally {
+                      setSearchInProgress(false);
+                    }
+                  }
+                }}
+                disabled={searchInProgress || !jobSearchQuery.trim()}
+                className={`bg-white text-orange-600 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md active:scale-95 transition-all duration-200 flex items-center ${
+                  !jobSearchQuery.trim() || searchInProgress
+                    ? "opacity-70 cursor-not-allowed"
+                    : "hover:bg-orange-50"
+                }`}
+              >
+                {searchInProgress ? (
+                  <svg
+                    className="animate-spin h-4 w-4 text-orange-600"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                ) : (
+                  <>
+                    <span>Search</span>
+                    <svg
+                      className="w-4 h-4 ml-1 transition-transform duration-200 transform group-hover:translate-x-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </>
                 )}
-              </span>
-            </MobileNavLink>
-
-            <MobileNavLink
-              href="/resume-builder"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              <span className="flex items-center">
-                <svg
-                  className="w-5 h-5 mr-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                Resume Builder
-              </span>
-            </MobileNavLink>
+              </button>
+            </div>
           </div>
 
           {profileProgress < 100 && (
-            <div className="mt-6 p-4 bg-white/20 backdrop-blur-md rounded-xl border border-white/30">
+            <button
+              onClick={() => {
+                const username =
+                  user?.username || user?.email?.split("@")[0] || "profile";
+                window.location.href = `/dashboard/employee/${username}?tab=profile&highlight=missing`;
+              }}
+              className="mb-6 p-4 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 hover:bg-white/30 transition-colors cursor-pointer w-full text-left"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-white">
+                  Profile Status
+                </span>
+                <span className="text-sm font-bold text-white">
+                  {profileProgress}%
+                </span>
+              </div>
+              <div className="w-full bg-white/30 rounded-full h-2">
+                <div
+                  className="bg-white h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${profileProgress}%` }}
+                ></div>
+              </div>
+              <p className="text-xs text-white/90 mt-2">
+                Complete your profile to get better job matches! Click to fix
+                missing details.
+              </p>
+            </button>
+          )}
+
+          {profileProgress < 100 && (
+            <button
+              onClick={() => {
+                const username =
+                  user?.username || user?.email?.split("@")[0] || "profile";
+                window.location.href = `/dashboard/employee/${username}?tab=profile&highlight=missing`;
+              }}
+              className="mt-6 p-4 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 hover:bg-white/30 transition-colors cursor-pointer w-full text-left"
+            >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-white">
                   Complete Profile
@@ -851,9 +1099,9 @@ export const EmployeeHeader = ({
                 ></div>
               </div>
               <p className="text-xs text-white/80 mt-1">
-                Get 3x more job matches!
+                Get 3x more job matches! Click to complete.
               </p>
-            </div>
+            </button>
           )}
         </div>
       </div>

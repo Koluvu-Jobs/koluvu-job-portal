@@ -58,119 +58,121 @@ const Sidebar = ({
   const [showProfilePictureUpload, setShowProfilePictureUpload] =
     useState(false);
   // Removed showSettingsModal state as we now use a dedicated settings page
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+
+  // Get current user's username for navigation
+  const getCurrentUsername = () => {
+    if (user?.username) return user.username;
+    if (user?.email) return user.email.split("@")[0];
+    return "profile"; // fallback
+  };
+
+  const username = getCurrentUsername();
 
   const menuItems = [
     {
       id: "dashboard",
       label: "Dashboard",
       icon: Gauge,
-      path: "/dashboard/employer",
+      path: `/dashboard/employer/${username}`,
       tabName: "Dashboard",
     },
     {
       id: "post-jobs",
       label: "Post Job",
       icon: PlusCircle,
-      path: "/dashboard/employer?tab=post-jobs",
+      path: `/dashboard/employer/${username}?tab=post-jobs`,
       tabName: "Post Job",
     },
     {
       id: "active-jobs",
       label: "Active Jobs",
       icon: Bolt,
-      path: "/dashboard/employer/active-jobs", // Keep as separate page
-      external: true,
+      path: `/dashboard/employer/${username}?tab=active-jobs`,
+      tabName: "Active Jobs",
     },
     {
       id: "expired-jobs",
       label: "Expired Jobs",
       icon: Hourglass,
-      path: "/dashboard/employer/expired-jobs", // Keep as separate page
-      external: true,
+      path: `/dashboard/employer/${username}?tab=expired-jobs`,
+      tabName: "Expired Jobs",
     },
     {
       id: "closed-jobs",
       label: "Closed Jobs",
       icon: Lock,
-      path: "/dashboard/employer/closed-jobs", // Keep as separate page
-      external: true,
+      path: `/dashboard/employer/${username}?tab=closed-jobs`,
+      tabName: "Closed Jobs",
     },
     {
       id: "boolean-search",
       label: "Boolean Search",
       icon: Search,
-      path: "/dashboard/employer?tab=boolean-search",
+      path: `/dashboard/employer/${username}?tab=boolean-search`,
       tabName: "Boolean Search",
     },
     {
       id: "ats",
       label: "ATS",
       icon: FileText,
-      path: "/dashboard/employer?tab=ats",
+      path: `/dashboard/employer/${username}?tab=ats`,
       tabName: "ATS",
     },
     {
       id: "interview-scheduler",
       label: "Interview Scheduler",
       icon: CalendarDays,
-      path: "/dashboard/employer?tab=interview-scheduler",
+      path: `/dashboard/employer/${username}?tab=interview-scheduler`,
       tabName: "Interview Scheduler",
     },
     {
       id: "proxying-detector",
       label: "Proxying Detector",
       icon: Shield,
-      path: "/dashboard/employer?tab=proxying-detector",
+      path: `/dashboard/employer/${username}?tab=proxying-detector`,
       tabName: "Proxying Detector",
     },
     {
       id: "feedback-form",
       label: "Feedback Form",
       icon: FileText,
-      path: "/dashboard/employer?tab=feedback-form",
+      path: `/dashboard/employer/${username}?tab=feedback-form`,
       tabName: "Feedback Form",
     },
     {
       id: "candidate-status",
       label: "Candidate Status",
       icon: UserCheck,
-      path: "/dashboard/employer?tab=candidate-status",
+      path: `/dashboard/employer/${username}?tab=candidate-status`,
       tabName: "Candidate Status",
     },
     {
       id: "verification",
       label: "Verification",
       icon: IdCard,
-      path: "/dashboard/employer?tab=verification",
+      path: `/dashboard/employer/${username}?tab=verification`,
       tabName: "Verification",
     },
     {
       id: "subscription-plans",
       label: "Subscription Plans",
       icon: CreditCardIcon,
-      path: "/dashboard/employer?tab=subscription-plans",
+      path: `/dashboard/employer/${username}?tab=subscription-plans`,
       tabName: "Subscription Plans",
-    },
-    {
-      id: "subscription-usage",
-      label: "Usage",
-      icon: ChartPie,
-      path: "/dashboard/employer/subscription/usage", // Keep as separate page
-      external: true,
     },
     {
       id: "help-center",
       label: "Help Center",
       icon: HelpCircle,
-      path: "/dashboard/employer?tab=help-center",
+      path: `/dashboard/employer/${username}?tab=help-center`,
       tabName: "Help Center",
     },
     {
       id: "settings",
       label: "Settings",
       icon: Settings,
-      path: "/dashboard/employer/settings",
+      path: `/dashboard/employer/${username}?tab=settings`,
       external: true,
     },
   ];
@@ -191,7 +193,9 @@ const Sidebar = ({
       menuItems.find(
         (item) =>
           pathname === item.path ||
-          (item.id === "dashboard" && pathname === "/dashboard/employer")
+          (item.id === "dashboard" &&
+            (pathname === "/dashboard/employer" ||
+              pathname === `/dashboard/employer/${username}`))
       )?.id || "dashboard";
     setActiveTab && setActiveTab(currentTab);
   }, [pathname, setActiveTab]);
@@ -250,7 +254,7 @@ const Sidebar = ({
   };
 
   const handleSettingsClick = () => {
-    router.push("/dashboard/employer/settings");
+    router.push(`/dashboard/employer/${username}?tab=settings`);
   };
 
   // Removed closeSettingsModal function as we now use a dedicated settings page
@@ -485,31 +489,6 @@ const SidebarContent = ({
           )}
         </div>
       </motion.div>
-
-      {/* Profile Picture Upload Modal */}
-      {showProfilePictureUpload && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-80 max-w-[90vw]">
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">
-              Update Profile Picture
-            </h3>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={onProfilePictureUpload}
-              className="mb-4"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowProfilePictureUpload(false)}
-                className="px-3 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Menu Items */}
       <nav className="flex-1 space-y-3">

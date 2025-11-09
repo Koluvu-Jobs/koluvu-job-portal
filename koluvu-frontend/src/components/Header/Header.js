@@ -11,6 +11,7 @@ export default function Header({
   toggleTheme,
   toggleSidebar,
   showSidebarToggle = false,
+  isSidebarOpen = false,
 }) {
   const { user, userType } = useAuth();
 
@@ -22,6 +23,7 @@ export default function Header({
         toggleTheme={toggleTheme}
         toggleSidebar={toggleSidebar}
         showSidebarToggle={showSidebarToggle}
+        isSidebarOpen={isSidebarOpen}
       />
     );
   }
@@ -33,6 +35,7 @@ export default function Header({
         toggleTheme={toggleTheme}
         toggleSidebar={toggleSidebar}
         showSidebarToggle={showSidebarToggle}
+        isSidebarOpen={isSidebarOpen}
       />
     );
   }
@@ -44,6 +47,7 @@ export default function Header({
       toggleTheme={toggleTheme}
       toggleSidebar={toggleSidebar}
       showSidebarToggle={showSidebarToggle}
+      isSidebarOpen={isSidebarOpen}
     />
   );
 }

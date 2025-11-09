@@ -1,11 +1,10 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import DashboardPage from "../page";
 
 export default function UsernameDashboardPage() {
-  const params = useParams();
-  
-  // Pass the username as a prop to the main dashboard
-  return <DashboardPage username={params.username} />;
+  // The main DashboardPage component already handles username and tab parameters
+  // so we can just render it directly
+  return <DashboardPage />;
 }

@@ -432,7 +432,7 @@ export default function EmployerRegistrationForm() {
         toast.success("Successfully signed in with Google!");
 
         // Redirect to employer dashboard
-        const redirectPath = getRedirectPath(USER_TYPES.EMPLOYER);
+        const redirectPath = getRedirectPath(USER_TYPES.EMPLOYER, result.username);
         console.log("Redirecting to:", redirectPath);
         router.push(redirectPath);
       } catch (error) {

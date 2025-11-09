@@ -105,8 +105,10 @@ export default function EmployerLayout({ children }) {
             userProfile={getUserProfile()}
           />
           <main className="flex-1 overflow-auto">
-            <div className="min-h-full bg-white/50 backdrop-blur-sm">
-              {children}
+            <div className="min-h-full bg-white/50 backdrop-blur-sm p-2 sm:p-4 lg:p-6">
+              <div className="max-w-full mx-auto">
+                {children}
+              </div>
             </div>
           </main>
         </div>
