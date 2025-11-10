@@ -370,40 +370,40 @@ class Job(models.Model):
     ats_keywords = models.TextField(blank=True, default='', help_text="ATS Keywords for resume matching")
     
     # ===== EMPLOYER DETAILS =====
-    # 20. Employer's Name (from employer profile)
+    # 17. Employer's Name (from employer profile)
     employer_name = models.CharField(max_length=255, blank=True, default='', help_text="Employer's Display Name")
     
-    # 21. Employer's Email Address
+    # 18. Employer's Email Address
     employer_email = models.EmailField(blank=True, default='', help_text="Employer's Email")
     
-    # 22. Employer's Phone Number
+    # 19. Employer's Phone Number
     employer_phone = models.CharField(max_length=20, blank=True, default='', help_text="Employer's Phone Number")
     
-    # 23. Employer's LinkedIn Profile URL
+    # 20. Employer's LinkedIn Profile URL
     employer_linkedin_url = models.URLField(blank=True, default='', help_text="Employer's LinkedIn Profile")
     
-    # 24. Employer's Website URL
+    # 21. Employer's Website URL
     employer_website_url = models.URLField(blank=True, default='', help_text="Employer's Website")
     
-    # 25. Employer's Logo Image (from employer profile or custom)
+    # 22. Employer's Logo Image (from employer profile or custom)
     # NOTE: Use employer_logo for uploaded files, employer_logo_url for external URLs
     # Priority: employer_logo > employer_logo_url > employer.company_logo
     employer_logo = models.ImageField(upload_to='job_employer_logos/', blank=True, null=True,
                                      help_text="Custom employer logo for this job posting (uploaded file)")
     employer_logo_url = models.URLField(blank=True, default='', help_text="Employer logo URL (external link)")
     
-    # 26. Employer's Bio or Introduction
+    # 23. Employer's Bio or Introduction
     employer_bio = models.TextField(blank=True, default='', help_text="Employer's Bio or Company Introduction")
     
-    # 27. Employer's Social Media Handles
+    # 24. Employer's Social Media Handles
     employer_social_media = models.JSONField(default=dict, blank=True,
                                             help_text="Social media handles (Twitter, Facebook, etc.)")
     
-    # 28. Company Size (job-specific, may differ from employer profile)
+    # 25. Company Size (job-specific, may differ from employer profile)
     company_size = models.CharField(max_length=50, blank=True, default='', 
                                    help_text="Company size for this job posting")
     
-    # 29. Company Benefits (company-wide benefits information)
+    # 26. Company Benefits (company-wide benefits information)
     # NOTE: Use 'benefits' field for job-specific benefits (JSONField)
     # Use 'company_benefits' for general company-wide benefits description (TextField)
     company_benefits = models.TextField(blank=True, default='', 

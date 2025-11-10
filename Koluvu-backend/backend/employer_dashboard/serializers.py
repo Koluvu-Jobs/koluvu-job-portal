@@ -10,9 +10,22 @@ from .models import (
 
 
 class UserSerializer(serializers.ModelSerializer):
+    user_type = serializers.SerializerMethodField()
+
+    def get_user_type(self, obj):
+        if hasattr(obj, 'user_type'):
+            return obj.user_type
+        if hasattr(obj, 'employer_profile'):
+            return 'employer'
+        if hasattr(obj, 'employee_profile'):
+            return 'employee'
+        if hasattr(obj, 'partner_profile'):
+            return 'partner'
+        return None
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'user_type']
 
 
 class EmployerProfileSerializer(serializers.ModelSerializer):
@@ -83,24 +96,25 @@ class JobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         fields = [
-            # Basic Job Information (1-13)
+            # Basic Job Information (1-11)
             'id', 'title', 'company_name', 'location', 'industry',
             'salary_min', 'salary_max', 'salary_currency',
             'description', 'job_brief', 'responsibilities', 'requirements', 
             'benefits', 'perks', 'faqs', 'screening_questions', 'hiring_process_stages',
             'application_deadline', 'contact_email', 'job_type',
             
-            # Qualification Requirements (14-19)
+            # Qualification Requirements (12-16)
             'education_level', 'education', 
             'experience_level', 'experience_min', 'experience_max',
             'skills', 'skills_required', 'language_proficiency',
             'additional_notes', 'ats_keywords',
             
-            # Employer Details (20-29)
+            # Employer Details (17-26)
             'employer_name', 'employer_email', 'employer_phone',
             'employer_linkedin_url', 'employer_website_url',
             'employer_logo', 'employer_logo_url', 'employer_logo_display',
-            'employer_bio', 'employer_social_media', 'company_size', 'company_benefits',
+            'employer_bio', 'employer_social_media',
+            'company_size', 'company_benefits',
             
             # Additional Fields
             'designation', 'department', 'employment_type', 'gender_preference',
@@ -120,6 +134,149 @@ class JobSerializer(serializers.ModelSerializer):
             'applications_count', 'employer', 'employer_name', 
             'employer_profile_picture', 'employer_logo_display'
         ]
+    
+    def validate_faqs(self, value):
+        """Validate FAQs structure"""
+        if not isinstance(value, list):
+            raise serializers.ValidationError("FAQs must be a list")
+        
+        for faq in value:
+            if not isinstance(faq, dict):
+                raise serializers.ValidationError("Each FAQ must be an object")
+            if 'question' not in faq or 'answer' not in faq:
+                raise serializers.ValidationError(
+                    "Each FAQ must have 'question' and 'answer' fields"
+                )
+            if not faq.get('question') or not faq.get('answer'):
+                raise serializers.ValidationError(
+                    "FAQ questions and answers cannot be empty"
+                )
+        return value
+    
+    def validate_screening_questions(self, value):
+        """Validate screening questions structure"""
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Screening questions must be a list")
+        
+        for question in value:
+            if not isinstance(question, dict):
+                raise serializers.ValidationError("Each question must be an object")
+            if 'question' not in question:
+                raise serializers.ValidationError(
+                    "Each screening question must have a 'question' field"
+                )
+            if not question.get('question'):
+                raise serializers.ValidationError(
+                    "Question text cannot be empty"
+                )
+            # Validate optional fields if present
+            if 'type' in question and question['type'] not in ['text', 'boolean', 'multiple_choice']:
+                raise serializers.ValidationError(
+                    "Question type must be 'text', 'boolean', or 'multiple_choice'"
+                )
+        return value
+    
+    def validate_hiring_process_stages(self, value):
+        """Validate hiring process stages structure"""
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Hiring process stages must be a list")
+        
+        for stage in value:
+            if not isinstance(stage, dict):
+                raise serializers.ValidationError("Each stage must be an object")
+            if 'stage' not in stage:
+                raise serializers.ValidationError(
+                    "Each hiring stage must have a 'stage' field"
+                )
+            if not stage.get('stage'):
+                raise serializers.ValidationError(
+                    "Stage name cannot be empty"
+                )
+        return value
+    
+    def validate_responsibilities(self, value):
+        """Ensure responsibilities is a list"""
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Responsibilities must be a list")
+        # Filter out empty items
+        return [item.strip() for item in value if item and str(item).strip()]
+    
+    def validate_requirements(self, value):
+        """Ensure requirements is a list"""
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Requirements must be a list")
+        # Filter out empty items
+        return [item.strip() for item in value if item and str(item).strip()]
+    
+    def validate_skills(self, value):
+        """Ensure skills is a list"""
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Skills must be a list")
+        # Filter out empty items
+        return [item.strip() for item in value if item and str(item).strip()]
+    
+    def validate_benefits(self, value):
+        """Ensure benefits is a list"""
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise serializers.ValidationError("Benefits must be a list")
+        # Filter out empty items
+        return [item.strip() for item in value if item and str(item).strip()]
+    
+    def validate_description(self, value):
+        """Clean up description"""
+        if value:
+            return value.strip()
+        return value
+    
+    def validate(self, data):
+        """Cross-field validation"""
+        # Ensure at least one of the description fields is provided
+        description = data.get('description', '')
+        job_brief = data.get('job_brief', '')
+        responsibilities = data.get('responsibilities', [])
+        requirements = data.get('requirements', [])
+        
+        has_content = any([
+            description and description.strip(),
+            job_brief and job_brief.strip(),
+            responsibilities and len(responsibilities) > 0,
+            requirements and len(requirements) > 0
+        ])
+        
+        if not has_content:
+            raise serializers.ValidationError(
+                "At least one of description, job_brief, responsibilities, or requirements must be provided"
+            )
+        
+        # Validate salary range
+        if data.get('salary_min') and data.get('salary_max'):
+            if data['salary_min'] > data['salary_max']:
+                raise serializers.ValidationError(
+                    "Minimum salary cannot be greater than maximum salary"
+                )
+        
+        # Validate experience range
+        if data.get('experience_min') is not None and data.get('experience_max') is not None:
+            if data['experience_min'] > data['experience_max']:
+                raise serializers.ValidationError(
+                    "Minimum experience cannot be greater than maximum experience"
+                )
+        
+        # Validate virtual platform is provided for virtual interviews
+        if data.get('interview_method') == 'virtual' and not data.get('virtual_platform'):
+            raise serializers.ValidationError(
+                "Virtual platform must be specified for virtual interviews"
+            )
+        
+        return data
     
     def create(self, validated_data):
         """Auto-populate employer details from profile if not provided"""

@@ -1037,9 +1037,6 @@ class JobListCreateView(generics.ListCreateAPIView):
         if 'employer_bio' not in data or not data.get('employer_bio'):
             data['employer_bio'] = employer_profile.bio
         
-        if 'company_size' not in data or not data.get('company_size'):
-            data['company_size'] = employer_profile.company_size
-        
         # Handle file uploads for employer logo
         if 'employer_logo' in request.FILES:
             data['employer_logo'] = request.FILES['employer_logo']
@@ -1138,6 +1135,8 @@ class JobDetailView(generics.RetrieveUpdateDestroyAPIView):
             'employerWebsite': 'employer_website_url',
             'employerBio': 'employer_bio',
             'employerSocialMedia': 'employer_social_media',
+            'companySize': 'company_size',
+            'companyBenefits': 'company_benefits',
         }
         
         for frontend_name, backend_name in field_mappings.items():

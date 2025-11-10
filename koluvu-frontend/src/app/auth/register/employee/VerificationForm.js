@@ -1,7 +1,7 @@
 // src/app/auth/register/employee/VerificationForm.js
 
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function VerificationForm({
   fieldName,
@@ -10,14 +10,33 @@ export default function VerificationForm({
   verificationType,
   inputStyle = "",
   btnStyle = "",
+  captchaVerified = false,
+  onEmailChange = null,
+  onVerificationChange = null,
+  hideEmailInput = false,
+  presetEmail = "",
 }) {
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showOTPField, setShowOTPField] = useState(false);
+
   const [otpValue, setOtpValue] = useState("");
   const [message, setMessage] = useState("");
-  const [fieldValue, setFieldValue] = useState("");
+  const [fieldValue, setFieldValue] = useState(presetEmail || "");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
+
+  // Auto-send OTP if email is preset and input is hidden
+  useEffect(() => {
+    if (
+      hideEmailInput &&
+      presetEmail &&
+      captchaVerified &&
+      !showOTPField &&
+      !isVerified
+    ) {
+      sendOTP();
+    }
+  }, [hideEmailInput, presetEmail, captchaVerified]);
 
   const sendOTP = async () => {
     setLoading(true);
@@ -26,6 +45,16 @@ export default function VerificationForm({
     try {
       if (!fieldValue) {
         setMessage(`Please enter your ${fieldLabel.toLowerCase()} first`);
+        setMessageType("error");
+        setLoading(false);
+        return;
+      }
+
+      // Check if main form CAPTCHA is verified
+      if (!captchaVerified) {
+        setMessage(
+          "Please complete the CAPTCHA verification at the bottom of the form first"
+        );
         setMessageType("error");
         setLoading(false);
         return;
@@ -41,7 +70,12 @@ export default function VerificationForm({
           return;
         }
 
+        // Get username from the form if available
+        const usernameField = document.querySelector('input[name="username"]');
+        const username = usernameField ? usernameField.value : "";
+
         // Send OTP via Django backend for email
+        const otpType = verificationType === "login" ? "login" : "email";
         const response = await fetch(
           "http://127.0.0.1:8000/api/auth/send-otp/",
           {
@@ -51,7 +85,8 @@ export default function VerificationForm({
             },
             body: JSON.stringify({
               email: fieldValue,
-              type: "email",
+              type: otpType,
+              username: username,
             }),
           }
         );
@@ -118,8 +153,9 @@ export default function VerificationForm({
     setMessage("");
 
     try {
-      if (verificationType === "email") {
-        // Verify email OTP via Django backend
+      if (verificationType === "email" || verificationType === "login") {
+        // Verify email or login OTP via Django backend
+        const otpType = verificationType === "login" ? "login" : "email";
         const response = await fetch(
           "http://127.0.0.1:8000/api/auth/verify-otp/",
           {
@@ -130,7 +166,7 @@ export default function VerificationForm({
             body: JSON.stringify({
               email: fieldValue,
               otp: otpValue,
-              type: "email",
+              type: otpType,
             }),
           }
         );
@@ -139,6 +175,7 @@ export default function VerificationForm({
 
         if (result.success) {
           setIsVerified(true);
+          if (onVerificationChange) onVerificationChange(true);
           setMessage("Email verified successfully!");
           setMessageType("success");
           setShowOTPField(false);
@@ -167,6 +204,7 @@ export default function VerificationForm({
 
         if (result.success) {
           setIsVerified(true);
+          if (onVerificationChange) onVerificationChange(true);
           setMessage("Mobile number verified successfully!");
           setMessageType("success");
           setShowOTPField(false);
@@ -192,28 +230,42 @@ export default function VerificationForm({
 
   return (
     <div className="space-y-2">
-      <div className="flex gap-2">
-        <input
-          className={`${inputStyle} flex-1`}
-          type={verificationType === "email" ? "email" : "tel"}
-          value={fieldValue}
-          onChange={(e) => setFieldValue(e.target.value)}
-          name={fieldName}
-          placeholder={placeholder}
-          required
-          disabled={isVerified}
-        />
-        <button
-          type="button"
-          className={`${btnStyle} whitespace-nowrap ${
-            isVerified ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          onClick={sendOTP}
-          disabled={loading || isVerified}
-        >
-          {loading ? "Sending..." : "Send OTP"}
-        </button>
-      </div>
+      {!hideEmailInput && (
+        <div className="flex gap-2">
+          <input
+            className={`${inputStyle} flex-1`}
+            type={
+              verificationType === "email" || verificationType === "login"
+                ? "email"
+                : "tel"
+            }
+            value={fieldValue}
+            onChange={(e) => {
+              setFieldValue(e.target.value);
+              if (onEmailChange) onEmailChange(e.target.value);
+            }}
+            name={fieldName}
+            placeholder={placeholder}
+            required
+            disabled={isVerified}
+          />
+          <button
+            type="button"
+            className={`${btnStyle} whitespace-nowrap ${
+              isVerified || !captchaVerified
+                ? "opacity-50 cursor-not-allowed"
+                : ""
+            }`}
+            onClick={sendOTP}
+            disabled={loading || isVerified || !captchaVerified}
+            title={
+              !captchaVerified ? "Complete CAPTCHA verification first" : ""
+            }
+          >
+            {loading ? "Sending..." : "Send OTP"}
+          </button>
+        </div>
+      )}
 
       {showOTPField && !isVerified && (
         <div className="space-y-2">

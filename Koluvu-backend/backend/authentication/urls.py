@@ -11,4 +11,6 @@ urlpatterns = [
     path('token-from-cookie/', views.TokenFromCookieView.as_view(), name='token_from_cookie'),
     path('refresh-token/', views.RefreshTokenView.as_view(), name='refresh_token'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
+    path('send-otp/', views.SendOTPView.as_view(), name='send_otp'),
+    path('verify-otp/', views.VerifyOTPView.as_view(), name='verify_otp'),
 ]

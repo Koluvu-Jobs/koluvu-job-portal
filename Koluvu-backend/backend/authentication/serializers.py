@@ -4,9 +4,24 @@ from authentication.models import SocialAccount
 
 
 class UserSerializer(serializers.ModelSerializer):
+    user_type = serializers.SerializerMethodField()
+
+    def get_user_type(self, obj):
+        # If user_type is a field on the User model, use it directly
+        if hasattr(obj, 'user_type'):
+            return obj.user_type
+        # Check for related profiles (EmployerProfile, EmployeeProfile, etc.)
+        if hasattr(obj, 'employer_profile'):
+            return 'employer'
+        if hasattr(obj, 'employee_profile'):
+            return 'employee'
+        if hasattr(obj, 'partner_profile'):
+            return 'partner'
+        return None
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'date_joined']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'date_joined', 'user_type']
 
 
 class SocialAccountSerializer(serializers.ModelSerializer):

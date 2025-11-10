@@ -25,6 +25,7 @@ import toast from "react-hot-toast";
 import CaptchaVerification, {
   verifyCaptchaValue,
 } from "@koluvu/components/auth/CaptchaVerification";
+import VerificationForm from "@koluvu/app/auth/register/employee/VerificationForm";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,6 +40,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [captchaValue, setCaptchaValue] = useState("");
   const [captchaKey, setCaptchaKey] = useState("");
+  const [loginStep, setLoginStep] = useState("credentials"); // "credentials", "otp", "complete"
+  const [otpSent, setOtpSent] = useState(false);
 
   // Clear any stale auth data when login page loads
   useEffect(() => {
@@ -117,6 +120,40 @@ export default function LoginPage() {
         return;
       }
 
+      if (loginStep === "credentials") {
+        // Step 1: Send login OTP
+        const otpResponse = await fetch("http://127.0.0.1:8000/api/auth/send-otp/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: email,
+            type: "login",
+          }),
+        });
+
+        const otpData = await otpResponse.json();
+        if (otpData.success) {
+          setLoginStep("otp");
+          setOtpSent(true);
+          toast.success("Login OTP sent to your email!");
+        } else {
+          setLoginError(otpData.message || "Failed to send login OTP.");
+        }
+      }
+    } catch (error) {
+      console.error("Login step failed:", error);
+      setLoginError("An unexpected error occurred.");
+      toast.error("Login step failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOTPVerified = async () => {
+    setIsLoading(true);
+    setLoginError("");
+
+    try {
       const response = await fetch("/api/employee/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -500,88 +537,146 @@ export default function LoginPage() {
                 <hr style={styles.dividerLine} />
               </div>
 
-              <form
-                onSubmit={handleSubmit}
-                style={{
-                  marginBottom: deviceType === "mobile" ? "1.1rem" : "1.3rem",
-                }}
-              >
-                <div style={styles.inputGroup}>
-                  <FaEnvelope style={styles.inputIcon} />
-                  <input
-                    type="email"
-                    placeholder="Email ID"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    aria-label="Email address"
-                    style={styles.input}
-                  />
-                </div>
-                <div style={styles.inputGroup}>
-                  <FaLock style={styles.inputIcon} />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    aria-label="Password"
-                    style={styles.input}
-                  />
-                  <div
-                    style={styles.eyeIcon}
-                    onClick={togglePasswordVisibility}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && togglePasswordVisibility()
-                    }
-                  >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {loginStep === "credentials" && (
+                <form
+                  onSubmit={handleSubmit}
+                  style={{
+                    marginBottom: deviceType === "mobile" ? "1.1rem" : "1.3rem",
+                  }}
+                >
+                  <div style={styles.inputGroup}>
+                    <FaEnvelope style={styles.inputIcon} />
+                    <input
+                      type="email"
+                      placeholder="Email ID"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      aria-label="Email address"
+                      style={styles.input}
+                    />
                   </div>
-                </div>
+                  <div style={styles.inputGroup}>
+                    <FaLock style={styles.inputIcon} />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      aria-label="Password"
+                      style={styles.input}
+                    />
+                    <div
+                      style={styles.eyeIcon}
+                      onClick={togglePasswordVisibility}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && togglePasswordVisibility()
+                      }
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </div>
+                  </div>
 
-                {/* CAPTCHA Verification */}
-                <CaptchaVerification
-                  onCaptchaChange={handleCaptchaChange}
-                  captchaValue={captchaValue}
-                  deviceType={deviceType}
-                  required={true}
-                />
+                  {/* CAPTCHA Verification */}
+                  <CaptchaVerification
+                    onCaptchaChange={handleCaptchaChange}
+                    captchaValue={captchaValue}
+                    deviceType={deviceType}
+                    required={true}
+                  />
 
-                {loginError && (
-                  <div
+                  {loginError && (
+                    <div
+                      style={{
+                        color: "#ef4444",
+                        fontSize: deviceType === "mobile" ? "0.8rem" : "0.85rem",
+                        marginBottom: "0.75rem",
+                        textAlign: "center",
+                        padding: "0.5rem",
+                        backgroundColor: "rgba(239, 68, 68, 0.1)",
+                        borderRadius: "6px",
+                        border: "1px solid rgba(239, 68, 68, 0.3)",
+                      }}
+                    >
+                      {loginError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
                     style={{
-                      color: "#ef4444",
-                      fontSize: deviceType === "mobile" ? "0.8rem" : "0.85rem",
-                      marginBottom: "0.75rem",
+                      ...styles.loginBtn,
+                      ...(isLoading
+                        ? { opacity: 0.7, cursor: "not-allowed" }
+                        : {}),
+                    }}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Sending Login OTP..." : "Continue to Login"}
+                  </button>
+                </form>
+              )}
+
+              {loginStep === "otp" && (
+                <div style={{ marginBottom: deviceType === "mobile" ? "1.1rem" : "1.3rem" }}>
+                  <div style={{ textAlign: "center", marginBottom: "1rem", color: "#cbd5e1" }}>
+                    <p style={{ fontSize: deviceType === "mobile" ? "0.85rem" : "0.9rem" }}>
+                      We've sent a login verification code to<br />
+                      <strong style={{ color: "#fff" }}>{email}</strong>
+                    </p>
+                  </div>
+                  
+                  <VerificationForm
+                    fieldName="loginOTP"
+                    fieldLabel="Login OTP"
+                    placeholder="Enter 6-digit verification code"
+                    verificationType="login"
+                    captchaVerified={true}
+                    onVerificationChange={handleOTPVerified}
+                    inputStyle={`${styles.input} text-center text-lg tracking-wider`}
+                    btnStyle={styles.loginBtn}
+                    hideEmailInput={true}
+                    presetEmail={email}
+                  />
+
+                  {loginError && (
+                    <div
+                      style={{
+                        color: "#ef4444",
+                        fontSize: deviceType === "mobile" ? "0.8rem" : "0.85rem",
+                        marginTop: "0.75rem",
+                        textAlign: "center",
+                        padding: "0.5rem",
+                        backgroundColor: "rgba(239, 68, 68, 0.1)",
+                        borderRadius: "6px",
+                        border: "1px solid rgba(239, 68, 68, 0.3)",
+                      }}
+                    >
+                      {loginError}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => setLoginStep("credentials")}
+                    style={{
+                      ...styles.forgotLink,
+                      marginTop: "1rem",
                       textAlign: "center",
-                      padding: "0.5rem",
-                      backgroundColor: "rgba(239, 68, 68, 0.1)",
-                      borderRadius: "6px",
-                      border: "1px solid rgba(239, 68, 68, 0.3)",
+                      width: "100%",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer"
                     }}
                   >
-                    {loginError}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  style={{
-                    ...styles.loginBtn,
-                    ...(isLoading
-                      ? { opacity: 0.7, cursor: "not-allowed" }
-                      : {}),
-                  }}
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Signing in..." : "Login"}
-                </button>
-              </form>
+                    ← Back to Login
+                  </button>
+                </div>
+              )}
 
               <div style={styles.forgotOptions}>
                 <a

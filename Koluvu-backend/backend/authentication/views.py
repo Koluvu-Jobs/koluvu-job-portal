@@ -10,21 +10,19 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from google.auth.transport import requests
 from google.oauth2 import id_token
-from datetime import datetime, timezone
+from datetime import datetime
+from django.utils import timezone
 import logging
+from datetime import timezone as dt_timezone
 
-from authentication.models import SocialAccount, UserSession
+from authentication.models import SocialAccount, UserSession, OTPSession
 from authentication.serializers import GoogleOAuthSerializer, AuthResponseSerializer, UserSerializer
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.core.mail import EmailMultiAlternatives
 from employee_dashboard.models import EmployeeProfile
 from employer_dashboard.models import EmployerProfile
-
-# Try to import PartnerProfile, but handle if it fails
-try:
-    from backend.partner_dashboard.models import PartnerProfile
-    PARTNER_PROFILE_AVAILABLE = True
-except ImportError:
-    PartnerProfile = None
-    PARTNER_PROFILE_AVAILABLE = False
+from backend.partner_dashboard.models import PartnerProfile
 from django.http import HttpResponseRedirect
 import requests as http_requests
 import uuid
@@ -132,7 +130,7 @@ class GoogleOAuthView(APIView):
                         },
                         status=status.HTTP_400_BAD_REQUEST
                     )
-                if PARTNER_PROFILE_AVAILABLE and PartnerProfile.objects.filter(user=user).exists():
+                if PartnerProfile.objects.filter(user=user).exists():
                     logger.warning(f"User {email} already has a partner profile, cannot create employee profile")
                     return Response(
                         {
@@ -151,7 +149,7 @@ class GoogleOAuthView(APIView):
                         },
                         status=status.HTTP_400_BAD_REQUEST
                     )
-                if PARTNER_PROFILE_AVAILABLE and PartnerProfile.objects.filter(user=user).exists():
+                if PartnerProfile.objects.filter(user=user).exists():
                     logger.warning(f"User {email} already has a partner profile, cannot create employer profile")
                     return Response(
                         {
@@ -226,11 +224,6 @@ class GoogleOAuthView(APIView):
                         )
                         logger.info(f"Created new employer profile for user {user.email}")
                 elif user_type == 'partner':
-                    if not PARTNER_PROFILE_AVAILABLE:
-                        return Response(
-                            {'error': 'Partner registration is not available at this time.'},
-                            status=status.HTTP_503_SERVICE_UNAVAILABLE
-                        )
                     logger.info(f"Entered partner profile creation block")
                     try:
                         partner_profile = PartnerProfile.objects.get(user=user)
@@ -272,7 +265,7 @@ class GoogleOAuthView(APIView):
             # Convert Unix timestamp to datetime
             exp_timestamp = refresh.get('exp')
             if exp_timestamp:
-                expires_at = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+                expires_at = datetime.fromtimestamp(exp_timestamp, tz=dt_timezone.utc)
             else:
                 expires_at = None
                 
@@ -553,8 +546,7 @@ class GitHubCallbackView(APIView):
             exp_timestamp = refresh.get('exp')
             expires_at = None
             if exp_timestamp:
-                from datetime import datetime, timezone
-                expires_at = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+                expires_at = datetime.fromtimestamp(exp_timestamp, tz=dt_timezone.utc)
 
             UserSession.objects.create(user=user, refresh_token=refresh_token_jwt, expires_at=expires_at)
 
@@ -694,8 +686,7 @@ class LinkedInCallbackView(APIView):
             exp_timestamp = refresh.get('exp')
             expires_at = None
             if exp_timestamp:
-                from datetime import datetime, timezone
-                expires_at = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+                expires_at = datetime.fromtimestamp(exp_timestamp, tz=dt_timezone.utc)
             UserSession.objects.create(user=user, refresh_token=refresh_token_jwt, expires_at=expires_at)
 
             redirect_url = f"{getattr(settings, 'FRONTEND_URL', '/')}/auth/auth-success?provider=linkedin"
@@ -798,3 +789,490 @@ class LogoutView(APIView):
             print(f"Logout error: {e}")
             # Always return success for logout to ensure frontend can complete logout
             return Response({'message': 'Successfully logged out'}, status=status.HTTP_200_OK)
+
+
+class SendOTPView(APIView):
+    """Send OTP for email or mobile verification"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        try:
+            email = request.data.get('email')
+            phone = request.data.get('phone')
+            username = request.data.get('username')  # Get username from request
+            verification_type = request.data.get('type', 'email')
+            
+            if not email and not phone:
+                return Response({
+                    'success': False,
+                    'message': 'Email or phone number is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Clean up expired OTP sessions
+            OTPSession.objects.filter(expires_at__lt=timezone.now()).delete()
+            
+            # Check for existing valid OTP session
+            if email and verification_type == 'email':
+                existing_otp = OTPSession.objects.filter(
+                    email=email,
+                    verification_type='email',
+                    is_verified=False,
+                    expires_at__gt=timezone.now()
+                ).first()
+                
+                if existing_otp:
+                    # Resend existing OTP if it's less than 1 minute old
+                    if timezone.now() - existing_otp.created_at < timezone.timedelta(minutes=1):
+                        return Response({
+                            'success': False,
+                            'message': 'Please wait before requesting a new OTP'
+                        }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+                    else:
+                        # Delete old session and create new one
+                        existing_otp.delete()
+            
+            elif phone and verification_type == 'phone':
+                existing_otp = OTPSession.objects.filter(
+                    phone=phone,
+                    verification_type='phone',
+                    is_verified=False,
+                    expires_at__gt=timezone.now()
+                ).first()
+                
+                if existing_otp:
+                    if timezone.now() - existing_otp.created_at < timezone.timedelta(minutes=1):
+                        return Response({
+                            'success': False,
+                            'message': 'Please wait before requesting a new OTP'
+                        }, status=status.HTTP_429_TOO_MANY_REQUESTS)
+                    else:
+                        existing_otp.delete()
+            
+            # Create new OTP session
+            if verification_type == 'email' and email:
+                otp_session = OTPSession.objects.create(
+                    email=email,
+                    verification_type='email'
+                )
+                
+                # Send email
+                success = self.send_email_otp(email, otp_session.otp_code, username)
+                
+                if success:
+                    return Response({
+                        'success': True,
+                        'message': 'OTP sent to your email successfully'
+                    })
+                else:
+                    otp_session.delete()
+                    return Response({
+                        'success': False,
+                        'message': 'Failed to send email. Please try again.'
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    
+            elif verification_type == 'login' and email:
+                otp_session = OTPSession.objects.create(
+                    email=email,
+                    verification_type='login'
+                )
+                
+                # Send login OTP email
+                success = self.send_login_otp(email, otp_session.otp_code)
+                
+                if success:
+                    return Response({
+                        'success': True,
+                        'message': 'Login OTP sent to your email successfully'
+                    })
+                else:
+                    otp_session.delete()
+                    return Response({
+                        'success': False,
+                        'message': 'Failed to send login OTP. Please try again.'
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    
+            elif verification_type == 'phone' and phone:
+                otp_session = OTPSession.objects.create(
+                    phone=phone,
+                    verification_type='phone'
+                )
+                
+                # For development, just log the OTP
+                logger.info(f"SMS OTP for {phone}: {otp_session.otp_code}")
+                print(f"SMS OTP for {phone}: {otp_session.otp_code}")  # Console output for development
+                
+                return Response({
+                    'success': True,
+                    'message': 'OTP sent to your mobile number successfully'
+                })
+            
+            else:
+                return Response({
+                    'success': False,
+                    'message': 'Invalid verification type or missing contact information'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Exception as e:
+            logger.error(f"Error sending OTP: {str(e)}")
+            return Response({
+                'success': False,
+                'message': 'Failed to send OTP. Please try again.'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def send_email_otp(self, email, otp_code, username=None):
+        """Send OTP via email using professional HTML template"""
+        try:
+            subject = 'Koluvu - Email Verification Code'
+            
+            # Try to get username from email if not provided
+            if not username:
+                # Extract potential username from email (before @)
+                username = email.split('@')[0]
+            
+            # Context for the template
+            context = {
+                'otp_code': otp_code,
+                'username': username,
+                'registration_url': f"{settings.FRONTEND_URL}/auth/register/employee",
+                'frontend_url': settings.FRONTEND_URL,
+                'user_email': email,
+                'company_name': 'Koluvu',
+                'support_email': settings.DEFAULT_FROM_EMAIL,
+                'current_year': timezone.now().year
+            }
+            
+            # Render HTML content
+            html_content = render_to_string('emails/otp_verification.html', context)
+            
+            # Plain text fallback
+            text_content = f"""
+Hello {username}!
+
+Welcome to Koluvu! Your email verification code is: {otp_code}
+
+This code is valid for 30 minutes. Please do not share this code with anyone.
+
+If you didn't request this verification, please ignore this email.
+
+To complete your registration, please login at: {settings.FRONTEND_URL}/auth/login/employee
+
+Best regards,
+Koluvu Team
+
+---
+About Koluvu: We are India's leading job portal connecting talented professionals with their dream careers.
+
+© {timezone.now().year} Koluvu Jobs. All rights reserved.
+            """
+            
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [email]
+            
+            # Create EmailMultiAlternatives object for HTML email
+            email_message = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=from_email,
+                to=recipient_list
+            )
+            
+            # Attach HTML content
+            email_message.attach_alternative(html_content, "text/html")
+            
+            # Send email
+            email_message.send(fail_silently=False)
+            
+            logger.info(f"Professional HTML OTP email sent successfully to {email}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to send OTP email to {email}: {str(e)}")
+            return False
+    
+    def send_password_reset_otp(self, email, otp_code):
+        """Send password reset OTP via email using professional HTML template"""
+        try:
+            subject = 'Koluvu - Password Reset Code'
+            
+            # Context for the template
+            context = {
+                'otp_code': otp_code,
+                'user_email': email,
+                'frontend_url': settings.FRONTEND_URL,
+                'reset_url': f"{settings.FRONTEND_URL}/auth/reset-password",
+                'login_url': f"{settings.FRONTEND_URL}/auth/login",
+                'current_year': timezone.now().year
+            }
+            
+            # Render HTML content
+            html_content = render_to_string('emails/password_reset_otp.html', context)
+            
+            # Plain text fallback
+            text_content = f"""
+Hello,
+
+We received a request to reset your password for {email}.
+
+Your password reset code is: {otp_code}
+
+This code is valid for 30 minutes. If you didn't request this reset, please ignore this email.
+
+Best regards,
+Koluvu Team
+
+© {timezone.now().year} Koluvu Jobs. All rights reserved.
+            """
+            
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [email]
+            
+            # Create EmailMultiAlternatives object for HTML email
+            email_message = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=from_email,
+                to=recipient_list
+            )
+            
+            # Attach HTML content
+            email_message.attach_alternative(html_content, "text/html")
+            
+            # Send email
+            email_message.send(fail_silently=False)
+            
+            logger.info(f"Password reset OTP email sent successfully to {email}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to send password reset OTP email to {email}: {str(e)}")
+            return False
+    
+    def send_login_otp(self, email, otp_code):
+        """Send login OTP via email using professional HTML template"""
+        try:
+            subject = 'Koluvu - Login Verification Code'
+            
+            # Context for the template
+            context = {
+                'otp_code': otp_code,
+                'user_email': email,
+                'frontend_url': settings.FRONTEND_URL,
+                'login_url': f"{settings.FRONTEND_URL}/auth/login",
+                'current_year': timezone.now().year
+            }
+            
+            # Render HTML content
+            html_content = render_to_string('emails/login_otp.html', context)
+            
+            # Plain text fallback
+            text_content = f"""
+Hello,
+
+We received a login attempt for {email}.
+
+Your login verification code is: {otp_code}
+
+This code is valid for 30 minutes. If you didn't attempt to log in, please secure your account.
+
+Best regards,
+Koluvu Team
+
+© {timezone.now().year} Koluvu Jobs. All rights reserved.
+            """
+            
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [email]
+            
+            # Create EmailMultiAlternatives object for HTML email
+            email_message = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=from_email,
+                to=recipient_list
+            )
+            
+            # Attach HTML content
+            email_message.attach_alternative(html_content, "text/html")
+            
+            # Send email
+            email_message.send(fail_silently=False)
+            
+            logger.info(f"Login OTP email sent successfully to {email}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to send login OTP email to {email}: {str(e)}")
+            return False
+    
+    def send_welcome_email(self, user_email, user_name=None):
+        """Send welcome email after successful registration"""
+        try:
+            subject = 'Welcome to Koluvu - Your Career Journey Begins!'
+            
+            # Context for the template
+            context = {
+                'user_name': user_name or user_email.split('@')[0].title(),
+                'user_email': user_email,
+                'frontend_url': settings.FRONTEND_URL,
+                'profile_url': f"{settings.FRONTEND_URL}/dashboard/profile",
+                'jobs_url': f"{settings.FRONTEND_URL}/jobs",
+                'current_year': timezone.now().year
+            }
+            
+            # Render HTML content
+            html_content = render_to_string('emails/welcome.html', context)
+            
+            # Plain text fallback
+            text_content = f"""
+Welcome to Koluvu, {user_name or user_email.split('@')[0].title()}!
+
+Congratulations! Your account has been successfully created.
+
+We're excited to help you discover amazing career opportunities and connect with your dream job.
+
+What you can do with Koluvu:
+• Smart Job Search - AI-powered job matching
+• Profile Analytics - Track your progress
+• Company Insights - Detailed company information
+• Career Growth - Skill assessments and training
+
+Ready to get started?
+Complete your profile: {settings.FRONTEND_URL}/dashboard/profile
+Browse jobs: {settings.FRONTEND_URL}/jobs
+
+Need help? Contact us at support@koluvu.com
+
+Best regards,
+Koluvu Team
+
+© {timezone.now().year} Koluvu Jobs. All rights reserved.
+Building careers, connecting futures.
+            """
+            
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [user_email]
+            
+            # Create EmailMultiAlternatives object for HTML email
+            email_message = EmailMultiAlternatives(
+                subject=subject,
+                body=text_content,
+                from_email=from_email,
+                to=recipient_list
+            )
+            
+            # Attach HTML content
+            email_message.attach_alternative(html_content, "text/html")
+            
+            # Send email
+            email_message.send(fail_silently=False)
+            
+            logger.info(f"Welcome email sent successfully to {user_email}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to send welcome email to {user_email}: {str(e)}")
+            return False
+    
+
+class VerifyOTPView(APIView):
+    """Verify OTP for email or mobile verification"""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        try:
+            email = request.data.get('email')
+            phone = request.data.get('phone')
+            otp = request.data.get('otp')
+            verification_type = request.data.get('type', 'email')
+            
+            if not otp:
+                return Response({
+                    'success': False,
+                    'message': 'OTP is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Find OTP session
+            otp_session = None
+            
+            if verification_type == 'email' and email:
+                otp_session = OTPSession.objects.filter(
+                    email=email,
+                    verification_type='email',
+                    is_verified=False
+                ).order_by('-created_at').first()
+                
+            elif verification_type == 'login' and email:
+                otp_session = OTPSession.objects.filter(
+                    email=email,
+                    verification_type='login',
+                    is_verified=False
+                ).order_by('-created_at').first()
+                
+            elif verification_type == 'phone' and phone:
+                otp_session = OTPSession.objects.filter(
+                    phone=phone,
+                    verification_type='phone',
+                    is_verified=False
+                ).order_by('-created_at').first()
+            
+            if not otp_session:
+                return Response({
+                    'success': False,
+                    'message': 'No valid OTP session found. Please request a new OTP.'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            # Check if OTP session is expired
+            if otp_session.is_expired():
+                return Response({
+                    'success': False,
+                    'message': 'OTP has expired. Please request a new one.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Check if maximum attempts exceeded
+            if not otp_session.can_attempt():
+                return Response({
+                    'success': False,
+                    'message': 'Maximum OTP attempts exceeded. Please request a new OTP.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Increment attempts
+            otp_session.attempts += 1
+            otp_session.save()
+            
+            # Verify OTP
+            if otp_session.otp_code == otp:
+                otp_session.is_verified = True
+                otp_session.save()
+                
+                # Send welcome email after successful registration verification
+                if verification_type == 'email' and email:
+                    try:
+                        # Try to get user's name from User model if they exist
+                        user_name = None
+                        try:
+                            user = User.objects.get(email=email)
+                            user_name = f"{user.first_name} {user.last_name}".strip() or user.username
+                        except User.DoesNotExist:
+                            user_name = email.split('@')[0].title()
+                        
+                        self.send_welcome_email(email, user_name)
+                    except Exception as e:
+                        logger.warning(f"Failed to send welcome email to {email}: {str(e)}")
+                        # Don't fail the OTP verification if welcome email fails
+                
+                return Response({
+                    'success': True,
+                    'message': f'{verification_type.title()} verified successfully'
+                })
+            else:
+                return Response({
+                    'success': False,
+                    'message': f'Invalid OTP. {otp_session.max_attempts - otp_session.attempts} attempts remaining.'
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+        except Exception as e:
+            logger.error(f"Error verifying OTP: {str(e)}")
+            return Response({
+                'success': False,
+                'message': 'Failed to verify OTP. Please try again.'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

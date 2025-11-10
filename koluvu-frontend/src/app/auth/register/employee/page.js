@@ -109,7 +109,10 @@ export default function EmployeeRegistration() {
         toast.success("Successfully signed in with Google!");
 
         // Redirect to employee dashboard
-        const redirectPath = getRedirectPath(USER_TYPES.EMPLOYEE, result.username);
+        const redirectPath = getRedirectPath(
+          USER_TYPES.EMPLOYEE,
+          result.username
+        );
         console.log("Redirecting to:", redirectPath);
         router.push(redirectPath);
       } catch (error) {
@@ -434,27 +437,18 @@ export default function EmployeeRegistration() {
                   />
                 </div>
 
+                {/* Mobile number field is now optional 
                 <div>
                   <VerificationForm
                     fieldName="mobileNumber"
                     fieldLabel="Mobile Number"
-                    placeholder="Enter Mobile Number *"
+                    placeholder="Enter Mobile Number (Optional)"
                     verificationType="mobile"
                     inputStyle="w-full text-sm sm:text-base font-medium border border-gray-700 bg-gray-800/40 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 text-white"
                     btnStyle="text-sm sm:text-base font-medium border border-gray-700 bg-gray-800/40 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 hover:bg-gray-700/50 text-white"
                   />
                 </div>
-
-                <div>
-                  <VerificationForm
-                    fieldName="email"
-                    fieldLabel="Email ID"
-                    placeholder="Enter Email *"
-                    verificationType="email"
-                    inputStyle="w-full text-sm sm:text-base font-medium border border-gray-700 bg-gray-800/40 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 text-white"
-                    btnStyle="text-sm sm:text-base font-medium border border-gray-700 bg-gray-800/40 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 hover:bg-gray-700/50 text-white"
-                  />
-                </div>
+                */}
 
                 <div className="grid grid-cols-1 gap-3 sm:gap-4">
                   <div className="relative">
@@ -513,10 +507,32 @@ export default function EmployeeRegistration() {
                   />
                 </div>
 
+                {/* Email Verification - shown only after CAPTCHA is completed */}
+                {captchaValue && captchaKey && (
+                  <div className="pt-2">
+                    <div className="mb-3 p-3 bg-green-900/20 border border-green-700/30 rounded-lg text-center text-sm text-green-300">
+                      <p>
+                        ✅ CAPTCHA verified! Now enter and verify your email
+                        address:
+                      </p>
+                    </div>
+                    <VerificationForm
+                      fieldName="email"
+                      fieldLabel="Email Verification"
+                      placeholder="Enter Email *"
+                      verificationType="email"
+                      captchaVerified={true}
+                      inputStyle="w-full text-sm sm:text-base font-medium border border-gray-700 bg-gray-800/40 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 text-white"
+                      btnStyle="text-sm sm:text-base font-medium border border-gray-700 bg-gray-800/40 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 hover:bg-gray-700/50 text-white"
+                    />
+                  </div>
+                )}
+
                 <div className="pt-2">
                   <button
                     type="submit"
                     className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium px-4 py-2.5 sm:py-3 rounded-lg hover:opacity-90 transition-opacity text-sm sm:text-base"
+                    disabled={captchaValue && captchaKey ? false : true}
                   >
                     Register Now
                   </button>

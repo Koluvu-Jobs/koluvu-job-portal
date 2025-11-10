@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Verification - Koluvu</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+        line-height: 1.6;
+      }
+
+      .email-container {
+        width: 100%;
+        max-width: 580px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        padding: 35px 30px;
+        text-align: center;
+        position: relative;
+      }
+
+      .logo {
+        width: 70px;
+        height: 70px;
+        border-radius: 16px;
+        margin: 0 auto 15px;
+        display: block;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        position: relative;
+        animation: logoFloat 3s ease-in-out infinite;
+        object-fit: cover;
+        background: #ffffff;
+        padding: 10px;
+      }
+
+      .logo::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(
+          45deg,
+          transparent 40%,
+          rgba(255, 255, 255, 0.4) 50%,
+          transparent 60%
+        );
+        animation: shine 4s infinite;
+      }
+
+      @keyframes logoFloat {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      @keyframes shine {
+        0%,
+        100% {
+          transform: rotate(0deg);
+          opacity: 0;
+        }
+        50% {
+          transform: rotate(180deg);
+          opacity: 1;
+        }
+      }
+
+      .company-name {
+        color: #ffffff;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 5px;
+        letter-spacing: 2px;
+      }
+
+      .tagline {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 14px;
+        font-weight: 400;
+      }
+
+      .content {
+        padding: 35px 30px;
+        text-align: center;
+      }
+
+      .title {
+        color: #2c3e50;
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 12px;
+      }
+
+      .message {
+        color: #5a6c7d;
+        font-size: 14px;
+        margin-bottom: 25px;
+        line-height: 1.7;
+      }
+
+      .otp-container {
+        background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+        border: 2px solid #4caf50;
+        border-radius: 15px;
+        padding: 25px 20px;
+        margin: 25px 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .otp-container::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle,
+          rgba(76, 175, 80, 0.15) 0%,
+          transparent 70%
+        );
+        animation: pulse 4s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(0.9);
+          opacity: 0.5;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 0.3;
+        }
+      }
+
+      .otp-label {
+        color: #388e3c;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 12px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .otp-code {
+        font-size: 32px;
+        font-weight: 800;
+        color: #2c3e50;
+        letter-spacing: 6px;
+        font-family: "Courier New", monospace;
+        background: #ffffff;
+        padding: 12px 20px;
+        border-radius: 10px;
+        display: inline-block;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border: 1px solid #4caf50;
+        position: relative;
+        z-index: 1;
+        animation: codePop 0.5s ease-out;
+      }
+
+      @keyframes codePop {
+        0% {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .expiry-info {
+        color: #388e3c;
+        font-size: 13px;
+        font-weight: 600;
+        margin-top: 15px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .security-warning {
+        background: #f3e5f5;
+        border-left: 4px solid #9c27b0;
+        padding: 15px 18px;
+        margin: 20px 0;
+        border-radius: 0 10px 10px 0;
+        text-align: left;
+      }
+
+      .security-text {
+        color: #5a6c7d;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .security-text .icon {
+        color: #9c27b0;
+        font-size: 16px;
+        margin-right: 8px;
+      }
+
+      .cta-button {
+        background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        color: #ffffff;
+        padding: 14px 32px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        display: inline-block;
+        box-shadow: 0 6px 20px rgba(56, 142, 60, 0.3);
+        transition: all 0.3s ease;
+        margin-top: 5px;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(56, 142, 60, 0.4);
+      }
+
+      .footer {
+        background: #f8f9fa;
+        padding: 25px 30px;
+        text-align: center;
+        border-top: 1px solid #e9ecef;
+      }
+
+      .about-koluvu {
+        color: #5a6c7d;
+        font-size: 13px;
+        line-height: 1.7;
+        margin-bottom: 15px;
+      }
+
+      .social-links {
+        margin: 12px 0;
+      }
+
+      .social-links a {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        background: #4caf50;
+        color: #ffffff;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 32px;
+        margin: 0 4px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      .social-links a:hover {
+        background: #388e3c;
+        transform: translateY(-2px);
+      }
+
+      .footer-links {
+        margin: 12px 0 15px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px 15px;
+      }
+
+      .footer-links a {
+        color: #4caf50;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 12px;
+        transition: color 0.3s ease;
+      }
+
+      .footer-links a:hover {
+        color: #388e3c;
+        text-decoration: underline;
+      }
+
+      .copyright {
+        color: #9ca3af;
+        font-size: 11px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #e9ecef;
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+
+        .email-container {
+          border-radius: 15px;
+        }
+
+        .header {
+          padding: 25px 20px;
+        }
+
+        .logo {
+          width: 60px;
+          height: 60px;
+          font-size: 28px;
+          margin-bottom: 12px;
+        }
+
+        .company-name {
+          font-size: 24px;
+          letter-spacing: 1.5px;
+        }
+
+        .tagline {
+          font-size: 13px;
+        }
+
+        .content {
+          padding: 25px 20px;
+        }
+
+        .title {
+          font-size: 20px;
+        }
+
+        .message {
+          font-size: 13px;
+          margin-bottom: 20px;
+        }
+
+        .otp-container {
+          padding: 20px 15px;
+          margin: 20px 0;
+        }
+
+        .otp-code {
+          font-size: 26px;
+          letter-spacing: 4px;
+          padding: 10px 16px;
+        }
+
+        .expiry-info {
+          font-size: 12px;
+          margin-top: 12px;
+        }
+
+        .security-warning {
+          padding: 12px 15px;
+          margin: 15px 0;
+        }
+
+        .security-text {
+          font-size: 12px;
+        }
+
+        .cta-button {
+          padding: 12px 28px;
+          font-size: 14px;
+        }
+
+        .footer {
+          padding: 20px 20px;
+        }
+
+        .about-koluvu {
+          font-size: 12px;
+          margin-bottom: 12px;
+        }
+
+        .footer-links {
+          gap: 6px 12px;
+        }
+
+        .footer-links a {
+          font-size: 11px;
+        }
+
+        .copyright {
+          font-size: 10px;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .header {
+          padding: 20px 15px;
+        }
+
+        .content {
+          padding: 20px 15px;
+        }
+
+        .otp-code {
+          font-size: 24px;
+          letter-spacing: 3px;
+        }
+
+        .footer {
+          padding: 18px 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <!-- Header -->
+      <div class="header">
+        <img
+          src="{{ frontend_url }}/images/koluvu_logo.jpg"
+          alt="Koluvu Logo"
+          class="logo"
+        />
+        <div class="company-name">KOLUVU</div>
+        <div class="tagline">Secure Login Verification</div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <h1 class="title">🔐 Login Verification Code</h1>
+        <p class="message">
+          We received a login attempt for {{ user_email }}. Use the verification
+          code below to complete your secure login.
+        </p>
+
+        <div class="otp-container">
+          <div class="otp-label">Login Verification Code</div>
+          <div class="otp-code">{{ otp_code }}</div>
+          <div class="expiry-info">⏰ Expires in 30 minutes</div>
+        </div>
+
+        <div class="security-warning">
+          <div class="security-text">
+            <span class="icon">🔒</span>
+            <strong>Security Notice:</strong> This is a one-time login code. If
+            you didn't attempt to log in, please secure your account
+            immediately.
+          </div>
+        </div>
+
+        <a href="{{ login_url }}" class="cta-button">Complete Login</a>
+
+        <p class="message" style="margin-top: 20px; font-size: 13px">
+          Need help?
+          <a href="{{ frontend_url }}/contact" style="color: #4caf50"
+            >Contact our support team</a
+          >
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <div class="footer-links">
+          <a href="{{ frontend_url }}/about">About Us</a>
+          <a href="{{ frontend_url }}/career-opportunities">Careers</a>
+          <a href="{{ frontend_url }}/legal/privacy-policy">Privacy Policy</a>
+          <a href="{{ frontend_url }}/legal/terms">Terms</a>
+          <a href="{{ frontend_url }}/contact">Contact</a>
+        </div>
+
+        <div class="copyright">
+          © {{ current_year }} Koluvu Jobs. All rights reserved.<br />
+          Building careers, connecting futures.
+        </div>
+
+        <div class="about-koluvu">
+          <strong>About Koluvu:</strong> India's leading job portal connecting
+          talented professionals with dream careers through personalized
+          matching and comprehensive support.
+        </div>
+
+        <div class="social-links">
+          <a href="https://linkedin.com/company/koluvu-jobs" title="LinkedIn"
+            >📱</a
+          >
+          <a href="https://twitter.com/koluvujobs" title="Twitter">🐦</a>
+          <a href="https://facebook.com/koluvujobs" title="Facebook">📘</a>
+          <a href="https://instagram.com/koluvujobs" title="Instagram">📷</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

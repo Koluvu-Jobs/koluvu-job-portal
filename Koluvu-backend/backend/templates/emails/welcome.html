@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to Koluvu - Your Career Journey Begins!</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+        line-height: 1.6;
+      }
+
+      .email-container {
+        width: 100%;
+        max-width: 620px;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 30px;
+        text-align: center;
+        position: relative;
+      }
+
+      .logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 16px;
+        margin: 0 auto 20px;
+        display: block;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        position: relative;
+        animation: celebrate 2s ease-in-out infinite;
+        object-fit: cover;
+        background: #ffffff;
+        padding: 12px;
+      }
+
+      .logo::after {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: linear-gradient(
+          45deg,
+          transparent 40%,
+          rgba(255, 255, 255, 0.4) 50%,
+          transparent 60%
+        );
+        animation: shine 3s infinite;
+      }
+
+      @keyframes celebrate {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        25% {
+          transform: translateY(-3px) rotate(-5deg);
+        }
+        75% {
+          transform: translateY(-3px) rotate(5deg);
+        }
+      }
+
+      @keyframes shine {
+        0%,
+        100% {
+          transform: rotate(0deg);
+          opacity: 0;
+        }
+        50% {
+          transform: rotate(180deg);
+          opacity: 1;
+        }
+      }
+
+      .company-name {
+        color: #ffffff;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: 2px;
+      }
+
+      .tagline {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 16px;
+        font-weight: 400;
+      }
+
+      .content {
+        padding: 40px 30px;
+        text-align: center;
+      }
+
+      .welcome-title {
+        color: #2c3e50;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .welcome-message {
+        color: #5a6c7d;
+        font-size: 15px;
+        margin-bottom: 30px;
+        line-height: 1.7;
+      }
+
+      .user-info {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 25px;
+        margin: 25px 0;
+        border: 2px solid #667eea;
+      }
+
+      .user-name {
+        color: #2c3e50;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .user-email {
+        color: #667eea;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .features-section {
+        margin: 30px 0;
+        text-align: left;
+      }
+
+      .features-title {
+        color: #2c3e50;
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .feature-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+      }
+
+      .feature-icon {
+        font-size: 20px;
+        margin-right: 12px;
+        width: 30px;
+        text-align: center;
+      }
+
+      .feature-text {
+        flex: 1;
+      }
+
+      .feature-title {
+        color: #2c3e50;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .feature-desc {
+        color: #5a6c7d;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .cta-section {
+        background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        border-radius: 15px;
+        padding: 25px;
+        margin: 25px 0;
+        border: 2px solid #667eea;
+      }
+
+      .cta-title {
+        color: #2c3e50;
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .cta-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 15px;
+      }
+
+      .cta-button {
+        padding: 12px 24px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-block;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .cta-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #ffffff;
+      }
+
+      .cta-secondary {
+        background: #ffffff;
+        color: #667eea;
+        border: 2px solid #667eea;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      .footer {
+        background: #f8f9fa;
+        padding: 30px;
+        text-align: center;
+        border-top: 1px solid #e9ecef;
+      }
+
+      .about-koluvu {
+        color: #5a6c7d;
+        font-size: 13px;
+        line-height: 1.7;
+        margin-bottom: 15px;
+      }
+
+      .support-info {
+        background: #e3f2fd;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 15px 0;
+        border-left: 4px solid #2196f3;
+        text-align: left;
+      }
+
+      .support-title {
+        color: #1976d2;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      .support-text {
+        color: #5a6c7d;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .social-links {
+        margin: 15px 0;
+      }
+
+      .social-links a {
+        display: inline-block;
+        width: 36px;
+        height: 36px;
+        background: #667eea;
+        color: #ffffff;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 36px;
+        margin: 0 5px;
+        text-decoration: none;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .social-links a:hover {
+        background: #764ba2;
+        transform: translateY(-2px);
+      }
+
+      .footer-links {
+        margin: 15px 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px 15px;
+      }
+
+      .footer-links a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 12px;
+        transition: color 0.3s ease;
+      }
+
+      .footer-links a:hover {
+        color: #764ba2;
+        text-decoration: underline;
+      }
+
+      .copyright {
+        color: #9ca3af;
+        font-size: 11px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+
+        .email-container {
+          border-radius: 15px;
+        }
+
+        .header {
+          padding: 30px 20px;
+        }
+
+        .logo {
+          width: 70px;
+          height: 70px;
+          font-size: 32px;
+          margin-bottom: 15px;
+        }
+
+        .company-name {
+          font-size: 28px;
+          letter-spacing: 1.5px;
+        }
+
+        .tagline {
+          font-size: 14px;
+        }
+
+        .content {
+          padding: 30px 20px;
+        }
+
+        .welcome-title {
+          font-size: 24px;
+        }
+
+        .welcome-message {
+          font-size: 14px;
+          margin-bottom: 25px;
+        }
+
+        .user-info {
+          padding: 20px;
+          margin: 20px 0;
+        }
+
+        .features-section {
+          margin: 25px 0;
+        }
+
+        .feature-item {
+          padding: 12px;
+          margin-bottom: 12px;
+        }
+
+        .cta-section {
+          padding: 20px;
+          margin: 20px 0;
+        }
+
+        .cta-buttons {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .cta-button {
+          padding: 10px 20px;
+          font-size: 13px;
+        }
+
+        .footer {
+          padding: 25px 20px;
+        }
+
+        .about-koluvu {
+          font-size: 12px;
+          margin-bottom: 12px;
+        }
+
+        .support-info {
+          padding: 12px;
+          margin: 12px 0;
+        }
+
+        .footer-links {
+          gap: 6px 12px;
+        }
+
+        .footer-links a {
+          font-size: 11px;
+        }
+
+        .copyright {
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <!-- Header -->
+      <div class="header">
+        <img
+          src="{{ frontend_url }}/images/koluvu_logo.jpg"
+          alt="Koluvu Logo"
+          class="logo"
+        />
+        <div class="company-name">KOLUVU</div>
+        <div class="tagline">Welcome to Your Career Journey!</div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <h1 class="welcome-title">🎉 Welcome to Koluvu!</h1>
+        <p class="welcome-message">
+          Congratulations! Your account has been successfully created. We're
+          excited to help you discover amazing career opportunities and connect
+          with your dream job.
+        </p>
+
+        <div class="user-info">
+          <div class="user-name">Hello {{ user_name }}!</div>
+          <div class="user-email">Account: {{ user_email }}</div>
+        </div>
+
+        <div class="features-section">
+          <h2 class="features-title">What you can do with Koluvu:</h2>
+
+          <div class="feature-item">
+            <div class="feature-icon">🔍</div>
+            <div class="feature-text">
+              <div class="feature-title">Smart Job Search</div>
+              <div class="feature-desc">
+                AI-powered job matching based on your skills and preferences
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-item">
+            <div class="feature-icon">📊</div>
+            <div class="feature-text">
+              <div class="feature-title">Profile Analytics</div>
+              <div class="feature-desc">
+                Track your application progress and get insights on market
+                trends
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-item">
+            <div class="feature-icon">💼</div>
+            <div class="feature-text">
+              <div class="feature-title">Company Insights</div>
+              <div class="feature-desc">
+                Detailed company profiles, culture insights, and employee
+                reviews
+              </div>
+            </div>
+          </div>
+
+          <div class="feature-item">
+            <div class="feature-icon">🚀</div>
+            <div class="feature-text">
+              <div class="feature-title">Career Growth</div>
+              <div class="feature-desc">
+                Skill assessments, training resources, and career development
+                tools
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-section">
+          <h3 class="cta-title">Ready to get started?</h3>
+          <p style="color: #5a6c7d; font-size: 14px; margin-bottom: 15px">
+            Complete your profile and start exploring thousands of job
+            opportunities waiting for you!
+          </p>
+          <div class="cta-buttons">
+            <a href="{{ profile_url }}" class="cta-button cta-primary"
+              >Complete Profile</a
+            >
+            <a href="{{ jobs_url }}" class="cta-button cta-secondary"
+              >Browse Jobs</a
+            >
+          </div>
+        </div>
+
+        <div class="support-info">
+          <div class="support-title">📞 Need Help Getting Started?</div>
+          <div class="support-text">
+            Our support team is here to help! Contact us anytime at
+            <a href="mailto:support@koluvu.com" style="color: #2196f3"
+              >support@koluvu.com</a
+            >
+            or visit our
+            <a href="{{ frontend_url }}/contact" style="color: #2196f3"
+              >help center</a
+            >.
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <div class="footer-links">
+          <a href="{{ frontend_url }}/about">About Us</a>
+          <a href="{{ frontend_url }}/career-opportunities">Careers</a>
+          <a href="{{ frontend_url }}/legal/privacy-policy">Privacy Policy</a>
+          <a href="{{ frontend_url }}/legal/terms">Terms</a>
+          <a href="{{ frontend_url }}/contact">Contact</a>
+        </div>
+
+        <div class="copyright">
+          © {{ current_year }} Koluvu Jobs. All rights reserved.<br />
+          Building careers, connecting futures.
+        </div>
+
+        <div class="about-koluvu">
+          <strong>About Koluvu:</strong> India's leading job portal connecting
+          talented professionals with dream careers through personalized
+          matching and comprehensive support.
+        </div>
+
+        <div class="social-links">
+          <a href="https://linkedin.com/company/koluvu-jobs" title="LinkedIn"
+            >📱</a
+          >
+          <a href="https://twitter.com/koluvujobs" title="Twitter">🐦</a>
+          <a href="https://facebook.com/koluvujobs" title="Facebook">📘</a>
+          <a href="https://instagram.com/koluvujobs" title="Instagram">📷</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

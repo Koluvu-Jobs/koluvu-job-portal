@@ -26,14 +26,17 @@ export async function registerEmployee(formData) {
       };
     }
 
-    // Check if mobile is verified (if you want both verifications)
+    // Mobile verification is now optional
     const mobileVerified = formData.get("mobileNumberVerified");
+    // Commenting out mobile verification requirement
+    /*
     if (!mobileVerified) {
       return {
         success: false,
         message: "Please verify your mobile number before proceeding",
       };
     }
+    */
 
     if (password !== confirmPassword) {
       return { success: false, message: "Passwords don't match" };
@@ -48,7 +51,7 @@ export async function registerEmployee(formData) {
       captcha_key: captchaKey, // Backend expects captcha_key
       captcha_value: captcha, // Backend expects captcha_value
       profile: {
-        phone: mobileNumber,
+        phone: mobileNumber || "", // Make mobile optional
       },
     };
 

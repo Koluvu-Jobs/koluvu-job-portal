@@ -3,8 +3,3 @@
 .env.local
 *.env
 client_secret_1063632984987-tqkse0fobaph0maqec0iccfrdukfdorp.apps.googleusercontent.com.json
-
-__pycache__/
-node_modules/
-dist/
-build/

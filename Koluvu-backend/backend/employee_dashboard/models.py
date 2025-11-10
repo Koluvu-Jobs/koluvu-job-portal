@@ -489,7 +489,7 @@ class EmployeeSettings(models.Model):
     
     def broadcast_settings_update(self, section=None):
         """Broadcast settings update to connected clients"""
-        from shared_services.realtime_notifications import NotificationManager
+        from shared_services.realtime_notifications import broadcast_to_user
         
         data = {
             'type': 'employee_settings_update',
@@ -507,7 +507,7 @@ class EmployeeSettings(models.Model):
             elif section == 'job_preferences':
                 data['settings'] = self.get_job_preferences()
         
-        NotificationManager.send_notification_to_user(self.employee.user.id, data)
+        broadcast_to_user(self.employee.user.id, data)
 
 
 @receiver(post_save, sender=EmployeeProfile)

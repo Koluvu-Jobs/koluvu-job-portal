@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import CaptchaVerification, {
   verifyCaptchaValue,
 } from "@koluvu/components/auth/CaptchaVerification";
+import VerificationForm from "@koluvu/app/auth/register/employee/VerificationForm";
 
 const FORM_CACHE_KEY = "employerRegistrationFormData";
 const LOCAL_DB_KEY = "koluvu_employers";
@@ -127,6 +128,7 @@ export default function EmployerRegistrationForm() {
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [useLocalStorage, setUseLocalStorage] = useState(false);
@@ -281,6 +283,14 @@ export default function EmployerRegistrationForm() {
     setCaptchaKey(key);
   };
 
+  const handleEmailChange = (email) => {
+    setFormData((prev) => ({ ...prev, email }));
+  };
+
+  const handleEmailVerification = (isVerified) => {
+    setEmailVerified(isVerified);
+  };
+
   const saveToLocalStorage = async () => {
     try {
       const existingData = JSON.parse(localStorage.getItem(LOCAL_DB_KEY)) || [];
@@ -322,6 +332,20 @@ export default function EmployerRegistrationForm() {
     // The component calls onCaptchaChange when verification is successful
     if (!captchaValue || !captchaKey) {
       toast.error("Please complete and verify the CAPTCHA.");
+      return;
+    }
+
+    if (!emailVerified) {
+      toast.error("Please verify your email address before proceeding.");
+      return;
+    }
+
+    // Check if email is verified
+    const emailVerified = document.querySelector(
+      'input[name="emailVerified"]'
+    )?.value;
+    if (!emailVerified) {
+      toast.error("Please verify your email address before proceeding.");
       return;
     }
 
@@ -432,7 +456,10 @@ export default function EmployerRegistrationForm() {
         toast.success("Successfully signed in with Google!");
 
         // Redirect to employer dashboard
-        const redirectPath = getRedirectPath(USER_TYPES.EMPLOYER, result.username);
+        const redirectPath = getRedirectPath(
+          USER_TYPES.EMPLOYER,
+          result.username
+        );
         console.log("Redirecting to:", redirectPath);
         router.push(redirectPath);
       } catch (error) {
@@ -636,20 +663,6 @@ export default function EmployerRegistrationForm() {
         </div>
 
         {/* Contact Info */}
-        <div>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email *"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full text-xs font-medium border border-gray-700 bg-gray-800/40 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400 text-white"
-            required
-          />
-          {errors.email && (
-            <p className="mt-0.5 text-xs text-red-300">{errors.email}</p>
-          )}
-        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
@@ -860,11 +873,33 @@ export default function EmployerRegistrationForm() {
           />
         </div>
 
+        {/* Email Verification - shown only after CAPTCHA is completed */}
+        {captchaValue && captchaKey && (
+          <div className="pt-1">
+            <div className="mb-2 p-2 bg-green-900/20 border border-green-700/30 rounded text-center text-xs text-green-300">
+              <p>
+                ✅ CAPTCHA verified! Now enter and verify your email address:
+              </p>
+            </div>
+            <VerificationForm
+              fieldName="email"
+              fieldLabel="Email"
+              placeholder="Enter Email *"
+              verificationType="email"
+              captchaVerified={true}
+              onEmailChange={handleEmailChange}
+              onVerificationChange={handleEmailVerification}
+              inputStyle="w-full text-xs font-medium border border-gray-700 bg-gray-800/40 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400 text-white"
+              btnStyle="text-xs font-medium border border-gray-700 bg-gray-800/40 rounded px-2 py-1.5 hover:bg-gray-700/50 text-white"
+            />
+          </div>
+        )}
+
         {/* Submit Button */}
         <div className="pt-1 sm:pt-2">
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !emailVerified}
             className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium px-3 py-1.5 rounded hover:opacity-90 transition-opacity text-xs"
           >
             {isSubmitting ? (

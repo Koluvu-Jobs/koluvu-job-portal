@@ -249,3 +249,11 @@ WARNING 2025-11-03 23:49:28,302 middleware 6472 480 Rate limit exceeded for IP 1
 WARNING 2025-11-03 23:49:28,350 middleware 6472 19708 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/notifications/stream/
 WARNING 2025-11-03 23:49:30,373 middleware 6472 19708 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/notifications/stream/
 WARNING 2025-11-03 23:49:34,394 middleware 6472 19708 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/notifications/stream/
+WARNING 2025-11-08 22:19:39,322 middleware 11096 17676 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/employer/dashboard-stats/
+WARNING 2025-11-08 22:19:39,365 middleware 11096 17676 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/employer/dashboard-stats/
+WARNING 2025-11-08 22:19:39,548 middleware 11096 23172 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/employer/profile/
+WARNING 2025-11-08 22:19:39,552 middleware 11096 23172 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/employer/profile/
+WARNING 2025-11-08 22:19:39,556 middleware 11096 23172 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/employer/profile/
+WARNING 2025-11-08 22:19:39,562 middleware 11096 23172 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/employer/profile/
+WARNING 2025-11-08 22:19:39,567 middleware 11096 23172 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/employer/profile/
+WARNING 2025-11-08 22:19:39,570 middleware 11096 23172 Rate limit exceeded for IP 127.0.0.1 on endpoint /api/employer/profile/

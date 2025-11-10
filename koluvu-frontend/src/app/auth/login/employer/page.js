@@ -24,6 +24,7 @@ import toast from "react-hot-toast";
 import CaptchaVerification, {
   verifyCaptchaValue,
 } from "@koluvu/components/auth/CaptchaVerification";
+import VerificationForm from "@koluvu/app/auth/register/employee/VerificationForm";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,6 +38,8 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [captchaValue, setCaptchaValue] = useState("");
   const [captchaKey, setCaptchaKey] = useState("");
+  const [loginStep, setLoginStep] = useState("credentials"); // "credentials", "otp", "complete"
+  const [otpSent, setOtpSent] = useState(false);
 
   // Clear any stale auth data when login page loads
   useEffect(() => {
@@ -118,6 +121,43 @@ export default function LoginPage() {
         return;
       }
 
+      if (loginStep === "credentials") {
+        // Step 1: Send login OTP
+        const otpResponse = await fetch(
+          "http://127.0.0.1:8000/api/auth/send-otp/",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: email,
+              type: "login",
+            }),
+          }
+        );
+
+        const otpData = await otpResponse.json();
+        if (otpData.success) {
+          setLoginStep("otp");
+          setOtpSent(true);
+          toast.success("Login OTP sent to your email!");
+        } else {
+          setLoginError(otpData.message || "Failed to send login OTP.");
+        }
+      }
+    } catch (error) {
+      console.error("Login step failed:", error);
+      setLoginError("An unexpected error occurred.");
+      toast.error("Login step failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOTPVerified = async () => {
+    setIsLoading(true);
+    setLoginError("");
+
+    try {
       const response = await fetch("/api/employer/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -232,73 +272,115 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <FaEnvelope className="text-gray-300" />
+            {loginStep === "credentials" && (
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <FaEnvelope className="text-gray-300" />
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="Email ID"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    aria-label="Email address"
+                    className="w-full pl-10 pr-3 py-3 text-sm bg-gray-800/60 border border-gray-600/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500/70 placeholder-gray-300 text-white"
+                  />
                 </div>
-                <input
-                  type="email"
-                  placeholder="Email ID"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  aria-label="Email address"
-                  className="w-full pl-10 pr-3 py-3 text-sm bg-gray-800/60 border border-gray-600/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500/70 placeholder-gray-300 text-white"
-                />
-              </div>
 
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <FaLock className="text-gray-300" />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <FaLock className="text-gray-300" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    aria-label="Password"
+                    className="w-full pl-10 pr-10 py-3 text-sm bg-gray-800/60 border border-gray-600/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500/70 placeholder-gray-300 text-white"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-300 hover:text-white transition-colors"
+                    onClick={togglePasswordVisibility}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
                 </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  aria-label="Password"
-                  className="w-full pl-10 pr-10 py-3 text-sm bg-gray-800/60 border border-gray-600/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500/70 placeholder-gray-300 text-white"
+
+                {/* CAPTCHA Verification */}
+                <CaptchaVerification
+                  onCaptchaChange={handleCaptchaChange}
+                  captchaValue={captchaValue}
+                  deviceType="desktop"
+                  required={true}
+                  style={{
+                    marginBottom: "1rem",
+                  }}
                 />
+
+                {loginError && (
+                  <div className="text-red-400 text-xs text-center p-3 bg-red-400/10 border border-red-400/20 rounded-lg">
+                    {loginError}
+                  </div>
+                )}
                 <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-300 hover:text-white transition-colors"
-                  onClick={togglePasswordVisibility}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  type="submit"
+                  className={`w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-medium py-3 rounded-lg hover:opacity-90 transition-opacity ${
+                    isLoading ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
+                  disabled={isLoading}
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  {isLoading ? "Sending Login OTP..." : "Continue to Login"}
+                </button>
+              </form>
+            )}
+
+            {loginStep === "otp" && (
+              <div className="space-y-5">
+                <div className="text-center text-gray-300">
+                  <p className="text-sm">
+                    We've sent a login verification code to
+                    <br />
+                    <strong className="text-white">{email}</strong>
+                  </p>
+                </div>
+
+                <VerificationForm
+                  fieldName="loginOTP"
+                  fieldLabel="Login OTP"
+                  placeholder="Enter 6-digit verification code"
+                  verificationType="login"
+                  captchaVerified={true}
+                  onVerificationChange={handleOTPVerified}
+                  inputStyle="w-full py-3 text-sm bg-gray-800/60 border border-gray-600/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500/70 text-white text-center text-lg tracking-wider"
+                  btnStyle="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-medium py-3 rounded-lg hover:opacity-90 transition-opacity"
+                  hideEmailInput={true}
+                  presetEmail={email}
+                />
+
+                {loginError && (
+                  <div className="text-red-400 text-xs text-center p-3 bg-red-400/10 border border-red-400/20 rounded-lg">
+                    {loginError}
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setLoginStep("credentials")}
+                  className="w-full text-gray-300 hover:text-blue-400 transition-colors text-sm"
+                >
+                  ← Back to Login
                 </button>
               </div>
-
-              {/* CAPTCHA Verification */}
-              <CaptchaVerification
-                onCaptchaChange={handleCaptchaChange}
-                captchaValue={captchaValue}
-                deviceType="desktop"
-                required={true}
-                style={{
-                  marginBottom: "1rem",
-                }}
-              />
-
-              {loginError && (
-                <div className="text-red-400 text-xs text-center p-3 bg-red-400/10 border border-red-400/20 rounded-lg">
-                  {loginError}
-                </div>
-              )}
-              <button
-                type="submit"
-                className={`w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-medium py-3 rounded-lg hover:opacity-90 transition-opacity ${
-                  isLoading ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-                disabled={isLoading}
-              >
-                {isLoading ? "Signing in..." : "Login"}
-              </button>
-            </form>
+            )}
 
             <div className="flex justify-between mt-5 text-sm">
               <button

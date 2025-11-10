@@ -27,3 +27,6 @@ nltk==3.9.1
 scikit-learn==1.7.0
 Pillow
 numpy==1.26.4
+setuptools<81
+wheel
+django-otp

@@ -56,13 +56,19 @@ def dashboard_data(request):
         # Get social account info (Google OAuth data)
         social_account = request.user.social_accounts.filter(provider='google').first()
         
+        # Calculate real stats from database
+        # TODO: Implement job application tracking model to get real application count
+        applications_count = 0  # Will be dynamic when job application model is added
+        interviews_count = 0    # Will be dynamic when interview scheduling is added
+        profile_views_count = 0  # Will be dynamic when profile view tracking is added
+        
         dashboard_data = {
             'user': profile_serializer.data,
             'profile_completion': profile_completion,
             'stats': {
-                'applications': 47,  # You can make this dynamic later
-                'interviews': 12,
-                'profile_views': 1247,
+                'applications': applications_count,
+                'interviews': interviews_count,
+                'profile_views': profile_views_count,
             },
             'education_count': education.count(),
             'experience_count': experience.count(),
@@ -137,9 +143,9 @@ class RegisterEmployeeView(generics.CreateAPIView):
                 # Clean up OTP sessions on validation failure
                 email = request.data.get('email')
                 if email:
-                    from authentication.models import OTPSession, RegistrationCache
-                    OTPSession.objects.filter(identifier=email).delete()
-                    RegistrationCache.objects.filter(email=email).delete()
+                    from authentication.models import OTPSession
+                    OTPSession.objects.filter(email=email).delete()
+                    # Note: RegistrationCache model doesn't exist anymore
                 
                 return Response({
                     'success': False,
@@ -154,9 +160,8 @@ class RegisterEmployeeView(generics.CreateAPIView):
             # Clean up OTP sessions after successful registration
             email = request.data.get('email')
             if email:
-                from authentication.models import OTPSession, RegistrationCache
-                OTPSession.objects.filter(identifier=email).delete()
-                RegistrationCache.objects.filter(email=email).delete()
+                from authentication.models import OTPSession
+                OTPSession.objects.filter(email=email).delete()
             
             return Response({
                 'success': True,
@@ -168,9 +173,8 @@ class RegisterEmployeeView(generics.CreateAPIView):
             # Clean up OTP sessions on any error
             email = request.data.get('email')
             if email:
-                from authentication.models import OTPSession, RegistrationCache
-                OTPSession.objects.filter(identifier=email).delete()
-                RegistrationCache.objects.filter(email=email).delete()
+                from authentication.models import OTPSession
+                OTPSession.objects.filter(email=email).delete()
             
             return Response({
                 'success': False,
@@ -840,6 +844,90 @@ def profile_summary(request):
 
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def applications_list(request):
+    """Get employee's job applications"""
+    try:
+        # TODO: Implement job application model and logic
+        # For now, return empty list with proper structure
+        return Response({
+            'applications': [],
+            'total_count': 0,
+            'status_counts': {
+                'applied': 0,
+                'under_review': 0,
+                'interviewed': 0,
+                'offered': 0,
+                'rejected': 0
+            },
+            'message': 'Job applications feature coming soon'
+        })
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to fetch applications: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def location_based_jobs(request):
+    """Get location-based job recommendations"""
+    try:
+        profile, created = EmployeeProfile.objects.get_or_create(user=request.user)
+        user_location = profile.location or 'Not specified'
+        
+        # TODO: Implement job matching logic based on location
+        # For now, return empty list with proper structure
+        return Response({
+            'jobs': [],
+            'user_location': user_location,
+            'search_radius': 50,  # km
+            'total_count': 0,
+            'message': 'Location-based job matching feature coming soon'
+        })
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to fetch location-based jobs: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def job_recommendations(request):
+    """Get personalized job recommendations"""
+    try:
+        profile, created = EmployeeProfile.objects.get_or_create(user=request.user)
+        
+        # Get user's skills for matching
+        user_skills = list(profile.skills.values_list('name', flat=True))
+        
+        # TODO: Implement AI-based job recommendation logic
+        # For now, return empty list with proper structure
+        return Response({
+            'recommendations': [],
+            'user_skills': user_skills,
+            'match_criteria': {
+                'skills_match': True,
+                'location_preference': bool(profile.location),
+                'experience_level': profile.experience_years or 0,
+                'salary_expectation': float(profile.expected_salary) if profile.expected_salary else None
+            },
+            'total_count': 0,
+            'message': 'AI-powered job recommendations feature coming soon'
+        })
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to fetch job recommendations: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
 def api_endpoints_info(request):
     """Get information about all available API endpoints"""
     endpoints = {
@@ -1224,5 +1312,97 @@ def create_resume_sharing_link(request, resume_id):
     except Exception as e:
         return Response(
             {'error': f'Failed to create sharing link: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ================== JOB RELATED VIEWS ==================
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def employee_applications(request):
+    """Get job applications for the employee"""
+    try:
+        profile, created = EmployeeProfile.objects.get_or_create(user=request.user)
+        
+        # TODO: Implement actual job application model
+        # For now, return empty data structure
+        applications = []
+        
+        return Response({
+            'applications': applications,
+            'total_count': 0,
+            'pending_count': 0,
+            'interviewed_count': 0,
+            'rejected_count': 0,
+            'accepted_count': 0,
+            'message': 'Job application tracking will be available soon'
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to fetch applications: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def location_based_jobs(request):
+    """Get jobs based on employee's location"""
+    try:
+        profile, created = EmployeeProfile.objects.get_or_create(user=request.user)
+        
+        # TODO: Implement actual job matching based on location
+        # For now, return empty data structure
+        jobs = []
+        
+        return Response({
+            'jobs': jobs,
+            'total_count': 0,
+            'location': profile.location or 'Not specified',
+            'radius': 50,  # km
+            'message': 'Location-based job matching will be available soon'
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to fetch location-based jobs: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def job_recommendations(request):
+    """Get personalized job recommendations for the employee"""
+    try:
+        profile, created = EmployeeProfile.objects.get_or_create(user=request.user)
+        
+        # Get employee skills for recommendations
+        skills = Skill.objects.filter(employee=profile).values_list('name', flat=True)
+        
+        # TODO: Implement actual AI-based job recommendation system
+        # For now, return empty data structure with profile-based info
+        recommendations = []
+        
+        return Response({
+            'recommendations': recommendations,
+            'total_count': 0,
+            'match_criteria': {
+                'skills': list(skills),
+                'experience_years': profile.experience_years or 0,
+                'preferred_location': profile.location or 'Any',
+                'current_designation': profile.current_designation or 'Any'
+            },
+            'message': 'AI-powered job recommendations will be available soon'
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to fetch job recommendations: {str(e)}'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

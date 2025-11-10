@@ -36,7 +36,11 @@ from .views import (
     update_resume_styling,
     resume_templates_list,
     generate_resume_pdf,
-    create_resume_sharing_link
+    create_resume_sharing_link,
+    # Job-related views
+    applications_list,
+    location_based_jobs,
+    job_recommendations
 )
 from .settings_views import (
     EmployeeSettingsView,
@@ -111,4 +115,9 @@ urlpatterns = [
     path('settings/reset/', reset_employee_settings, name='reset_employee_settings'),
     path('settings/export/', export_employee_settings, name='export_employee_settings'),
     path('settings/import/', import_employee_settings, name='import_employee_settings'),
+    
+    # Job-related URLs
+    path('applications/', applications_list, name='employee_applications'),
+    path('jobs/location-based/', location_based_jobs, name='location_based_jobs'),
+    path('jobs/recommendations/', job_recommendations, name='job_recommendations'),
 ]
