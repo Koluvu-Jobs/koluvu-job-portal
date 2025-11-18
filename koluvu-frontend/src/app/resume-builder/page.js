@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 
@@ -11,7 +11,7 @@ const Loader = () => (
   </div>
 );
 
-// ✅ Dynamic Imports
+// Dynamic Imports
 const PreviewSection = dynamic(() => import("./components/PreviewSection"), {
   ssr: false,
   loading: Loader,
@@ -82,15 +82,12 @@ const ResumeBuilder = () => {
   const [activeSection, setActiveSection] = useState("section-personal");
   const previewRef = useRef(null);
 
-  // Selected template (shared with TemplateSection)
-  const [selectedTemplate, setSelectedTemplate] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("resumeBuilder.selectedTemplate") || null;
-    }
-    return null;
-  });
+  // Template chosen, resume id and title held in state (server-driven)
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [resumeId, setResumeId] = useState(null);
+  const [title, setTitle] = useState("Draft Resume");
 
-  // Simple consolidated form data for backend
+  // Form data
   const [personalInfo, setPersonalInfo] = useState({
     name: "",
     email: "",
@@ -125,7 +122,6 @@ const ResumeBuilder = () => {
     },
   ]);
 
-  // Additional state for fresher resume components
   const [projects, setProjects] = useState([
     {
       title: "",
@@ -149,13 +145,17 @@ const ResumeBuilder = () => {
   ]);
   const [strengths, setStrengths] = useState("");
 
+  const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved | error
+  const saveTimerRef = useRef(null);
+  const isAutoSavingRef = useRef(false);
+  const wsRef = useRef(null);
+
   const handlePersonalChange = (e) => {
     const { name, value } = e.target;
     setPersonalInfo((prev) => ({ ...prev, [name]: value }));
   };
   const handleSummaryChange = (e) => setSummary(e.target.value);
 
-  // Skill category handlers
   const handleSkillCategoryChange = (index, field, value) => {
     setSkillCategories((prev) =>
       prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
@@ -202,7 +202,14 @@ const ResumeBuilder = () => {
   const handleAddEducation = () =>
     setEducations((prev) => [
       ...prev,
-      { degree: "", college: "", university: "", startDate: "", endDate: "", cgpa: "" },
+      {
+        degree: "",
+        college: "",
+        university: "",
+        startDate: "",
+        endDate: "",
+        cgpa: "",
+      },
     ]);
   const handleRemoveEducation = (index) =>
     setEducations((prev) => prev.filter((_, i) => i !== index));
@@ -220,7 +227,6 @@ const ResumeBuilder = () => {
   const handleRemoveExperience = (index) =>
     setExperiences((prev) => prev.filter((_, i) => i !== index));
 
-  // Handler functions for additional fresher resume components
   const handleAddProject = () =>
     setProjects((prev) => [...prev, { title: "", description: "" }]);
   const handleRemoveProject = (index) =>
@@ -241,7 +247,77 @@ const ResumeBuilder = () => {
 
   const handleStrengthsChange = (e) => setStrengths(e.target.value);
 
-  // New state for customization features
+  // Save handler (manual)
+  const handleSave = async () => {
+    try {
+      isAutoSavingRef.current = true;
+      setSaveStatus("saving");
+      const payload = {
+        title: title || "Draft Resume",
+        template: selectedTemplate || null,
+        status: "draft",
+        personal_info: personalInfo,
+        education_data: educations,
+        experience_data: experiences,
+        skills_data: skillCategories,
+        projects_data: projects,
+        certifications_data: certifications,
+        languages_data: personalInfo.languages || [],
+        custom_sections: {},
+        color_scheme: { sidebar: sidebarColor },
+        font_family: "Inter",
+        font_size: fontSize,
+        page_margins: {},
+      };
+
+      if (!resumeId) {
+        const res = await fetch("/api/employee/resume-builder/resumes/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error("Failed to create resume", res.status, txt);
+          setSaveStatus("error");
+          isAutoSavingRef.current = false;
+          return;
+        }
+        const data = await res.json();
+        setResumeId(data.id);
+        setTitle(data.title || payload.title);
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus("idle"), 1500);
+        isAutoSavingRef.current = false;
+        return;
+      }
+
+      const res = await fetch(
+        `/api/employee/resume-builder/resumes/${resumeId}/`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error("Failed to update resume", res.status, txt);
+        setSaveStatus("error");
+        isAutoSavingRef.current = false;
+        return;
+      }
+      const data = await res.json();
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 1500);
+      isAutoSavingRef.current = false;
+    } catch (err) {
+      console.error("Error saving resume", err);
+      setSaveStatus("error");
+      isAutoSavingRef.current = false;
+    }
+  };
+
   const [sectionOrder, setSectionOrder] = useState([
     "summary",
     "experience",
@@ -259,8 +335,8 @@ const ResumeBuilder = () => {
     "strengths",
     "certifications",
   ]);
-  const [sidebarColor, setSidebarColor] = useState("#111827"); // default gray-900
-  const [fontSize, setFontSize] = useState(13); // default font size in px
+  const [sidebarColor, setSidebarColor] = useState("#111827");
+  const [fontSize, setFontSize] = useState(13);
 
   const consolidatedData = {
     personal: personalInfo,
@@ -274,7 +350,207 @@ const ResumeBuilder = () => {
     strengths,
   };
 
-  // ✅ Define options here
+  // Load or create resume once on mount, and open WS
+  useEffect(() => {
+    let ws;
+    const loadOrCreateResume = async () => {
+      try {
+        const listRes = await fetch("/api/employee/resume-builder/resumes/");
+        if (listRes.ok) {
+          const list = await listRes.json();
+          if (Array.isArray(list) && list.length > 0) {
+            const r = list[0];
+            setResumeId(r.id);
+            setTitle(r.title || title);
+            setPersonalInfo(r.personal_info || personalInfo);
+            setEducations(r.education_data || educations);
+            setExperiences(r.experience_data || experiences);
+            setSkillCategories(r.skills_data || skillCategories);
+            setProjects(r.projects_data || projects);
+            setCertifications(r.certifications_data || certifications);
+            setStrengths(
+              (r.personal_info && r.personal_info.strengths) || strengths
+            );
+            return r.id;
+          }
+        }
+
+        const createPayload = {
+          title: title || "Draft Resume",
+          template: selectedTemplate || null,
+          status: "draft",
+          personal_info: personalInfo,
+          education_data: educations,
+          experience_data: experiences,
+          skills_data: skillCategories,
+          projects_data: projects,
+          certifications_data: certifications,
+          languages_data: personalInfo.languages || [],
+          custom_sections: {},
+          color_scheme: { sidebar: sidebarColor },
+          font_family: "Inter",
+          font_size: fontSize,
+          page_margins: {},
+        };
+
+        const createRes = await fetch("/api/employee/resume-builder/resumes/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(createPayload),
+        });
+
+        if (createRes.ok) {
+          const created = await createRes.json();
+          setResumeId(created.id);
+          setTitle(created.title || title);
+          return created.id;
+        }
+      } catch (err) {
+        console.error("Failed to load or create resume", err);
+      }
+      return null;
+    };
+
+    (async () => {
+      const id = await loadOrCreateResume();
+      if (id && typeof window !== "undefined") {
+        try {
+          const origin = window.location.origin.replace(/^http/, "ws");
+          ws = new WebSocket(`${origin}/ws/resume/${id}/`);
+          wsRef.current = ws;
+
+          ws.addEventListener("open", () => {
+            console.log("Resume WS connected", id);
+          });
+
+          ws.addEventListener("message", (ev) => {
+            try {
+              const msg = JSON.parse(ev.data);
+              if (msg.type === "init" || msg.type === "update") {
+                const remote = msg.data || {};
+                if (remote.personal_info)
+                  setPersonalInfo((prev) => ({
+                    ...prev,
+                    ...remote.personal_info,
+                  }));
+                if (remote.education_data) setEducations(remote.education_data);
+                if (remote.experience_data)
+                  setExperiences(remote.experience_data);
+                if (remote.skills_data)
+                  setSkillCategories(remote.skills_data || []);
+                if (remote.projects_data)
+                  setProjects(remote.projects_data || []);
+                if (remote.certifications_data)
+                  setCertifications(remote.certifications_data || []);
+                if (remote.personal_info && remote.personal_info.strengths) {
+                  setStrengths(remote.personal_info.strengths);
+                }
+              }
+            } catch (e) {
+              console.error("Invalid WS message", e);
+            }
+          });
+
+          ws.addEventListener("close", () => console.log("Resume WS closed"));
+        } catch (e) {
+          console.error("Failed to open resume WS", e);
+        }
+      }
+    })();
+
+    return () => {
+      if (ws) ws.close();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Debounced auto-save
+  useEffect(() => {
+    if (isAutoSavingRef.current) return;
+
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      (async () => {
+        isAutoSavingRef.current = true;
+        setSaveStatus("saving");
+        try {
+          // Auto-save uses same payload as manual save
+          const payload = {
+            title: title || "Draft Resume",
+            template: selectedTemplate || null,
+            status: "draft",
+            personal_info: personalInfo,
+            education_data: educations,
+            experience_data: experiences,
+            skills_data: skillCategories,
+            projects_data: projects,
+            certifications_data: certifications,
+            languages_data: personalInfo.languages || [],
+            custom_sections: {},
+            color_scheme: { sidebar: sidebarColor },
+            font_family: "Inter",
+            font_size: fontSize,
+            page_margins: {},
+          };
+
+          if (!resumeId) {
+            const res = await fetch("/api/employee/resume-builder/resumes/", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            if (!res.ok) throw new Error("Failed to create resume");
+            const data = await res.json();
+            setResumeId(data.id);
+            // notify WS
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.send(
+                JSON.stringify({ type: "update", data: data })
+              );
+            }
+          } else {
+            const res = await fetch(
+              `/api/employee/resume-builder/resumes/${resumeId}/`,
+              {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              }
+            );
+            if (!res.ok) throw new Error("Failed to update resume");
+            const data = await res.json();
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.send(
+                JSON.stringify({ type: "update", data: data })
+              );
+            }
+          }
+
+          setSaveStatus("saved");
+          setTimeout(() => setSaveStatus("idle"), 1500);
+        } catch (e) {
+          console.error("Auto-save error", e);
+          setSaveStatus("error");
+        } finally {
+          isAutoSavingRef.current = false;
+        }
+      })();
+    }, 2000);
+
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+    // watch the core parts of consolidatedData
+  }, [
+    personalInfo,
+    educations,
+    experiences,
+    skillCategories,
+    projects,
+    certifications,
+    strengths,
+  ]);
+
   const options = [
     {
       type: "fresher",
@@ -282,7 +558,6 @@ const ResumeBuilder = () => {
       description:
         "Build a resume tailored for students or recent graduates with no work experience.",
       icon: "🎓",
-      // cream theme
       color: "bg-gray-200 hover:bg-amber-100 border-black-1000",
     },
     {
@@ -316,7 +591,6 @@ const ResumeBuilder = () => {
   return (
     <main className="min-h-screen w-full bg-gradient-to-br from-[#e0e5ec] to-[#f5f7fa] p-0">
       {!resumeType ? (
-        // STEP 1: Resume Type Selection - Neumorphic Style
         <div className="flex flex-col items-center justify-center min-h-[80vh] w-full px-6 py-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4 text-gray-800 tracking-tight">
             Choose Your Resume Type
@@ -338,17 +612,8 @@ const ResumeBuilder = () => {
                       ? "12px 12px 24px #a8adb5, -12px -12px 24px #ffffff"
                       : "12px 12px 24px #a8adb5, -12px -12px 24px #ffffff",
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow =
-                    "inset 8px 8px 16px #a8adb5, inset -8px -8px 16px #ffffff";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow =
-                    "12px 12px 24px #a8adb5, -12px -12px 24px #ffffff";
-                }}
               >
                 <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-                  {/* Icon Container */}
                   <div
                     className="w-24 h-24 rounded-full flex items-center justify-center mb-6 transition-all duration-500 group-hover:scale-110"
                     style={{
@@ -360,32 +625,19 @@ const ResumeBuilder = () => {
                     <span className="text-5xl">{opt.icon}</span>
                   </div>
 
-                  {/* Title */}
                   <h3 className="text-2xl font-bold mb-4 text-gray-800 group-hover:text-blue-600 transition-colors duration-300">
                     {opt.title}
                   </h3>
 
-                  {/* Description */}
                   <p className="text-sm text-gray-600 mb-8 leading-relaxed px-4">
                     {opt.description}
                   </p>
 
-                  {/* Button */}
                   <button
                     className="px-8 py-3 text-sm font-semibold rounded-full transition-all duration-300 text-gray-700 group-hover:text-blue-600"
                     style={{
                       background: "#e0e5ec",
                       boxShadow: "6px 6px 12px #a8adb5, -6px -6px 12px #ffffff",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.stopPropagation();
-                      e.currentTarget.style.boxShadow =
-                        "inset 4px 4px 8px #a8adb5, inset -4px -4px 8px #ffffff";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.stopPropagation();
-                      e.currentTarget.style.boxShadow =
-                        "6px 6px 12px #a8adb5, -6px -6px 12px #ffffff";
                     }}
                   >
                     Get Started →
@@ -394,18 +646,6 @@ const ResumeBuilder = () => {
               </div>
             ))}
           </div>
-
-          <style jsx>{`
-            @keyframes float {
-              0%,
-              100% {
-                transform: translateY(0px);
-              }
-              50% {
-                transform: translateY(-10px);
-              }
-            }
-          `}</style>
         </div>
       ) : (
         <div className="w-full">
@@ -413,8 +653,6 @@ const ResumeBuilder = () => {
             <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800 mb-4">
               Professional Resume Builder
             </h1>
-
-            {/* Tabs (always visible) */}
             <div className="flex justify-start gap-2">
               <button
                 className={`px-4 py-2 text-sm rounded-md ${
@@ -449,12 +687,9 @@ const ResumeBuilder = () => {
             </div>
           </div>
 
-          {/* Builder: Sidebar Layout (no preview) */}
           {activeTab === "builder" && (
             <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-0">
-              {/* Sidebar */}
               <aside className="bg-white border-r border-gray-200 p-0 lg:sticky lg:top-0 h-screen lg:h-auto lg:min-h-screen">
-                {/* Section Nav */}
                 <div className="p-4">
                   <p className="text-xs uppercase tracking-wide text-gray-500 mb-3 font-semibold">
                     Builder Sections
@@ -477,11 +712,9 @@ const ResumeBuilder = () => {
                 </div>
               </aside>
 
-              {/* Main content: Builder */}
               <section className="w-full bg-gray-50">
                 <div className="w-full bg-white border-b border-gray-200 p-4 sm:p-6">
                   <Suspense fallback={<Loader />}>
-                    {/* Personal Info Section */}
                     {activeSection === "section-personal" && (
                       <PersonalInfoSection
                         personalInfo={personalInfo}
@@ -489,7 +722,6 @@ const ResumeBuilder = () => {
                       />
                     )}
 
-                    {/* Career Objective Section */}
                     {activeSection === "section-objective" && (
                       <CareerObjectiveSection
                         formData={{ summary }}
@@ -497,7 +729,6 @@ const ResumeBuilder = () => {
                       />
                     )}
 
-                    {/* Skills Section */}
                     {activeSection === "section-skills" && (
                       <SkillsSection
                         formData={{ skillCategories }}
@@ -507,7 +738,6 @@ const ResumeBuilder = () => {
                       />
                     )}
 
-                    {/* Experience Section */}
                     {activeSection === "section-experience" &&
                       resumeType === "experienced" && (
                         <ExperienceSection
@@ -520,7 +750,6 @@ const ResumeBuilder = () => {
                         />
                       )}
 
-                    {/* Education Section */}
                     {activeSection === "section-education" && (
                       <EducationSection
                         formData={{ educations }}
@@ -532,7 +761,6 @@ const ResumeBuilder = () => {
                       />
                     )}
 
-                    {/* Projects Section */}
                     {activeSection === "section-projects" && (
                       <ProjectSection
                         formData={{ projects }}
@@ -544,7 +772,6 @@ const ResumeBuilder = () => {
                       />
                     )}
 
-                    {/* Internships Section */}
                     {activeSection === "section-internships" && (
                       <InternshipSection
                         formData={{ internships }}
@@ -556,7 +783,6 @@ const ResumeBuilder = () => {
                       />
                     )}
 
-                    {/* Certifications Section */}
                     {activeSection === "section-certifications" && (
                       <CertificationSection
                         formData={{ certifications }}
@@ -568,7 +794,6 @@ const ResumeBuilder = () => {
                       />
                     )}
 
-                    {/* Strengths Section */}
                     {activeSection === "section-strengths" && (
                       <StrengthsSection
                         formData={{ strengths }}
@@ -576,11 +801,12 @@ const ResumeBuilder = () => {
                       />
                     )}
 
-                    {/* Form Actions */}
                     <div className="mt-6 pt-6 border-t border-gray-200">
                       <FormActions
                         setActiveTab={setActiveTab}
                         activeTab={activeTab}
+                        onSave={handleSave}
+                        saveStatus={saveStatus}
                       />
                     </div>
                   </Suspense>
@@ -589,7 +815,6 @@ const ResumeBuilder = () => {
             </div>
           )}
 
-          {/* Templates: Full-width (no sidebar) */}
           {activeTab === "templates" && (
             <div className="mt-4">
               <Suspense fallback={<Loader />}>
@@ -603,7 +828,6 @@ const ResumeBuilder = () => {
             </div>
           )}
 
-          {/* Preview: Full-width (no sidebar) */}
           {activeTab === "preview" && (
             <div className="mt-4">
               <Suspense fallback={<Loader />}>
@@ -627,7 +851,6 @@ const ResumeBuilder = () => {
         </div>
       )}
 
-      {/* SAVED DRAFTS */}
       <Suspense fallback={<Loader />}>
         <SavedDraftsModal />
       </Suspense>

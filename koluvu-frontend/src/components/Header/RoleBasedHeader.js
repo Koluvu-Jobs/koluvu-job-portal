@@ -35,6 +35,10 @@ export const RoleBasedHeader = ({
 
   // Get username for URL routing
   const getUsername = () => {
+    // For employees, use public_identifier (KJS-) if available, else fallback to username
+    if (userType === "employee" && user?.public_identifier) {
+      return user.public_identifier;
+    }
     if (user?.username) return user.username;
     if (user?.email) return user.email.split("@")[0];
     return "user";

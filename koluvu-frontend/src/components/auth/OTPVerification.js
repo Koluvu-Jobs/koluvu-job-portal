@@ -51,7 +51,16 @@ const OTPVerification = ({
         setCountdown(60); // 1 minute countdown
         setAttempts(0);
       } else {
-        toast.error(data.message || "Failed to send OTP");
+        // Handle rate limiting with countdown
+        if (response.status === 429 && data.countdown) {
+          setCountdown(data.countdown);
+          toast.error(
+            data.message ||
+              `Please wait ${data.countdown} seconds before requesting a new OTP`
+          );
+        } else {
+          toast.error(data.message || "Failed to send OTP");
+        }
       }
     } catch (error) {
       console.error("Error sending OTP:", error);

@@ -1,4 +1,14 @@
 from django.db import models
+import uuid
+
+
+def generate_public_identifier():
+    """Generate a readable public identifier for job seekers.
+
+    Format: KJS-<12 hex chars> (uppercase). Using UUID4 hex truncated to 12
+    characters gives a compact, collision-resistant identifier.
+    """
+    return f"KJS-{uuid.uuid4().hex[:12].upper()}"
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
@@ -30,6 +40,19 @@ class EmployeeProfile(models.Model):
     is_profile_complete = models.BooleanField(default=False)  # Track onboarding completion
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    # Public identifier to avoid exposing username or sequential DB id in public URLs
+    # NOTE: initially allow NULL and not unique so migrations can be applied safely
+    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=False, null=True, blank=True)
+    # Human-friendly public identifier used for public/profile URLs
+    # Initially allow null/non-unique so migration can be applied safely.
+    public_identifier = models.CharField(
+        max_length=40,
+        unique=False,
+        default=generate_public_identifier,
+        editable=False,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         db_table = 'employee_dashboard_employeeprofile'
@@ -199,6 +222,8 @@ class CandidateSearchProfile(models.Model):
     # Additional Details
     languages = models.CharField(max_length=255, blank=True, default='')  # Comma-separated
     achievements = models.TextField(blank=True, default='')  # JSON or newline-separated
+    # Canonical strengths for search and matching; store as JSON list of strings
+    strengths = models.JSONField(default=list, blank=True)
     availability_schedule = models.CharField(max_length=255, blank=True, default='')
     
     # Contact preferences
@@ -525,3 +550,64 @@ def employee_settings_saved(sender, instance, **kwargs):
     
     # Broadcast real-time update
     instance.broadcast_settings_update()
+
+
+class Notification(models.Model):
+    """Notification model for employee notifications"""
+    NOTIFICATION_TYPES = [
+        ('system', 'System'),
+        ('job_alert', 'Job Alert'),
+        ('application', 'Application Update'),
+        ('interview', 'Interview'),
+        ('message', 'Message'),
+        ('reminder', 'Reminder'),
+        ('announcement', 'Announcement'),
+    ]
+    
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    ]
+    
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='employee_notifications')
+    sender_name = models.CharField(max_length=255, default='System')
+    title = models.CharField(max_length=255, blank=True, default='')
+    message = models.TextField()
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='system')
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    is_read = models.BooleanField(default=False)
+    avatar = models.CharField(max_length=10, default='🔔')  # Emoji or icon
+    related_job_id = models.IntegerField(null=True, blank=True)
+    action_url = models.URLField(blank=True, default='')
+    metadata = models.JSONField(default=dict, blank=True)  # For additional data
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['recipient', '-created_at']),
+            models.Index(fields=['recipient', 'is_read']),
+        ]
+    
+    def __str__(self):
+        return f"Notification for {self.recipient.username}: {self.title or self.message[:50]}"
+    
+    def mark_as_read(self):
+        """Mark notification as read"""
+        if not self.is_read:
+            self.is_read = True
+            self.save(update_fields=['is_read', 'updated_at'])
+    
+    @classmethod
+    def create_notification(cls, recipient, message, notification_type='system', priority='medium', **kwargs):
+        """Helper method to create notifications"""
+        return cls.objects.create(
+            recipient=recipient,
+            message=message,
+            notification_type=notification_type,
+            priority=priority,
+            **kwargs
+        )

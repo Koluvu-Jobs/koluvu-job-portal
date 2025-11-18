@@ -1,0 +1,61 @@
+{
+  "name": "John Doe",
+  "email": "john.doe@example.com",
+  "title": "Senior Software Engineer",
+  "company": "Tech Innovations Inc.",
+  "status": "Active",
+  "phone": "+1 (555) 123-4567",
+  "location": "San Francisco, CA",
+  "profilePicture": "",
+  "presentCTC": "",
+  "expectedCTC": "",
+  "workPeriod": "",
+  "objective": "",
+  "keySkills": [],
+  "experience": [
+    {
+      "position": "Senior Software Engineer",
+      "company": "Tech Innovations Inc.",
+      "duration": "2020 - Present",
+      "description": "Lead development of web applications using React and Node.js. Mentored junior developers and improved system performance by 40%."
+    },
+    {
+      "position": "Software Developer",
+      "company": "Digital Solutions",
+      "duration": "2018 - 2020",
+      "description": "Developed and maintained frontend components for SaaS platform. Collaborated with cross-functional teams to deliver new features."
+    }
+  ],
+  "qualification": [
+    {
+      "degree": "B.S. Computer Science",
+      "university": "University of California",
+      "year": "2018"
+    }
+  ],
+  "technicalSkills": [
+    "JavaScript",
+    "React",
+    "Node.js",
+    "TypeScript",
+    "AWS",
+    "Docker",
+    "CI/CD"
+  ],
+  "certificates": [
+    "AWS Certified Developer - Associate",
+    "Google Cloud Professional Data Engineer"
+  ],
+  "projects": [],
+  "strengths": [],
+  "languagesKnown": [],
+  "personalDetails": {
+    "dob": "",
+    "gender": "",
+    "address": ""
+  },
+  "quadBeading": "",
+  "boilertip": "",
+  "protocol": "HTTP",
+  "credential": ""
+}

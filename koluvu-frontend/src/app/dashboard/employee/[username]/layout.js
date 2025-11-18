@@ -15,10 +15,9 @@ export default function UsernameLayout({ children, params }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex h-screen bg-gray-50">
-
+      <div className="flex min-h-screen bg-gray-50">
         {/* Main Content */}
-        <div className="flex-1 overflow-auto">{children}</div>
+        <div className="flex-1">{children}</div>
       </div>
     </QueryClientProvider>
   );

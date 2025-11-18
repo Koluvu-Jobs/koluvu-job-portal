@@ -1,4 +1,5 @@
 import os
+import logging.handlers
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'channels',
     # OTP System
     'django_otp',
     'django_otp.plugins.otp_totp',
@@ -107,6 +109,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = 'core.asgi.application'
 
 # Database
 if DEBUG:
@@ -238,6 +241,13 @@ CACHES = {
     }
 }
 
+# Channels (WebSocket) settings - in-memory for development. For production, use Redis.
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
+
 # Password Security
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -281,15 +291,21 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'INFO',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': BASE_DIR / 'logs' / 'django.log',
             'formatter': 'verbose',
+            'maxBytes': 5 * 1024 * 1024,  # 5MB per file
+            'backupCount': 3,  # Keep 3 backup files (total max: 20MB)
+            'encoding': 'utf-8',
         },
         'security_file': {
             'level': 'WARNING',
-            'class': 'logging.FileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': BASE_DIR / 'logs' / 'security.log',
             'formatter': 'verbose',
+            'maxBytes': 2 * 1024 * 1024,  # 2MB per file
+            'backupCount': 2,  # Keep 2 backup files (total max: 6MB)
+            'encoding': 'utf-8',
         },
         'console': {
             'level': 'INFO',
@@ -299,25 +315,26 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'] if DEBUG else ['file', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
         'authentication': {
-            'handlers': ['file', 'console'],
+            'handlers': ['console'] if DEBUG else ['file', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
         'security': {
-            'handlers': ['security_file', 'console'],
+            'handlers': ['console'] if DEBUG else ['security_file', 'console'],
             'level': 'WARNING',
             'propagate': True,
         },
     },
 }
 
-# Ensure logs directory exists
-import os
-logs_dir = BASE_DIR / 'logs'
-if not os.path.exists(logs_dir):
-    os.makedirs(logs_dir)
+# Ensure logs directory exists (only in production)
+if not DEBUG:
+    import os
+    logs_dir = BASE_DIR / 'logs'
+    if not os.path.exists(logs_dir):
+        os.makedirs(logs_dir)

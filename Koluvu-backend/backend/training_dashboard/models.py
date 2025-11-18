@@ -13,6 +13,20 @@ class TrainingProviderProfile(models.Model):
     certification_number = models.CharField(max_length=100, blank=True)
     specialization = models.CharField(max_length=255, blank=True)
     logo = models.ImageField(upload_to='training_logos/', blank=True, null=True)
+    
+    # Enhanced profile fields
+    description = models.TextField(blank=True, help_text="Brief description about the organization")
+    qualifications = models.TextField(blank=True, help_text="Key qualifications and certifications")
+    experience_years = models.PositiveIntegerField(null=True, blank=True, help_text="Years of experience in training")
+    founded_year = models.PositiveIntegerField(null=True, blank=True, help_text="Year the organization was founded")
+    team_size = models.PositiveIntegerField(null=True, blank=True, help_text="Number of team members")
+    
+    # Social media links
+    linkedin_url = models.URLField(blank=True, help_text="LinkedIn profile URL")
+    facebook_url = models.URLField(blank=True, help_text="Facebook page URL")
+    twitter_url = models.URLField(blank=True, help_text="Twitter profile URL")
+    youtube_url = models.URLField(blank=True, help_text="YouTube channel URL")
+    
     is_verified = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

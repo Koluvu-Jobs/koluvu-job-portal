@@ -13,6 +13,8 @@ from .views import (
     ExperienceDetailView,
     SkillListCreateView,
     SkillDetailView,
+    AchievementListCreateView,
+    AchievementDetailView,
     ResumeListCreateView,
     ResumeDetailView,
     dashboard_data,
@@ -34,6 +36,7 @@ from .views import (
     duplicate_resume,
     update_resume_section,
     update_resume_styling,
+    update_candidate_strengths,
     resume_templates_list,
     generate_resume_pdf,
     create_resume_sharing_link,
@@ -41,6 +44,15 @@ from .views import (
     applications_list,
     location_based_jobs,
     job_recommendations
+)
+from .notification_views import (
+    notifications_list,
+    mark_notification_read,
+    mark_all_notifications_read,
+    delete_notification,
+    clear_all_notifications,
+    notification_stats,
+    create_test_notification
 )
 from .settings_views import (
     EmployeeSettingsView,
@@ -76,6 +88,9 @@ urlpatterns = [
     # Skills
     path('skills/', SkillListCreateView.as_view(), name='skill_list_create'),
     path('skills/<int:pk>/', SkillDetailView.as_view(), name='skill_detail'),
+    # Achievements
+    path('achievements/', AchievementListCreateView.as_view(), name='achievement_list_create'),
+    path('achievements/<int:pk>/', AchievementDetailView.as_view(), name='achievement_detail'),
     
     # Resumes
     path('resumes/', ResumeListCreateView.as_view(), name='resume_list_create'),
@@ -96,6 +111,8 @@ urlpatterns = [
     # Additional Profile Views
     path('profile/summary/', profile_summary, name='profile_summary'),
     path('api-info/', api_endpoints_info, name='api_endpoints_info'),
+    # Candidate search profile helpers
+    path('candidate/strengths/', update_candidate_strengths, name='update_candidate_strengths'),
     
     # Resume Builder URLs
     path('resume-builder/', resume_builder_dashboard, name='resume_builder_dashboard'),
@@ -120,4 +137,13 @@ urlpatterns = [
     path('applications/', applications_list, name='employee_applications'),
     path('jobs/location-based/', location_based_jobs, name='location_based_jobs'),
     path('jobs/recommendations/', job_recommendations, name='job_recommendations'),
+    
+    # Notification URLs
+    path('notifications/', notifications_list, name='employee_notifications'),
+    path('notifications/<int:notification_id>/mark-read/', mark_notification_read, name='mark_notification_read'),
+    path('notifications/mark-all-read/', mark_all_notifications_read, name='mark_all_notifications_read'),
+    path('notifications/<int:notification_id>/delete/', delete_notification, name='delete_notification'),
+    path('notifications/clear-all/', clear_all_notifications, name='clear_all_notifications'),
+    path('notifications/stats/', notification_stats, name='notification_stats'),
+    path('notifications/create-test/', create_test_notification, name='create_test_notification'),
 ]

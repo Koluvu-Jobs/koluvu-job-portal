@@ -1,4 +1,4 @@
-// Modern Employee Profile Page - Real Backend Integration
+// Modern Employee Profile Page - Responsive Design
 
 "use client";
 
@@ -39,6 +39,9 @@ import {
   TrendingUp,
   Shield,
   Zap,
+  Menu,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,28 +51,29 @@ const ProfileSection = ({ title, icon: Icon, children, className = "" }) => (
   <div
     className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${className}`}
   >
-    <div className="p-6 border-b border-gray-100">
+    <div className="p-4 sm:p-6 border-b border-gray-100">
       <div className="flex items-center space-x-3">
         <div className="p-2 bg-orange-100 rounded-lg">
-          <Icon className="w-5 h-5 text-orange-600" />
+          <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900">{title}</h3>
       </div>
     </div>
-    <div className="p-6">{children}</div>
+    <div className="p-4 sm:p-6">{children}</div>
   </div>
 );
 
-const QuickLink = ({ title, active, onClick }) => (
+const QuickLink = ({ title, active, onClick, icon: Icon }) => (
   <button
     onClick={onClick}
-    className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+    className={`w-full text-left px-3 py-3 sm:px-4 sm:py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-3 ${
       active
         ? "bg-orange-50 text-orange-600 border-l-4 border-orange-600"
         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
     }`}
   >
-    {title}
+    <Icon className="w-4 h-4 flex-shrink-0" />
+    <span className="flex-1">{title}</span>
   </button>
 );
 
@@ -90,7 +94,7 @@ const InputField = ({
       value={value || ""}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors"
+      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors text-sm sm:text-base"
     />
   </div>
 );
@@ -109,7 +113,7 @@ const TextAreaField = ({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors resize-none"
+      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none transition-colors resize-none text-sm sm:text-base"
     />
   </div>
 );
@@ -130,11 +134,11 @@ const ListManager = ({
           value={item}
           onChange={(e) => onUpdate(index, e.target.value)}
           placeholder={placeholder}
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm sm:text-base"
         />
         <button
           onClick={() => onRemove(index)}
-          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -142,10 +146,10 @@ const ListManager = ({
     ))}
     <button
       onClick={onAdd}
-      className="flex items-center space-x-2 px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+      className="flex items-center space-x-2 px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors w-full justify-center sm:justify-start"
     >
       <Plus className="w-4 h-4" />
-      <span>{addButtonText}</span>
+      <span className="text-sm">{addButtonText}</span>
     </button>
   </div>
 );
@@ -162,7 +166,7 @@ const NotificationAlert = ({ message, type, onClose }) => {
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -50 }}
-        className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+        className={`fixed top-4 right-4 left-4 sm:left-auto z-50 p-4 rounded-lg shadow-lg ${
           type === "success"
             ? "bg-green-500"
             : type === "error"
@@ -171,14 +175,63 @@ const NotificationAlert = ({ message, type, onClose }) => {
         } text-white`}
       >
         <div className="flex items-center space-x-2">
-          {type === "success" && <CheckCircle className="w-5 h-5" />}
-          {type === "error" && <AlertTriangle className="w-5 h-5" />}
-          <span>{message}</span>
-          <button onClick={onClose} className="ml-2">
+          {type === "success" && <CheckCircle className="w-5 h-5 flex-shrink-0" />}
+          {type === "error" && <AlertTriangle className="w-5 h-5 flex-shrink-0" />}
+          <span className="flex-1 text-sm sm:text-base">{message}</span>
+          <button onClick={onClose} className="ml-2 flex-shrink-0">
             <X className="w-4 h-4" />
           </button>
         </div>
       </motion.div>
+    </AnimatePresence>
+  );
+};
+
+const MobileSidebar = ({ isOpen, onClose, quickLinks, activeSection, setActiveSection }) => {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            onClick={onClose}
+          />
+          
+          {/* Sidebar */}
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: "tween", duration: 0.3 }}
+            className="fixed left-0 top-0 h-full w-80 bg-white z-50 lg:hidden overflow-y-auto"
+          >
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Quick Links</h3>
+              <button onClick={onClose} className="p-2">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-1">
+              {quickLinks.map((link) => (
+                <QuickLink
+                  key={link.id}
+                  title={link.title}
+                  active={activeSection === link.id}
+                  onClick={() => {
+                    setActiveSection(link.id);
+                    onClose();
+                  }}
+                  icon={link.icon}
+                />
+              ))}
+            </div>
+          </motion.div>
+        </>
+      )}
     </AnimatePresence>
   );
 };
@@ -197,21 +250,7 @@ const Profile = ({
   const [saving, setSaving] = useState(false);
   const [activeSection, setActiveSection] = useState("career-objective");
   const [notification, setNotification] = useState(null);
-  const [highlightMissing, setHighlightMissing] = useState(false);
-
-  // Check for highlight parameter
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("highlight") === "missing") {
-      setHighlightMissing(true);
-      // Show notification about missing details
-      setNotification({
-        type: "info",
-        message:
-          "Complete the highlighted fields to improve your profile score!",
-      });
-    }
-  }, []);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Profile data state
   const [profileData, setProfileData] = useState({
@@ -256,18 +295,18 @@ const Profile = ({
   // Quick links configuration
   const quickLinks = [
     { id: "career-objective", title: "Career Objective", icon: Target },
-    { id: "unique-strengths", title: "Unique Strengths & Traits", icon: Star },
+    { id: "unique-strengths", title: "Unique Strengths", icon: Star },
     { id: "key-achievements", title: "Key Achievements", icon: Award },
-    { id: "professional-mission", title: "My Professional Mission", icon: Zap },
+    { id: "professional-mission", title: "Professional Mission", icon: Zap },
     { id: "key-skills", title: "Key Skills", icon: Code },
-    { id: "experience", title: "Experience Details", icon: Briefcase },
-    { id: "internship", title: "Internship Experience", icon: Building2 },
-    { id: "education", title: "Education Qualification", icon: GraduationCap },
-    { id: "technical", title: "Technical Qualification", icon: Code },
-    { id: "projects", title: "Project Details", icon: BookOpen },
-    { id: "research", title: "Research Details", icon: Brain },
-    { id: "social-links", title: "Social Media Links", icon: Globe },
-    { id: "personal", title: "Personal Details", icon: User },
+    { id: "experience", title: "Experience", icon: Briefcase },
+    { id: "internship", title: "Internship", icon: Building2 },
+    { id: "education", title: "Education", icon: GraduationCap },
+    { id: "technical", title: "Technical", icon: Code },
+    { id: "projects", title: "Projects", icon: BookOpen },
+    { id: "research", title: "Research", icon: Brain },
+    { id: "social-links", title: "Social Links", icon: Globe },
+    { id: "personal", title: "Personal", icon: User },
   ];
 
   // Fetch profile data from backend
@@ -282,9 +321,12 @@ const Profile = ({
       setLoading(true);
 
       // Fetch main profile data
-      const profileResponse = await fetch("/api/employee/profile", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const profileResponse = await fetch(
+        "http://127.0.0.1:8000/api/employee/dashboard/",
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
 
       if (!profileResponse.ok) {
         throw new Error(`Profile API error: ${profileResponse.status}`);
@@ -367,9 +409,7 @@ const Profile = ({
     for (const endpoint of endpoints) {
       try {
         const response = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000"
-          }/api/employee/${endpoint.url}/`,
+          `http://127.0.0.1:8000/api/employee/${endpoint.url}/`,
           { headers: { Authorization: `Bearer ${accessToken}` } }
         );
 
@@ -425,31 +465,90 @@ const Profile = ({
     try {
       setSaving(true);
 
-      // Prepare data for API
+      // Helper to convert placeholder text to empty values
+      const sanitize = (v) => {
+        if (typeof v === "string") {
+          const trimmed = v.trim();
+          if (trimmed === "Not specified" || trimmed === "Not provided") return "";
+          // Keep 'Immediate' for noticePeriod as it's a valid semantic value
+          return trimmed;
+        }
+        return v;
+      };
+
+      // Format date to YYYY-MM-DD expected by backend
+      const formatDateForBackend = (val) => {
+        if (!val) return "";
+        if (typeof val !== "string") return "";
+        const s = val.trim();
+        if (!s) return "";
+
+        // Already in YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+        // Common dd-mm-yyyy or dd/mm/yyyy -> convert
+        const dmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (dmy) {
+          const day = dmy[1].padStart(2, "0");
+          const month = dmy[2].padStart(2, "0");
+          const year = dmy[3];
+          return `${year}-${month}-${day}`;
+        }
+
+        // Try Date parsing fallback
+        const parsed = new Date(s);
+        if (!isNaN(parsed.getTime())) {
+          // Use local date components to avoid timezone shift issues
+          const yyyy = parsed.getFullYear();
+          const mm = String(parsed.getMonth() + 1).padStart(2, "0");
+          const dd = String(parsed.getDate()).padStart(2, "0");
+          return `${yyyy}-${mm}-${dd}`;
+        }
+
+        // Not parseable - return empty so backend treats it as not provided
+        return "";
+      };
+
+      // Prepare data for API (sanitize placeholder strings that some fields use)
+      const dobFormatted = formatDateForBackend(
+        sanitize(profileData.personalDetails.dob)
+      );
+
       const updateData = {
-        department: profileData.department,
-        phone_number: profileData.mobileNo,
-        location: profileData.location,
-        current_salary: profileData.currentCTC,
-        current_designation: profileData.designation,
-        notice_period: profileData.noticePeriod,
-        expected_salary: profileData.expectedCTC,
-        bio: profileData.careerObjective,
-        professional_mission: profileData.professionalMission,
+        department: sanitize(profileData.department),
+        phone_number: sanitize(profileData.mobileNo),
+        location: sanitize(profileData.location),
+        current_salary: sanitize(profileData.currentCTC),
+        current_designation: sanitize(profileData.designation),
+        notice_period: sanitize(profileData.noticePeriod),
+        expected_salary: sanitize(profileData.expectedCTC),
+        bio: sanitize(profileData.careerObjective),
+        professional_mission: sanitize(profileData.professionalMission),
         strengths: profileData.uniqueStrengths.join(", "),
         achievements: profileData.keyAchievements.join(", "),
         skills: profileData.keySkills.join(", "),
-        github_url: profileData.socialLinks.github,
-        linkedin_url: profileData.socialLinks.linkedin,
-        twitter_url: profileData.socialLinks.twitter,
-        website_url: profileData.socialLinks.portfolio,
-        date_of_birth: profileData.personalDetails.dob,
-        nationality: profileData.personalDetails.nationality,
-        marital_status: profileData.personalDetails.maritalStatus,
-        address: profileData.personalDetails.address,
+        github_url: sanitize(profileData.socialLinks.github),
+        linkedin_url: sanitize(profileData.socialLinks.linkedin),
+        twitter_url: sanitize(profileData.socialLinks.twitter),
+        website_url: sanitize(profileData.socialLinks.portfolio),
+        nationality: sanitize(profileData.personalDetails.nationality),
+        marital_status: sanitize(profileData.personalDetails.maritalStatus),
+        address: sanitize(profileData.personalDetails.address),
       };
 
-      const response = await fetch("/api/employee/profile", {
+      // Only include date_of_birth if we have a valid formatted value
+      if (dobFormatted) {
+        updateData.date_of_birth = dobFormatted;
+      }
+
+      // Prefer using the backend URL from env when available; keep localhost as fallback
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ||
+        "http://127.0.0.1:8000";
+
+  // Debug: log payload being sent (exclude full tokens)
+  console.log("Profile update payload:", updateData);
+
+  const response = await fetch(`${backendUrl}/api/employee/profile/`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -459,7 +558,74 @@ const Profile = ({
       });
 
       if (!response.ok) {
-        throw new Error(`Save failed: ${response.status}`);
+        // Read raw body first to preserve content for logging
+        let rawBody = "";
+        try {
+          rawBody = await response.text();
+        } catch (e) {
+          rawBody = "";
+        }
+
+        // Try to parse JSON from the raw body
+        let errBody = null;
+        try {
+          errBody = rawBody ? JSON.parse(rawBody) : null;
+        } catch (e) {
+          errBody = null;
+        }
+
+        console.error(
+          "Save failed response:",
+          response.status,
+          "raw:",
+          rawBody,
+          "parsed:",
+          errBody
+        );
+
+        // Build a friendly details string. Prefer parsed object, else raw text.
+        let detailsStr = "";
+        if (errBody && typeof errBody === "object") {
+          try {
+            detailsStr = JSON.stringify(errBody);
+          } catch (e) {
+            detailsStr = String(errBody);
+          }
+        } else if (rawBody && rawBody.length > 0) {
+          detailsStr = rawBody;
+        }
+
+        if (detailsStr) {
+          showNotification(`Failed to save profile: ${detailsStr}`, "error");
+        } else {
+          showNotification(
+            `Failed to save profile (status ${response.status}). Please try again.`,
+            "error"
+          );
+        }
+
+        return;
+      }
+
+      // Success - attempt to read response body for verification
+      try {
+        const text = await response.text();
+        let parsed = null;
+        try {
+          parsed = text ? JSON.parse(text) : null;
+        } catch (e) {
+          parsed = null;
+        }
+        console.log("Profile update response:", response.status, "body:", parsed || text);
+      } catch (e) {
+        console.log("Profile update succeeded (no readable body)");
+      }
+
+      // Refresh the profile from backend to ensure UI shows persisted values
+      try {
+        await fetchProfileData();
+      } catch (e) {
+        console.warn("Failed to refetch profile after save:", e);
       }
 
       setOriginalData(JSON.parse(JSON.stringify(profileData)));
@@ -468,7 +634,7 @@ const Profile = ({
       // Redirect back to dashboard after short delay
       setTimeout(() => {
         router.push(`/dashboard/employee/${username}`);
-      }, 2000);
+      }, 1200);
     } catch (error) {
       console.error("Error saving profile:", error);
       showNotification("Failed to save profile. Please try again.", "error");
@@ -592,10 +758,369 @@ const Profile = ({
           </ProfileSection>
         );
 
+      case "experience":
+        return (
+          <ProfileSection title="Experience" icon={Briefcase}>
+            {profileData.experience.map((exp, idx) => (
+              <div key={idx} className="mb-4 p-4 border rounded-lg bg-gray-50">
+                <InputField
+                  label="Company"
+                  value={exp.company}
+                  onChange={(value) => {
+                    const updated = [...profileData.experience];
+                    updated[idx].company = value;
+                    updateListData("experience", updated);
+                  }}
+                  placeholder="Company Name"
+                />
+                <InputField
+                  label="Title"
+                  value={exp.title}
+                  onChange={(value) => {
+                    const updated = [...profileData.experience];
+                    updated[idx].title = value;
+                    updateListData("experience", updated);
+                  }}
+                  placeholder="Job Title"
+                />
+                <InputField
+                  label="Start Date"
+                  value={exp.startDate}
+                  onChange={(value) => {
+                    const updated = [...profileData.experience];
+                    updated[idx].startDate = value;
+                    updateListData("experience", updated);
+                  }}
+                  type="date"
+                />
+                <InputField
+                  label="End Date"
+                  value={exp.endDate}
+                  onChange={(value) => {
+                    const updated = [...profileData.experience];
+                    updated[idx].endDate = value;
+                    updateListData("experience", updated);
+                  }}
+                  type="date"
+                />
+                <TextAreaField
+                  label="Description"
+                  value={exp.description}
+                  onChange={(value) => {
+                    const updated = [...profileData.experience];
+                    updated[idx].description = value;
+                    updateListData("experience", updated);
+                  }}
+                  placeholder="Describe your role and achievements..."
+                  rows={3}
+                />
+                <button
+                  onClick={() => removeListItem("experience", idx)}
+                  className="mt-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded-lg"
+                >
+                  Remove Experience
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => addListItem("experience", { company: "", title: "", startDate: "", endDate: "", description: "" })}
+              className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
+            >
+              Add Experience
+            </button>
+          </ProfileSection>
+        );
+
+      case "internship":
+        return (
+          <ProfileSection title="Internship" icon={Building2}>
+            {profileData.internship.map((intern, idx) => (
+              <div key={idx} className="mb-4 p-4 border rounded-lg bg-gray-50">
+                <InputField
+                  label="Company"
+                  value={intern.company || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.internship];
+                    updated[idx].company = value;
+                    updateListData("internship", updated);
+                  }}
+                  placeholder="Company Name"
+                />
+                <InputField
+                  label="Role"
+                  value={intern.role || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.internship];
+                    updated[idx].role = value;
+                    updateListData("internship", updated);
+                  }}
+                  placeholder="Internship Role"
+                />
+                <InputField
+                  label="Start Date"
+                  value={intern.startDate || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.internship];
+                    updated[idx].startDate = value;
+                    updateListData("internship", updated);
+                  }}
+                  type="date"
+                />
+                <InputField
+                  label="End Date"
+                  value={intern.endDate || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.internship];
+                    updated[idx].endDate = value;
+                    updateListData("internship", updated);
+                  }}
+                  type="date"
+                />
+                <TextAreaField
+                  label="Description"
+                  value={intern.description || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.internship];
+                    updated[idx].description = value;
+                    updateListData("internship", updated);
+                  }}
+                  placeholder="Describe your internship experience..."
+                  rows={3}
+                />
+                <button
+                  onClick={() => removeListItem("internship", idx)}
+                  className="mt-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded-lg"
+                >
+                  Remove Internship
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => addListItem("internship", { company: "", role: "", startDate: "", endDate: "", description: "" })}
+              className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
+            >
+              Add Internship
+            </button>
+          </ProfileSection>
+        );
+
+      case "education":
+        return (
+          <ProfileSection title="Education" icon={GraduationCap}>
+            {profileData.education.map((edu, idx) => (
+              <div key={idx} className="mb-4 p-4 border rounded-lg bg-gray-50">
+                <InputField
+                  label="Degree"
+                  value={edu.degree}
+                  onChange={(value) => {
+                    const updated = [...profileData.education];
+                    updated[idx].degree = value;
+                    updateListData("education", updated);
+                  }}
+                  placeholder="Degree Name"
+                />
+                <InputField
+                  label="Institution"
+                  value={edu.institution}
+                  onChange={(value) => {
+                    const updated = [...profileData.education];
+                    updated[idx].institution = value;
+                    updateListData("education", updated);
+                  }}
+                  placeholder="Institution Name"
+                />
+                <InputField
+                  label="Year"
+                  value={edu.year}
+                  onChange={(value) => {
+                    const updated = [...profileData.education];
+                    updated[idx].year = value;
+                    updateListData("education", updated);
+                  }}
+                  placeholder="Year of Completion"
+                  type="text"
+                />
+                <InputField
+                  label="Grade"
+                  value={edu.grade}
+                  onChange={(value) => {
+                    const updated = [...profileData.education];
+                    updated[idx].grade = value;
+                    updateListData("education", updated);
+                  }}
+                  placeholder="Grade/Percentage"
+                />
+                <button
+                  onClick={() => removeListItem("education", idx)}
+                  className="mt-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded-lg"
+                >
+                  Remove Education
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => addListItem("education", { degree: "", institution: "", year: "", grade: "" })}
+              className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
+            >
+              Add Education
+            </button>
+          </ProfileSection>
+        );
+
+      case "technical":
+        return (
+          <ProfileSection title="Technical Qualifications" icon={Code}>
+            {profileData.technicalQualifications.map((tech, idx) => (
+              <div key={idx} className="mb-4 p-4 border rounded-lg bg-gray-50">
+                <InputField
+                  label="Certification/Skill"
+                  value={tech.name || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.technicalQualifications];
+                    updated[idx].name = value;
+                    updateListData("technicalQualifications", updated);
+                  }}
+                  placeholder="Certification or Skill Name"
+                />
+                <InputField
+                  label="Details"
+                  value={tech.details || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.technicalQualifications];
+                    updated[idx].details = value;
+                    updateListData("technicalQualifications", updated);
+                  }}
+                  placeholder="Details about the certification or skill"
+                />
+                <button
+                  onClick={() => removeListItem("technicalQualifications", idx)}
+                  className="mt-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded-lg"
+                >
+                  Remove Technical Qualification
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => addListItem("technicalQualifications", { name: "", details: "" })}
+              className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
+            >
+              Add Technical Qualification
+            </button>
+          </ProfileSection>
+        );
+
+      case "projects":
+        return (
+          <ProfileSection title="Projects" icon={BookOpen}>
+            {profileData.projects.map((proj, idx) => (
+              <div key={idx} className="mb-4 p-4 border rounded-lg bg-gray-50">
+                <InputField
+                  label="Project Title"
+                  value={proj.title || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.projects];
+                    updated[idx].title = value;
+                    updateListData("projects", updated);
+                  }}
+                  placeholder="Project Title"
+                />
+                <InputField
+                  label="Year"
+                  value={proj.year || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.projects];
+                    updated[idx].year = value;
+                    updateListData("projects", updated);
+                  }}
+                  placeholder="Year"
+                  type="text"
+                />
+                <TextAreaField
+                  label="Description"
+                  value={proj.description || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.projects];
+                    updated[idx].description = value;
+                    updateListData("projects", updated);
+                  }}
+                  placeholder="Describe the project..."
+                  rows={3}
+                />
+                <button
+                  onClick={() => removeListItem("projects", idx)}
+                  className="mt-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded-lg"
+                >
+                  Remove Project
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => addListItem("projects", { title: "", year: "", description: "" })}
+              className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
+            >
+              Add Project
+            </button>
+          </ProfileSection>
+        );
+
+      case "research":
+        return (
+          <ProfileSection title="Research" icon={Brain}>
+            {profileData.research.map((res, idx) => (
+              <div key={idx} className="mb-4 p-4 border rounded-lg bg-gray-50">
+                <InputField
+                  label="Research Title"
+                  value={res.title || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.research];
+                    updated[idx].title = value;
+                    updateListData("research", updated);
+                  }}
+                  placeholder="Research Title"
+                />
+                <InputField
+                  label="Year"
+                  value={res.year || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.research];
+                    updated[idx].year = value;
+                    updateListData("research", updated);
+                  }}
+                  placeholder="Year"
+                  type="text"
+                />
+                <TextAreaField
+                  label="Description"
+                  value={res.description || ""}
+                  onChange={(value) => {
+                    const updated = [...profileData.research];
+                    updated[idx].description = value;
+                    updateListData("research", updated);
+                  }}
+                  placeholder="Describe the research..."
+                  rows={3}
+                />
+                <button
+                  onClick={() => removeListItem("research", idx)}
+                  className="mt-2 px-3 py-1 text-red-600 hover:bg-red-50 rounded-lg"
+                >
+                  Remove Research
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={() => addListItem("research", { title: "", year: "", description: "" })}
+              className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
+            >
+              Add Research
+            </button>
+          </ProfileSection>
+        );
+
       case "social-links":
         return (
           <ProfileSection title="Social Media Links" icon={Globe}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6">
               <InputField
                 label="GitHub Profile"
                 value={profileData.socialLinks.github}
@@ -635,7 +1160,7 @@ const Profile = ({
       case "personal":
         return (
           <ProfileSection title="Personal Details" icon={User}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6">
               <InputField
                 label="Date of Birth"
                 type="date"
@@ -660,17 +1185,15 @@ const Profile = ({
                 }
                 placeholder="Single/Married"
               />
-              <div className="md:col-span-2">
-                <TextAreaField
-                  label="Address"
-                  value={profileData.personalDetails.address}
-                  onChange={(value) =>
-                    updateNestedData("personalDetails", "address", value)
-                  }
-                  placeholder="Full address..."
-                  rows={3}
-                />
-              </div>
+              <TextAreaField
+                label="Address"
+                value={profileData.personalDetails.address}
+                onChange={(value) =>
+                  updateNestedData("personalDetails", "address", value)
+                }
+                placeholder="Full address..."
+                rows={3}
+              />
             </div>
           </ProfileSection>
         );
@@ -678,12 +1201,12 @@ const Profile = ({
       default:
         return (
           <ProfileSection title="Coming Soon" icon={Eye}>
-            <div className="text-center py-12">
-              <Eye className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <div className="text-center py-8 sm:py-12">
+              <Eye className="w-12 h-12 sm:w-16 sm:h-16 mx-auto text-gray-400 mb-3 sm:mb-4" />
+              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
                 Section Under Development
               </h3>
-              <p className="text-gray-500">
+              <p className="text-gray-500 text-sm sm:text-base">
                 This section is currently being developed and will be available
                 soon.
               </p>
@@ -695,13 +1218,13 @@ const Profile = ({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin text-orange-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <Loader className="w-8 h-8 sm:w-12 sm:h-12 animate-spin text-orange-600 mx-auto mb-3 sm:mb-4" />
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">
             Loading Profile
           </h3>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-sm sm:text-base">
             Fetching your professional information...
           </p>
         </div>
@@ -720,41 +1243,60 @@ const Profile = ({
         />
       )}
 
+      {/* Mobile Sidebar */}
+      <MobileSidebar
+        isOpen={mobileSidebarOpen}
+        onClose={() => setMobileSidebarOpen(false)}
+        quickLinks={quickLinks}
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
+      />
+
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            {/* Title */}
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
-              <p className="text-gray-600 mt-1">
-                Update your professional information and save changes
-              </p>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 sm:py-6 gap-4">
+            {/* Title and Mobile Menu */}
+            <div className="flex items-center justify-between sm:justify-start">
+              <div>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Edit Profile</h1>
+                <p className="text-gray-600 mt-1 text-sm sm:text-base">
+                  Update your professional information
+                </p>
+              </div>
+              
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setMobileSidebarOpen(true)}
+                className="p-2 lg:hidden border border-gray-300 rounded-lg text-gray-700"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <button
                 onClick={handleCancel}
-                className="flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center space-x-2 px-4 py-2 sm:px-6 sm:py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base flex-1 sm:flex-none justify-center"
               >
                 <X className="w-4 h-4" />
-                <span className="hidden sm:inline">Cancel</span>
+                <span>Cancel</span>
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center justify-center space-x-2 px-4 sm:px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="flex items-center space-x-2 px-4 py-2 sm:px-6 sm:py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 text-sm sm:text-base flex-1 sm:flex-none justify-center"
               >
                 {saving ? (
                   <>
                     <Loader className="w-4 h-4 animate-spin" />
-                    <span className="hidden sm:inline">Saving...</span>
+                    <span>Saving...</span>
                   </>
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    <span className="hidden sm:inline">Save Changes</span>
+                    <span>Save</span>
                   </>
                 )}
               </button>
@@ -764,15 +1306,15 @@ const Profile = ({
       </div>
 
       {/* Basic Details Card */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 sm:mb-8">
+          <div className="p-4 sm:p-6 border-b border-gray-100">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
               Basic Details
             </h2>
           </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <InputField
                 label="Department"
                 value={profileData.department}
@@ -829,9 +1371,9 @@ const Profile = ({
         </div>
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Quick Links Sidebar */}
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
+          {/* Quick Links Sidebar - Hidden on mobile, shown with menu button */}
+          <div className="hidden lg:block lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 sticky top-32">
               <div className="p-6 border-b border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -845,6 +1387,7 @@ const Profile = ({
                     title={link.title}
                     active={activeSection === link.id}
                     onClick={() => setActiveSection(link.id)}
+                    icon={link.icon}
                   />
                 ))}
               </div>
@@ -867,18 +1410,18 @@ const Profile = ({
           <div className="lg:col-span-1 space-y-6">
             {/* Job Suggestions */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="p-6 border-b border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-900">
+              <div className="p-4 sm:p-6 border-b border-gray-100">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                   Job Suggestions
                 </h3>
               </div>
-              <div className="p-6">
-                <div className="text-center py-8">
-                  <Briefcase className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                  <p className="text-gray-500 text-sm">
+              <div className="p-4 sm:p-6">
+                <div className="text-center py-6 sm:py-8">
+                  <Briefcase className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-gray-400 mb-3" />
+                  <p className="text-gray-500 text-sm sm:text-base">
                     Job suggestions will appear here based on your profile
                   </p>
-                  <button className="mt-4 px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors">
+                  <button className="mt-4 px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors text-sm sm:text-base">
                     View All Jobs
                   </button>
                 </div>
@@ -886,14 +1429,14 @@ const Profile = ({
             </div>
 
             {/* Security Note */}
-            <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 sm:p-6">
               <div className="flex items-start space-x-3">
                 <Shield className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold text-red-900 mb-2">
+                  <h4 className="font-semibold text-red-900 mb-2 text-sm sm:text-base">
                     Important Security Note
                   </h4>
-                  <p className="text-red-800 text-sm">
+                  <p className="text-red-800 text-xs sm:text-sm">
                     Client-side JavaScript protection for screenshotting and
                     content downloading is limited. For robust and foolproof
                     protection, server-side measures and digital rights

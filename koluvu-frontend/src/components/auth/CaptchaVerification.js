@@ -27,14 +27,14 @@ export default function CaptchaVerification({
       newCaptcha += chars[Math.floor(Math.random() * chars.length)];
     }
     setCaptcha(newCaptcha);
-    setCaptchaKey("simple_" + Date.now());
+    const newKey = "simple_" + Date.now();
+    setCaptchaKey(newKey);
     setCaptchaInput("");
     setIsVerified(false);
     setError("");
 
-    if (onCaptchaChange) {
-      onCaptchaChange("", "simple_" + Date.now());
-    }
+    // Don't call onCaptchaChange with empty values when generating a new CAPTCHA
+    // Only call it when CAPTCHA is actually verified
   };
 
   useEffect(() => {

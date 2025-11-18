@@ -116,23 +116,29 @@ export const isTokenExpired = (token) => {
   }
 };
 
-export const getRedirectPath = (userType, username = null) => {
+export const getRedirectPath = (userType, user = null) => {
   switch (userType) {
     case USER_TYPES.EMPLOYEE:
-      return username
-        ? `/dashboard/employee/${username}`
-        : DASHBOARD_ROUTES.EMPLOYEE;
+      if (user) {
+        // Use public_identifier for employees (KJS- prefixed) if available, fallback to username
+        const identifier = user.public_identifier || user.username;
+        return `/dashboard/employee/${identifier}`;
+      }
+      return DASHBOARD_ROUTES.EMPLOYEE;
     case USER_TYPES.EMPLOYER:
-      return username
-        ? `/dashboard/employer/${username}`
+      return user
+        ? `/dashboard/employer/${user.username || user}`
         : DASHBOARD_ROUTES.EMPLOYER;
     case USER_TYPES.PARTNER:
-      return username
-        ? `/dashboard/partner/${username}`
+      return user
+        ? `/dashboard/partner/${user.username || user}`
         : DASHBOARD_ROUTES.PARTNER;
     default:
-      return username
-        ? `/dashboard/employee/${username}`
-        : DASHBOARD_ROUTES.EMPLOYEE;
+      if (user) {
+        // Default to employee behavior for backward compatibility
+        const identifier = user.public_identifier || user.username || user;
+        return `/dashboard/employee/${identifier}`;
+      }
+      return DASHBOARD_ROUTES.EMPLOYEE;
   }
 };

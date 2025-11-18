@@ -3,6 +3,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +17,7 @@ import {
 } from "lucide-react";
 
 export default function ResumeBuilderPage() {
+  const router = useRouter();
   const [resumes, setResumes] = useState([
     {
       id: 1,
@@ -84,7 +86,7 @@ export default function ResumeBuilderPage() {
             <p className="text-sm text-gray-600 mb-4">
               Start building a new resume from scratch
             </p>
-            <Button className="w-full">Get Started</Button>
+            <Button className="w-full" onClick={() => router.push('/resume-builder')}>Get Started</Button>
           </CardContent>
         </Card>
 
@@ -97,7 +99,7 @@ export default function ResumeBuilderPage() {
             <p className="text-sm text-gray-600 mb-4">
               Upload your existing resume to edit
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={() => router.push('/resume-builder')}>
               Import
             </Button>
           </CardContent>
@@ -112,7 +114,7 @@ export default function ResumeBuilderPage() {
             <p className="text-sm text-gray-600 mb-4">
               Choose from professional templates
             </p>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" onClick={() => router.push('/resume-builder?tab=templates')}>
               Browse
             </Button>
           </CardContent>
@@ -154,11 +156,11 @@ export default function ResumeBuilderPage() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1">
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => router.push('/resume-builder')}>
                     <Eye className="w-4 h-4 mr-1" />
                     Preview
                   </Button>
-                  <Button size="sm" className="flex-1">
+                  <Button size="sm" className="flex-1" onClick={() => router.push('/resume-builder')}>
                     <Edit className="w-4 h-4 mr-1" />
                     Edit
                   </Button>
@@ -196,7 +198,7 @@ export default function ResumeBuilderPage() {
               </div>
               <CardContent className="p-4">
                 <h3 className="font-semibold mb-2">{template.name}</h3>
-                <Button size="sm" className="w-full">
+                <Button size="sm" className="w-full" onClick={() => router.push('/resume-builder')}>
                   Use Template
                 </Button>
               </CardContent>

@@ -1,7 +1,7 @@
 // src/app/main/dashboard/training/LogoutPage.jsx
 'use client';
 import React from 'react';
-import { Card, CardContent } from './components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSignOutAlt, 

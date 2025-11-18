@@ -64,15 +64,25 @@ const availabilityOptions = [
 ];
 
 // Dashboard component
-const Dashboard = ({ username, setActiveTab }) => {
+const Dashboard = ({
+  username,
+  setActiveTab: navigateToTab,
+  profileCompletion = 0,
+  onShowCompletionGuide,
+}) => {
   const router = useRouter();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [employee, setEmployee] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [dismissedNotifications, setDismissedNotifications] = useState(
+    new Set()
+  );
   const [appliedJobs, setAppliedJobs] = useState([]);
-  const [postedJobs, setPostedJobs] = useState([]);
+
   const [locationJobs, setLocationJobs] = useState([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [preferredJobs, setPreferredJobs] = useState([]);
   const [backgroundImage, setBackgroundImage] = useState(null);
   const [showImageEditor, setShowImageEditor] = useState(false);
@@ -90,6 +100,10 @@ const Dashboard = ({ username, setActiveTab }) => {
   );
   const [showJobsOptions, setShowJobsOptions] = useState(false);
   const [expandedJobSection, setExpandedJobSection] = useState(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [lastActivity, setLastActivity] = useState(new Date());
+  const [isOnline, setIsOnline] = useState(true);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Profile editing states
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -123,6 +137,9 @@ const Dashboard = ({ username, setActiveTab }) => {
     if (profile.background_image) {
       setBackgroundImage(profile.background_image);
     }
+
+    // Also fetch fresh profile data to ensure we have the latest background image
+    refreshProfile();
     const combinedName = `${firstName} ${lastName}`.trim();
     const fallbackName = user.name || (email ? email.split("@")[0] : "");
     const displayName = combinedName || fallbackName || "Your Profile";
@@ -231,7 +248,7 @@ const Dashboard = ({ username, setActiveTab }) => {
     fetchDashboardStats();
 
     // Initialize empty arrays - will be populated from backend
-    setPostedJobs([]);
+
     setAnnouncements([]);
     setAppliedJobs([]);
 
@@ -247,6 +264,128 @@ const Dashboard = ({ username, setActiveTab }) => {
 
     setLoading(false);
   }, [user]);
+
+  // Real-time clock update
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Online/Offline status tracking
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setLastActivity(new Date());
+    };
+    const handleOffline = () => setIsOnline(false);
+    const handleActivity = () => setLastActivity(new Date());
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("click", handleActivity);
+    window.addEventListener("keydown", handleActivity);
+    window.addEventListener("mousemove", handleActivity);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("click", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      window.removeEventListener("mousemove", handleActivity);
+    };
+  }, []);
+
+  // Profile completion is calculated in AppContent and passed as prop
+
+  // Function to get missing profile fields for completion guide
+  const getMissingFields = () => {
+    if (!user || !user.employee_profile) return [];
+
+    const profile = user.employee_profile;
+    const missingFields = [];
+
+    const fieldChecks = [
+      {
+        field: profile.first_name || user.first_name,
+        name: "First Name",
+        action: "Edit Profile",
+        description: "Add your first name",
+      },
+      {
+        field: profile.last_name || user.last_name,
+        name: "Last Name",
+        action: "Edit Profile",
+        description: "Add your last name",
+      },
+      {
+        field: profile.current_designation || profile.current_position,
+        name: "Job Title",
+        action: "Edit Profile",
+        description: "Add your current role/designation",
+      },
+      {
+        field: profile.location,
+        name: "Location",
+        action: "Edit Profile",
+        description: "Add your location",
+      },
+      {
+        field: profile.experience_years || profile.experience,
+        name: "Experience",
+        action: "Edit Profile",
+        description: "Add your years of experience",
+      },
+      {
+        field: profile.bio,
+        name: "Bio",
+        action: "Edit Profile",
+        description: "Write a professional bio",
+      },
+      {
+        field: profile.phone_number || profile.phone,
+        name: "Phone Number",
+        action: "Edit Profile",
+        description: "Add your contact number",
+      },
+      {
+        field: profile.linkedin_url || profile.linkedin_profile,
+        name: "LinkedIn",
+        action: "Edit Profile",
+        description: "Connect your LinkedIn profile",
+      },
+      {
+        field: profile.image_field_picture || profile.effective_profile_picture,
+        name: "Profile Picture",
+        action: "Upload Photo",
+        description: "Add a professional profile picture",
+      },
+      {
+        field: profile.background_image,
+        name: "Background Image",
+        action: "Customize Background",
+        description: "Set a background image for your profile",
+      },
+    ];
+
+    fieldChecks.forEach((check) => {
+      if (
+        !check.field ||
+        check.field === "" ||
+        check.field === "Add your role"
+      ) {
+        missingFields.push({
+          name: check.name,
+          action: check.action,
+          description: check.description,
+        });
+      }
+    });
+
+    return missingFields;
+  };
 
   // Function to fetch real dashboard stats from backend API
   const fetchDashboardStats = async () => {
@@ -469,58 +608,99 @@ const Dashboard = ({ username, setActiveTab }) => {
     }
   }, [employee?.availability]);
 
-  useEffect(() => {
-    const dynamic = [];
-    appliedJobs.forEach((job) => {
-      dynamic.push({
-        id: `apply-${job.id}`,
-        jobId: job.id,
-        user: employee?.name || "You",
-        avatar: employee?.avatar || "U",
-        time: job.appliedDate || new Date(),
-        message: `Applied to ${job.title} at ${job.company}. Status: ${job.status}.`,
-        type: "update",
-        priority:
-          job.statusColor === "gray"
-            ? "low"
-            : job.statusColor === "cyan"
-            ? "high"
-            : "medium",
-        unread: true,
-      });
-
-      if (job.status === "Interview Scheduled") {
-        dynamic.push({
-          id: `interview-${job.id}`,
-          jobId: job.id,
-          user: job.company,
-          avatar: job.logo,
-          time: new Date(job.appliedDate.getTime() + 6 * 60 * 60 * 1000),
-          message: `Interview scheduled for ${job.title}. Prepare accordingly.`,
-          type: "update",
-          priority: "high",
-          unread: true,
-        });
+  // Handle notifications - for now using real-time SSE, no historical endpoint yet
+  const fetchNotifications = async () => {
+    try {
+      setNotificationsLoading(true);
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        setAnnouncements([]);
+        return;
       }
-    });
 
-    postedJobs.forEach((p) => {
-      dynamic.push({
-        id: `posted-${p.id}`,
-        jobId: p.id,
-        user: employee?.name || "You",
-        avatar: employee?.avatar || "U",
-        time: p.postedAt,
-        message: `Posted a new job: ${p.title} (${p.company}). Applicants so far: ${p.applicants}.`,
-        type: "update",
-        priority: "medium",
-        unread: false,
-      });
-    });
+      // Try to fetch notifications from backend (endpoint might not exist yet)
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/employee/notifications/",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    dynamic.sort((a, b) => new Date(b.time) - new Date(a.time));
-    setAnnouncements(dynamic);
-  }, [appliedJobs, postedJobs, employee]);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Notifications fetched:", data);
+
+        // Transform backend data to match expected format
+        const notifications = (data.notifications || []).map(
+          (notification) => ({
+            id: notification.id,
+            user: notification.sender_name || "System",
+            avatar: notification.avatar || "🔔",
+            time: new Date(notification.created_at),
+            message: notification.message,
+            type: notification.notification_type || "system",
+            priority: notification.priority || "medium",
+            unread: !notification.is_read,
+            jobId: notification.related_job_id || null,
+          })
+        );
+
+        // Filter out dismissed notifications
+        const filteredNotifications = notifications.filter(
+          (notif) => !dismissedNotifications.has(notif.id.toString())
+        );
+
+        setAnnouncements(filteredNotifications);
+      } else if (response.status === 404) {
+        // Notifications endpoint doesn't exist yet - show placeholder message
+        console.info(
+          "Notifications endpoint not available yet. Using real-time notifications only."
+        );
+        setAnnouncements([
+          {
+            id: "welcome-placeholder",
+            user: "Koluvu System",
+            avatar: "🔔",
+            time: new Date(),
+            message:
+              "Welcome to your dashboard! Real-time notifications will appear here when you receive them.",
+            type: "info",
+            priority: "low",
+            unread: true,
+          },
+        ]);
+      } else {
+        console.error("Failed to fetch notifications:", response.status);
+        setAnnouncements([]);
+      }
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      // Show a friendly message when notifications aren't available
+      setAnnouncements([
+        {
+          id: "error-placeholder",
+          user: "System",
+          avatar: "ℹ️",
+          time: new Date(),
+          message:
+            "Notifications are temporarily unavailable. They will be restored shortly.",
+          type: "info",
+          priority: "low",
+          unread: true,
+        },
+      ]);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [dismissedNotifications]);
 
   const handleAvailabilityChange = () => {
     setAvailabilityStatus((current) => {
@@ -567,6 +747,75 @@ const Dashboard = ({ username, setActiveTab }) => {
     setShowJobsOptions(!showJobsOptions);
   };
 
+  // Load dismissed notifications from localStorage
+  useEffect(() => {
+    const dismissed = localStorage.getItem(
+      `dismissed-notifications-${user?.id || "anonymous"}`
+    );
+    if (dismissed) {
+      try {
+        setDismissedNotifications(new Set(JSON.parse(dismissed)));
+      } catch (error) {
+        console.error("Failed to parse dismissed notifications:", error);
+      }
+    }
+  }, [user]);
+
+  // Save dismissed notifications to localStorage
+  const saveDismissedNotifications = (dismissedSet) => {
+    localStorage.setItem(
+      `dismissed-notifications-${user?.id || "anonymous"}`,
+      JSON.stringify([...dismissedSet])
+    );
+  };
+
+  // Function to dismiss a notification
+  const dismissNotification = async (notificationId, event) => {
+    event?.stopPropagation(); // Prevent triggering the click handler
+
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken) {
+        // Try to mark notification as read in backend (endpoint might not exist yet)
+        const response = await fetch(
+          `http://127.0.0.1:8000/api/employee/notifications/${notificationId}/mark-read/`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok && response.status !== 404) {
+          console.warn(
+            "Failed to mark notification as read on server:",
+            response.status
+          );
+        }
+      }
+    } catch (error) {
+      console.warn("Notification backend not available yet:", error.message);
+    }
+
+    // Always update local state regardless of backend response
+    const newDismissed = new Set([
+      ...dismissedNotifications,
+      notificationId.toString(),
+    ]);
+    setDismissedNotifications(newDismissed);
+    saveDismissedNotifications(newDismissed);
+  };
+
+  // Function to clear all dismissed notifications (for testing/admin)
+  const clearAllDismissed = () => {
+    setDismissedNotifications(new Set());
+    localStorage.removeItem(
+      `dismissed-notifications-${user?.id || "anonymous"}`
+    );
+  };
+
   const handleBackgroundImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -591,12 +840,105 @@ const Dashboard = ({ username, setActiveTab }) => {
     }
   };
 
+  const refreshProfile = async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/employee/profile/",
+        {
+          headers: accessToken
+            ? { Authorization: `Bearer ${accessToken}` }
+            : {},
+        }
+      );
+
+      if (response.ok) {
+        const profileData = await response.json();
+        console.log("Fresh profile data loaded:", profileData);
+
+        // Update background image from fresh profile data
+        if (profileData.background_image) {
+          setBackgroundImage(profileData.background_image);
+        }
+
+        // Update user context with fresh profile data if needed
+        if (user && user.employee_profile) {
+          const updatedUser = {
+            ...user,
+            employee_profile: {
+              ...user.employee_profile,
+              ...profileData,
+            },
+          };
+          // You might want to update the auth context here too
+        }
+      }
+    } catch (err) {
+      console.error("Error refreshing profile:", err);
+    }
+  };
+
   const handleImageEditorSave = (editedImage) => {
-    setBackgroundImage(editedImage);
+    // Close editor immediately to improve UX
     setShowImageEditor(false);
     setEditingImage(null);
-    // Here you would typically also upload the image to your backend
-    // and update the user's profile with the new background image URL
+
+    // If editedImage is a data URL, convert to Blob and upload to backend
+    (async () => {
+      try {
+        // Optimistically set preview while uploading
+        setBackgroundImage(editedImage);
+
+        // Convert data URL to blob via fetch
+        let blob;
+        if (
+          typeof editedImage === "string" &&
+          editedImage.startsWith("data:")
+        ) {
+          const res = await fetch(editedImage);
+          blob = await res.blob();
+        } else if (editedImage instanceof Blob) {
+          blob = editedImage;
+        } else {
+          // Can't handle this format; keep preview only
+          return;
+        }
+
+        const filename = `background_${Date.now()}.png`;
+        const file = new File([blob], filename, {
+          type: blob.type || "image/png",
+        });
+        const formData = new FormData();
+        formData.append("background_image", file);
+
+        const accessToken = localStorage.getItem("accessToken");
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/employee/profile/background/upload/",
+          {
+            method: "POST",
+            headers: accessToken
+              ? { Authorization: `Bearer ${accessToken}` }
+              : {},
+            body: formData,
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          // Use server-provided absolute URL when available
+          if (data && data.background_image_url) {
+            setBackgroundImage(data.background_image_url);
+          }
+
+          // Refresh the entire profile to sync with latest data
+          await refreshProfile();
+        } else {
+          console.error("Failed to upload background image", response.status);
+        }
+      } catch (err) {
+        console.error("Error uploading background image:", err);
+      }
+    })();
   };
 
   const handleImageEditorCancel = () => {
@@ -640,6 +982,26 @@ const Dashboard = ({ username, setActiveTab }) => {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) {
         console.error("No access token found");
+        alert("No access token found. Please log in again.");
+        return;
+      }
+
+      console.log("Saving profile data:", editProfileData);
+
+      // Client-side validation
+      if (
+        editProfileData.experience &&
+        isNaN(parseInt(editProfileData.experience, 10))
+      ) {
+        alert("Please enter a valid number for years of experience.");
+        return;
+      }
+
+      if (
+        editProfileData.expectedSalary &&
+        isNaN(parseFloat(editProfileData.expectedSalary))
+      ) {
+        alert("Please enter a valid number for expected salary.");
         return;
       }
 
@@ -648,14 +1010,20 @@ const Dashboard = ({ username, setActiveTab }) => {
         last_name: editProfileData.name?.split(" ").slice(1).join(" ") || "",
         current_designation: editProfileData.role,
         location: editProfileData.location,
-        experience_years: editProfileData.experience,
-        expected_salary: editProfileData.expectedSalary,
+        experience_years: editProfileData.experience
+          ? Math.max(0, parseInt(editProfileData.experience, 10))
+          : 0,
+        expected_salary: editProfileData.expectedSalary
+          ? Math.max(0, parseFloat(editProfileData.expectedSalary))
+          : null,
         bio: editProfileData.bio,
         skills:
           editProfileData.skills
             ?.map((skill) => skill.name || skill)
             .join(", ") || "",
       };
+
+      console.log("Update data being sent:", updateData);
 
       const response = await fetch(
         "http://127.0.0.1:8000/api/employee/profile/",
@@ -669,7 +1037,13 @@ const Dashboard = ({ username, setActiveTab }) => {
         }
       );
 
+      console.log("Response status:", response.status);
+      console.log("Response headers:", response.headers);
+
       if (response.ok) {
+        const responseData = await response.json();
+        console.log("Profile update response:", responseData);
+
         // Update local employee data
         setEmployee((prev) => ({
           ...prev,
@@ -683,12 +1057,36 @@ const Dashboard = ({ username, setActiveTab }) => {
         }));
 
         setIsEditingProfile(false);
+        setShowSuccessMessage(true);
+
+        // Hide success message after 3 seconds
+        setTimeout(() => setShowSuccessMessage(false), 3000);
+
         console.log("Profile updated successfully");
       } else {
-        console.error("Failed to update profile");
+        const errorData = await response.text();
+        console.error("Failed to update profile:", response.status, errorData);
+
+        // Try to parse the error and show user-friendly message
+        try {
+          const errorObj = JSON.parse(errorData);
+          if (errorObj.details) {
+            const errorMessages = Object.entries(errorObj.details)
+              .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+              .join("\n");
+            alert(`Please fix the following errors:\n${errorMessages}`);
+          } else {
+            alert(
+              `Failed to update profile: ${errorObj.error || "Unknown error"}`
+            );
+          }
+        } catch (e) {
+          alert(`Failed to update profile: ${response.status} - ${errorData}`);
+        }
       }
     } catch (error) {
       console.error("Error saving profile:", error);
+      alert(`Error saving profile: ${error.message}`);
     }
   };
 
@@ -715,13 +1113,37 @@ const Dashboard = ({ username, setActiveTab }) => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-6">
       {showImageEditor && (
         <ImageEditor
           image={editingImage}
           onSave={handleImageEditorSave}
           onCancel={handleImageEditorCancel}
         />
+      )}
+
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-500 ease-in-out animate-bounce">
+          <div className="flex items-center space-x-2">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 13l4 4L19 7"
+              ></path>
+            </svg>
+            <span className="font-medium">
+              Profile updated successfully! 🎉
+            </span>
+          </div>
+        </div>
       )}
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
@@ -756,20 +1178,67 @@ const Dashboard = ({ username, setActiveTab }) => {
               )}
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Welcome back,{" "}
-                {user?.first_name || user?.email?.split("@")[0] || "User"}!
-              </h1>
+              <div className="flex items-center space-x-3">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Welcome back,{" "}
+                  {user?.first_name || user?.email?.split("@")[0] || "User"}! 👋
+                </h1>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 text-gray-500 hover:text-gray-700"
+                  title="Refresh Dashboard"
+                >
+                  🔄
+                </button>
+              </div>
               <p className="text-gray-600">
                 {username ? `@${username} • ` : ""}Here's your summary for
                 today.
               </p>
+              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                <div className="flex items-center space-x-1">
+                  <span>🕒</span>
+                  <span className="font-medium">
+                    {currentTime.toLocaleTimeString()}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span>📅</span>
+                  <span>
+                    {currentTime.toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
           <div className="hidden sm:flex items-center space-x-2">
-            <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-              {employee?.availabilityStatus || "Available for Hire"}
+            <div
+              className={`px-3 py-1 rounded-full text-sm font-medium animate-pulse hover:bg-green-200 transition-colors duration-200 ${
+                isOnline
+                  ? "bg-green-100 text-green-800"
+                  : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              <span
+                className={`inline-block w-2 h-2 rounded-full mr-2 ${
+                  isOnline ? "bg-green-500 animate-pulse" : "bg-gray-400"
+                }`}
+              ></span>
+              {isOnline
+                ? employee?.availabilityStatus || "Available for Hire"
+                : "Offline"}
             </div>
+            <button
+              onClick={() => setIsEditingProfile(true)}
+              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            >
+              ✏️ Edit Profile
+            </button>
           </div>
         </div>
       </div>
@@ -956,12 +1425,14 @@ const Dashboard = ({ username, setActiveTab }) => {
                         Experience
                       </label>
                       <input
-                        type="text"
+                        type="number"
+                        min="0"
+                        max="50"
                         value={editProfileData.experience || ""}
                         onChange={(e) =>
                           updateEditProfileData("experience", e.target.value)
                         }
-                        placeholder="e.g., 3+ years"
+                        placeholder="Years of experience (e.g., 3)"
                         className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -971,7 +1442,9 @@ const Dashboard = ({ username, setActiveTab }) => {
                         Expected Salary
                       </label>
                       <input
-                        type="text"
+                        type="number"
+                        min="0"
+                        step="0.01"
                         value={editProfileData.expectedSalary || ""}
                         onChange={(e) =>
                           updateEditProfileData(
@@ -979,7 +1452,7 @@ const Dashboard = ({ username, setActiveTab }) => {
                             e.target.value
                           )
                         }
-                        placeholder="e.g., ₹15-20 LPA"
+                        placeholder="Expected salary (in LPA, e.g., 15.5)"
                         className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
@@ -1060,6 +1533,21 @@ const Dashboard = ({ username, setActiveTab }) => {
                   </div>
                 </div>
               )}
+
+              {/* Activity Status */}
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>Last activity:</span>
+                  <span className="flex items-center space-x-1">
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        isOnline ? "bg-green-400" : "bg-gray-400"
+                      }`}
+                    ></div>
+                    <span>{lastActivity.toLocaleTimeString()}</span>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1099,18 +1587,41 @@ const Dashboard = ({ username, setActiveTab }) => {
             ].map((card, idx) => (
               <div
                 key={card.label}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer group"
+                onClick={() => {
+                  if (card.label === "Notifications") {
+                    // Show notifications panel
+                    setShowNotifications(true);
+                  } else if (card.label === "Profile Views") {
+                    // Show profile analytics (future feature)
+                    alert("Profile analytics coming soon!");
+                  }
+                }}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`p-2 rounded-lg ${card.bg}`}>{card.icon}</div>
-                  <span className="text-2xl font-bold text-gray-900">
-                    {card.value}
-                  </span>
+                  <div
+                    className={`p-2 rounded-lg ${card.bg} group-hover:scale-110 transition-transform duration-200`}
+                  >
+                    {card.icon}
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
+                      {card.value}
+                    </span>
+                    {isOnline && (
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    )}
+                  </div>
                 </div>
-                <p className="text-gray-600 text-sm font-medium">
+                <p className="text-gray-600 text-sm font-medium group-hover:text-gray-800">
                   {card.label}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">{card.sub}</p>
+                <p className="text-xs text-gray-500 mt-1 group-hover:text-gray-600">
+                  {card.sub}
+                </p>
+                <div className="mt-2 text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  Click to view details →
+                </div>
               </div>
             ))}
           </div>
@@ -1122,52 +1633,79 @@ const Dashboard = ({ username, setActiveTab }) => {
             </h3>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <button
-                onClick={() => setActiveTab("My Applications")}
-                className="flex flex-col items-center p-4 text-center hover:bg-blue-50 rounded-lg transition-colors group"
+                onClick={() => navigateToTab("My Applications")}
+                className="flex flex-col items-center p-4 text-center hover:bg-blue-50 rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md"
               >
-                <div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors mb-2">
-                  <Briefcase className="w-5 h-5 text-blue-600" />
+                <div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 group-hover:scale-110 transition-all duration-200 mb-2">
+                  <Briefcase className="w-5 h-5 text-blue-600 group-hover:animate-bounce" />
                 </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600">
-                  Create New Task
+                <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors duration-200">
+                  View Applications
+                </span>
+                <span className="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  {stats.applications} active
                 </span>
               </button>
 
               <button
-                onClick={handleEditProfile}
-                className="flex flex-col items-center p-4 text-center hover:bg-green-50 rounded-lg transition-colors group"
+                onClick={() => {
+                  if (profileCompletion < 100) {
+                    onShowCompletionGuide && onShowCompletionGuide(true);
+                  } else {
+                    handleEditProfile();
+                  }
+                }}
+                className="flex flex-col items-center p-4 text-center hover:bg-green-50 rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md relative"
               >
-                <div className="p-3 bg-green-100 rounded-full group-hover:bg-green-200 transition-colors mb-2">
-                  <User className="w-5 h-5 text-green-600" />
+                <div className="p-3 bg-green-100 rounded-full group-hover:bg-green-200 group-hover:scale-110 transition-all duration-200 mb-2">
+                  <User className="w-5 h-5 text-green-600 group-hover:animate-pulse" />
                 </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-green-600">
-                  Edit Profile
+                <span className="text-sm font-medium text-gray-700 group-hover:text-green-600 transition-colors duration-200">
+                  {profileCompletion < 100
+                    ? "Complete Profile"
+                    : "Edit Profile"}
+                </span>
+                <span
+                  className={`text-xs mt-1 transition-opacity duration-200 ${
+                    profileCompletion < 100
+                      ? "text-orange-500 font-semibold opacity-100"
+                      : "text-gray-500 opacity-0 group-hover:opacity-100"
+                  }`}
+                >
+                  {profileCompletion}% complete
+                </span>
+                {profileCompletion < 100 && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
+                )}
+              </button>
+
+              <button
+                onClick={() => navigateToTab("Resume Builder")}
+                className="flex flex-col items-center p-4 text-center hover:bg-purple-50 rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md"
+              >
+                <div className="p-3 bg-purple-100 rounded-full group-hover:bg-purple-200 group-hover:scale-110 transition-all duration-200 mb-2">
+                  <TrendingUp className="w-5 h-5 text-purple-600 group-hover:animate-bounce" />
+                </div>
+                <span className="text-sm font-medium text-gray-700 group-hover:text-purple-600 transition-colors duration-200">
+                  Resume Builder
+                </span>
+                <span className="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  Create new resume
                 </span>
               </button>
 
               <button
-                onClick={() => setActiveTab("My Profile")}
-                className="flex flex-col items-center p-4 text-center hover:bg-purple-50 rounded-lg transition-colors group"
+                onClick={() => navigateToTab("Skill Enhancement")}
+                className="flex flex-col items-center p-4 text-center hover:bg-orange-50 rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md"
               >
-                <div className="p-3 bg-purple-100 rounded-full group-hover:bg-purple-200 transition-colors mb-2">
-                  <TrendingUp className="w-5 h-5 text-purple-600" />
+                <div className="p-3 bg-orange-100 rounded-full group-hover:bg-orange-200 group-hover:scale-110 transition-all duration-200 mb-2">
+                  <Zap className="w-5 h-5 text-orange-600 group-hover:animate-pulse" />
                 </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-purple-600">
-                  View Analytics
+                <span className="text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors duration-200">
+                  Skill Enhancement
                 </span>
-              </button>
-
-              <button
-                onClick={() =>
-                  router.push(`/dashboard/employee/${username}/settings`)
-                }
-                className="flex flex-col items-center p-4 text-center hover:bg-orange-50 rounded-lg transition-colors group"
-              >
-                <div className="p-3 bg-orange-100 rounded-full group-hover:bg-orange-200 transition-colors mb-2">
-                  <Settings className="w-5 h-5 text-orange-600" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-orange-600">
-                  Settings
+                <span className="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  Level up skills
                 </span>
               </button>
             </div>
@@ -1184,14 +1722,30 @@ const Dashboard = ({ username, setActiveTab }) => {
                   Announcements
                 </h2>
               </div>
-              <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-semibold hover:bg-blue-200 transition">
-                View All
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={clearAllDismissed}
+                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition"
+                  title="Restore all dismissed notifications"
+                >
+                  Restore All
+                </button>
+                <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-semibold hover:bg-blue-200 transition">
+                  View All
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {announcements.length === 0 ? (
+              {notificationsLoading ? (
                 <div className="col-span-full text-center text-gray-500 py-8">
-                  No announcements available.
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                    Loading notifications...
+                  </div>
+                </div>
+              ) : announcements.length === 0 ? (
+                <div className="col-span-full text-center text-gray-500 py-8">
+                  No notifications available.
                 </div>
               ) : (
                 announcements.map((announcement) => (
@@ -1209,7 +1763,7 @@ const Dashboard = ({ username, setActiveTab }) => {
                       <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold text-lg">
                         {announcement.avatar}
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <span className="font-semibold text-gray-800 text-sm">
                           {announcement.user}
                         </span>
@@ -1217,6 +1771,25 @@ const Dashboard = ({ username, setActiveTab }) => {
                           {formatTimeAgo(announcement.time)}
                         </span>
                       </div>
+                      <button
+                        onClick={(e) => dismissNotification(announcement.id, e)}
+                        className="p-1 hover:bg-red-100 rounded-full transition-colors duration-200 group"
+                        title="Dismiss notification"
+                      >
+                        <svg
+                          className="w-4 h-4 text-gray-400 group-hover:text-red-600 transition-colors duration-200"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
                     </div>
                     <div className="text-gray-700 text-sm mb-2">
                       {announcement.message}
@@ -1314,13 +1887,7 @@ const Dashboard = ({ username, setActiveTab }) => {
               </div>
             </div>
 
-            <div
-              className={`p-4 space-y-4 ${
-                expandedJobSection === "applied" || expandedJobSection === "all"
-                  ? "max-h-[600px]"
-                  : "max-h-[400px]"
-              } overflow-y-auto custom-scrollbar`}
-            >
+            <div className="p-4 space-y-4">
               {appliedJobs.map((job) => (
                 <div
                   key={job.id}
@@ -1437,14 +2004,7 @@ const Dashboard = ({ username, setActiveTab }) => {
               </div>
             </div>
 
-            <div
-              className={`p-4 space-y-4 ${
-                expandedJobSection === "location" ||
-                expandedJobSection === "all"
-                  ? "max-h-[600px]"
-                  : "max-h-[400px]"
-              } overflow-y-auto custom-scrollbar`}
-            >
+            <div className="p-4 space-y-4">
               {locationJobs.map((job) => (
                 <div
                   key={job.id}
@@ -1549,14 +2109,7 @@ const Dashboard = ({ username, setActiveTab }) => {
               </div>
             </div>
 
-            <div
-              className={`p-4 space-y-4 ${
-                expandedJobSection === "preferences" ||
-                expandedJobSection === "all"
-                  ? "max-h-[600px]"
-                  : "max-h-[400px]"
-              } overflow-y-auto custom-scrollbar`}
-            >
+            <div className="p-4 space-y-4">
               {preferredJobs.map((job) => (
                 <div
                   key={job.id}
@@ -1654,18 +2207,19 @@ const Dashboard = ({ username, setActiveTab }) => {
 };
 
 // Lazy load components for different tabs
-const ImageEditor = dynamic(
-  () => import("@/components/imageEditor/ImageEditor"),
-  {
-    loading: () => (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-        <div className="bg-white rounded-lg p-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
-        </div>
-      </div>
-    ),
-  }
-);
+// Temporarily commented out to debug syntax error
+// const ImageEditor = dynamic(
+//   () => import("@/components/imageEditor/ImageEditor"),
+//   {
+//     loading: () => (
+//       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+//         <div className="bg-white rounded-lg p-4">
+//           <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
+//         </div>
+//       </div>
+//     ),
+//   }
+// );
 
 const ApplicationsComponent = dynamic(() => import("./application/page"), {
   loading: () => (
@@ -1746,6 +2300,7 @@ const AccountSettingsComponent = ({ user }) => {
   const [activeTab, setActiveTab] = useState("profile");
   const [formData, setFormData] = useState({
     name: user?.name || user?.first_name || "",
+    username: user?.username || "",
     email: user?.email || "",
     phone: user?.phone || "",
     location: user?.location || "",
@@ -1768,6 +2323,16 @@ const AccountSettingsComponent = ({ user }) => {
 
   const validateForm = () => {
     const newErrors = {};
+
+    if (activeTab === "profile") {
+      if (formData.username && formData.username.length < 3) {
+        newErrors.username = "Username must be at least 3 characters";
+      }
+      if (formData.username && !/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+        newErrors.username =
+          "Username can only contain letters, numbers, and underscores";
+      }
+    }
 
     if (activeTab === "password") {
       if (formData.newPassword !== formData.confirmPassword) {
@@ -1845,6 +2410,22 @@ const AccountSettingsComponent = ({ user }) => {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter your username"
+                />
+                {errors.username && (
+                  <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -2001,7 +2582,45 @@ const AppContent = ({ username, forceTab }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState(forceTab || "Dashboard");
+  const [showCompletionGuide, setShowCompletionGuide] = useState(false);
+  const [profileCompletion, setProfileCompletion] = useState(0);
   const { user, loading, isAuthenticated, accessToken } = useAuth();
+
+  // Calculate profile completion percentage
+  useEffect(() => {
+    if (user && user.employee_profile) {
+      const profile = user.employee_profile;
+
+      // Check required profile fields
+      const profileFields = [
+        profile.first_name || user.first_name,
+        profile.last_name || user.last_name,
+        profile.current_designation || profile.current_position,
+        profile.location,
+        profile.experience_years || profile.experience,
+        profile.bio,
+        profile.phone_number || profile.phone,
+        profile.linkedin_url || profile.linkedin_profile,
+        profile.image_field_picture || profile.effective_profile_picture,
+        profile.background_image,
+      ];
+
+      const completedFields = profileFields.filter(
+        (field) =>
+          field !== null &&
+          field !== undefined &&
+          field !== "" &&
+          field !== "Add your role"
+      ).length;
+
+      const percentage = Math.round(
+        (completedFields / profileFields.length) * 100
+      );
+      setProfileCompletion(percentage);
+    } else {
+      setProfileCompletion(0);
+    }
+  }, [user]);
 
   // Authentication and role guard - simplified to avoid redirect loops
   useEffect(() => {
@@ -2101,7 +2720,14 @@ const AppContent = ({ username, forceTab }) => {
 
     switch (activeTab) {
       case "Dashboard":
-        return <Dashboard username={username} setActiveTab={setActiveTab} />;
+        return (
+          <Dashboard
+            username={username}
+            setActiveTab={navigateToTab}
+            profileCompletion={profileCompletion}
+            onShowCompletionGuide={setShowCompletionGuide}
+          />
+        );
       case "My Applications":
         return <ApplicationsComponent />;
       case "My Profile":
@@ -2121,11 +2747,229 @@ const AppContent = ({ username, forceTab }) => {
       case "Account Settings":
         return <AccountSettingsComponent user={user} />;
       default:
-        return <Dashboard username={username} setActiveTab={setActiveTab} />;
+        return (
+          <Dashboard
+            username={username}
+            setActiveTab={setActiveTab}
+            profileCompletion={profileCompletion}
+            onShowCompletionGuide={setShowCompletionGuide}
+          />
+        );
     }
   };
 
-  return renderTabContent();
+  // Profile Completion Guide Modal
+  const ProfileCompletionGuide = ({ show, onClose }) => {
+    // Calculate missing fields inline
+    const getMissingFieldsInline = () => {
+      if (!user || !user.employee_profile) return [];
+
+      const profile = user.employee_profile;
+      const missingFields = [];
+
+      const fieldChecks = [
+        {
+          field: profile.first_name || user.first_name,
+          name: "First Name",
+          action: "Edit Profile",
+          description: "Add your first name",
+        },
+        {
+          field: profile.last_name || user.last_name,
+          name: "Last Name",
+          action: "Edit Profile",
+          description: "Add your last name",
+        },
+        {
+          field: profile.current_designation || profile.current_position,
+          name: "Job Title",
+          action: "Edit Profile",
+          description: "Add your current role/designation",
+        },
+        {
+          field: profile.location,
+          name: "Location",
+          action: "Edit Profile",
+          description: "Add your location",
+        },
+        {
+          field: profile.experience_years || profile.experience,
+          name: "Experience",
+          action: "Edit Profile",
+          description: "Add your years of experience",
+        },
+        {
+          field: profile.bio,
+          name: "Bio",
+          action: "Edit Profile",
+          description: "Write a professional bio",
+        },
+        {
+          field: profile.phone_number || profile.phone,
+          name: "Phone Number",
+          action: "Edit Profile",
+          description: "Add your contact number",
+        },
+        {
+          field: profile.linkedin_url || profile.linkedin_profile,
+          name: "LinkedIn",
+          action: "Edit Profile",
+          description: "Connect your LinkedIn profile",
+        },
+        {
+          field:
+            profile.image_field_picture || profile.effective_profile_picture,
+          name: "Profile Picture",
+          action: "Upload Photo",
+          description: "Add a professional profile picture",
+        },
+        {
+          field: profile.background_image,
+          name: "Background Image",
+          action: "Customize Background",
+          description: "Set a background image for your profile",
+        },
+      ];
+
+      fieldChecks.forEach((check) => {
+        if (
+          !check.field ||
+          check.field === "" ||
+          check.field === "Add your role"
+        ) {
+          missingFields.push({
+            name: check.name,
+            action: check.action,
+            description: check.description,
+          });
+        }
+      });
+
+      return missingFields;
+    };
+
+    const missingFields = getMissingFieldsInline();
+
+    return (
+      <div
+        className={`fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center transition-opacity duration-300 ${
+          show ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className={`bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden transform transition-all duration-300 ${
+            show ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
+          }`}
+        >
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-green-100 rounded-full">
+                  <User className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Complete Your Profile
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Get noticed by employers with a complete profile
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">
+                  Profile Completion
+                </span>
+                <span className="text-sm font-bold text-green-600">
+                  {profileCompletion}%
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${profileCompletion}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="space-y-3 max-h-60 overflow-y-auto">
+              <h4 className="text-lg font-medium text-gray-900 mb-3">
+                Missing Information ({missingFields.length} items)
+              </h4>
+              {missingFields.map((field, index) => (
+                <div
+                  key={index}
+                  className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                >
+                  <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                  <div className="flex-1">
+                    <h5 className="font-medium text-gray-900">{field.name}</h5>
+                    <p className="text-sm text-gray-600">{field.description}</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      onClose();
+                      if (field.action === "Edit Profile") {
+                        handleEditProfile();
+                      } else if (field.action === "Upload Photo") {
+                        document
+                          .getElementById("profile-picture-upload")
+                          ?.click();
+                      } else if (field.action === "Customize Background") {
+                        document.getElementById("background-upload")?.click();
+                      }
+                    }}
+                    className="px-3 py-1 text-xs font-medium text-green-600 border border-green-600 rounded-md hover:bg-green-600 hover:text-white transition-all duration-200"
+                  >
+                    {field.action}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex space-x-3">
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+              >
+                Later
+              </button>
+              <button
+                onClick={() => {
+                  onClose();
+                  handleEditProfile();
+                }}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+              >
+                Complete Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {renderTabContent()}
+      <ProfileCompletionGuide
+        show={showCompletionGuide}
+        onClose={() => setShowCompletionGuide(false)}
+      />
+    </>
+  );
 };
 
 // Wrapper component that provides the QueryClient

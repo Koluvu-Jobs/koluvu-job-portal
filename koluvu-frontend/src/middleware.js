@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import { authGuardMiddleware } from "./middleware/authGuard";
 
 // Define protected routes and their required roles
 const protectedRoutes = {
@@ -10,10 +11,27 @@ const protectedRoutes = {
   "/dashboard/admin": ["admin"],
 };
 
+// Define auth pages that need protection from authenticated users
+const authRoutes = [
+  "/auth/login/employee",
+  "/auth/login/employer",
+  "/auth/login/partner",
+  "/auth/login/admin",
+  "/auth/register/employee",
+  "/auth/register/employer",
+  "/auth/register/partner",
+];
+
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Check if current path is protected
+  // Check if this is an auth route (login/register pages)
+  if (authRoutes.includes(pathname)) {
+    // Apply auth guard middleware for login/register pages
+    return await authGuardMiddleware(request);
+  }
+
+  // Check if current path is protected dashboard route
   const requiredRoles = Object.entries(protectedRoutes).find(([route]) =>
     pathname.startsWith(route)
   )?.[1];
@@ -120,5 +138,5 @@ function redirectToLogin(request, from, userType = null) {
 
 // Configure which routes the middleware should run on
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/auth/login/:path*", "/auth/register/:path*"],
 };

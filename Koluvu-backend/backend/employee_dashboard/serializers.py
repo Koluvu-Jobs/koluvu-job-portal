@@ -4,7 +4,8 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from .models import (
     EmployeeProfile, Education, Experience, Skill, Resume, ResumeTemplate, 
-    ResumeSharingLink, CandidateSearchProfile, CandidateProject, CandidateAchievement
+    ResumeSharingLink, CandidateSearchProfile, CandidateProject, CandidateAchievement,
+    Notification
 )
 
 
@@ -17,10 +18,15 @@ class EmployeeProfileSerializer(serializers.ModelSerializer):
     google_profile_picture = serializers.SerializerMethodField()
     skills_list = serializers.SerializerMethodField()
     effective_profile_picture = serializers.SerializerMethodField()
+    background_image = serializers.SerializerMethodField()
+    public_id = serializers.UUIDField(read_only=True)
+    public_identifier = serializers.CharField(read_only=True)
     
     class Meta:
         model = EmployeeProfile
         fields = [
+            'public_id',
+            'public_identifier',
             'id', 'username', 'email', 'first_name', 'last_name', 'full_name',
             'phone_number', 'phone', 'date_of_birth', 'location', 
             'linkedin_url', 'linkedin_profile', 'github_url', 'github_profile', 
@@ -86,6 +92,16 @@ class EmployeeProfileSerializer(serializers.ModelSerializer):
             
         # Fall back to profile_picture field (URL)
         return obj.profile_picture if obj.profile_picture else None
+
+
+    def get_background_image(self, obj):
+        """Return absolute URL for background image when possible"""
+        if obj.background_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.background_image.url)
+            return obj.background_image.url
+        return None
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -256,6 +272,8 @@ class ResumeSerializer(serializers.ModelSerializer):
 
 class ResumeBuilderSerializer(serializers.ModelSerializer):
     """Enhanced serializer for resume builder functionality"""
+    # Allow template to be omitted or explicitly null from clients
+    template = serializers.CharField(allow_null=True, required=False)
     file_url = serializers.SerializerMethodField()
     file_size = serializers.SerializerMethodField()
     completion_percentage = serializers.SerializerMethodField()
@@ -339,6 +357,18 @@ class ResumeBuilderSerializer(serializers.ModelSerializer):
         if value and not isinstance(value, list):
             raise serializers.ValidationError("Experience data must be a list")
         return value
+
+    def create(self, validated_data):
+        # Ensure template is not None when saving to DB (model enforces non-null)
+        if validated_data.get('template') is None:
+            validated_data['template'] = 'modern'
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        # Default template if client provided null
+        if 'template' in validated_data and validated_data.get('template') is None:
+            validated_data['template'] = instance.template or 'modern'
+        return super().update(instance, validated_data)
 
 
 class ResumeTemplateSerializer(serializers.ModelSerializer):
@@ -539,7 +569,7 @@ class CandidateSearchProfileSerializer(serializers.ModelSerializer):
             'id', 'name', 'designation', 'department', 'industry', 'key_skills',
             'experience', 'location', 'present_ctc', 'expected_ctc', 'notice_period',
             'preferred_location', 'actively_looking', 'profile_picture', 'contact',
-            'education', 'languages', 'achievements', 'projects', 'achievement_details',
+            'education', 'languages', 'achievements', 'strengths', 'projects', 'achievement_details',
             'availability_schedule', 'last_active', 'last_active_display', 
             'match_score', 'is_searchable'
         ]
@@ -639,3 +669,38 @@ class CandidateSearchResponseSerializer(serializers.Serializer):
     candidates = CandidateSearchProfileSerializer(many=True)
     total_count = serializers.IntegerField()
     search_criteria = serializers.DictField()
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    """Serializer for notifications"""
+    recipient_username = serializers.CharField(source='recipient.username', read_only=True)
+    time_ago = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Notification
+        fields = [
+            'id', 'recipient_username', 'sender_name', 'title', 'message',
+            'notification_type', 'priority', 'is_read', 'avatar',
+            'related_job_id', 'action_url', 'metadata',
+            'created_at', 'updated_at', 'time_ago'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at', 'recipient_username', 'time_ago']
+    
+    def get_time_ago(self, obj):
+        """Calculate time ago string"""
+        from django.utils import timezone
+        import math
+        
+        now = timezone.now()
+        diff = now - obj.created_at
+        
+        if diff.days > 0:
+            return f"{diff.days}d ago"
+        elif diff.seconds >= 3600:
+            hours = math.floor(diff.seconds / 3600)
+            return f"{hours}h ago"
+        elif diff.seconds >= 60:
+            minutes = math.floor(diff.seconds / 60)
+            return f"{minutes}m ago"
+        else:
+            return "just now"

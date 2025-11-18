@@ -24,10 +24,18 @@ import { getRedirectPath, USER_TYPES } from "@/utils/auth";
 import CaptchaVerification, {
   verifyCaptchaValue,
 } from "@koluvu/components/auth/CaptchaVerification";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 export default function EmployeeRegistration() {
   const router = useRouter();
   const { login } = useAuth();
+
+  // Apply authentication guard
+  const { isAllowed } = useAuthGuard("employee-register", {
+    enableRedirect: true,
+    showError: true,
+  });
+
   const [captchaValue, setCaptchaValue] = useState("");
   const [captchaKey, setCaptchaKey] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -109,10 +117,7 @@ export default function EmployeeRegistration() {
         toast.success("Successfully signed in with Google!");
 
         // Redirect to employee dashboard
-        const redirectPath = getRedirectPath(
-          USER_TYPES.EMPLOYEE,
-          result.username
-        );
+        const redirectPath = getRedirectPath(USER_TYPES.EMPLOYEE, result);
         console.log("Redirecting to:", redirectPath);
         router.push(redirectPath);
       } catch (error) {
@@ -145,6 +150,11 @@ export default function EmployeeRegistration() {
       toast(`${provider} authentication not configured!`);
     }
   };
+
+  // Show loading or redirect if not allowed
+  if (!isAllowed) {
+    return null; // Auth guard handles redirect
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -437,6 +447,19 @@ export default function EmployeeRegistration() {
                   />
                 </div>
 
+                {/* Email Verification Field */}
+                <div>
+                  <VerificationForm
+                    fieldName="email"
+                    fieldLabel="Email Verification"
+                    placeholder="Enter Email *"
+                    verificationType="email"
+                    captchaVerified={true}
+                    inputStyle="w-full text-sm sm:text-base font-medium border border-gray-700 bg-gray-800/40 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 text-white"
+                    btnStyle="text-sm sm:text-base font-medium border border-gray-700 bg-gray-800/40 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 hover:bg-gray-700/50 text-white"
+                  />
+                </div>
+
                 {/* Mobile number field is now optional 
                 <div>
                   <VerificationForm
@@ -506,27 +529,6 @@ export default function EmployeeRegistration() {
                     }}
                   />
                 </div>
-
-                {/* Email Verification - shown only after CAPTCHA is completed */}
-                {captchaValue && captchaKey && (
-                  <div className="pt-2">
-                    <div className="mb-3 p-3 bg-green-900/20 border border-green-700/30 rounded-lg text-center text-sm text-green-300">
-                      <p>
-                        ✅ CAPTCHA verified! Now enter and verify your email
-                        address:
-                      </p>
-                    </div>
-                    <VerificationForm
-                      fieldName="email"
-                      fieldLabel="Email Verification"
-                      placeholder="Enter Email *"
-                      verificationType="email"
-                      captchaVerified={true}
-                      inputStyle="w-full text-sm sm:text-base font-medium border border-gray-700 bg-gray-800/40 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 text-white"
-                      btnStyle="text-sm sm:text-base font-medium border border-gray-700 bg-gray-800/40 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 hover:bg-gray-700/50 text-white"
-                    />
-                  </div>
-                )}
 
                 <div className="pt-2">
                   <button

@@ -11,6 +11,8 @@ import {
   Mic,
   MessageSquare,
   ShieldCheck,
+  Clipboard,
+  Bell,
   Settings,
   X,
   Camera,
@@ -106,7 +108,7 @@ const Sidebar = ({
     {
       id: "ats",
       label: "ATS",
-      icon: FileText,
+      icon: Clipboard,
       path: `/dashboard/employee/${username}?tab=ats`,
       tabName: "ATS",
     },
@@ -120,7 +122,7 @@ const Sidebar = ({
     {
       id: "interview",
       label: "AI Mock Interview",
-      icon: Mic,
+      icon: Edit3,
       path: "/mock-interview",
       tabName: "AI Mock Interview", // This stays external
     },
@@ -141,7 +143,7 @@ const Sidebar = ({
     {
       id: "subscription",
       label: "Subscription",
-      icon: ShieldCheck,
+      icon: Bell,
       path: `/dashboard/employee/${username}?tab=subscription`,
       tabName: "Subscription",
     },
@@ -149,7 +151,7 @@ const Sidebar = ({
       id: "settings",
       label: "Settings",
       icon: Settings,
-      path: `/dashboard/employee/${username}/settings`,
+      path: `/dashboard/employee/settings`,
       external: true,
     },
   ];
@@ -169,23 +171,57 @@ const Sidebar = ({
     const currentTab = searchParams.get("tab");
 
     if (currentTab) {
-      // If there's a tab query parameter, use it
-      setActiveTab(currentTab);
-    } else if (pathname === "/dashboard/employee") {
-      // If we're on the main dashboard route without tab, set to dashboard
-      setActiveTab("dashboard");
-    } else {
-      // For external routes like mock-interview, find matching item
-      const matchingItem = menuItems.find(
-        (item) =>
-          pathname === item.path ||
-          (item.path.includes(pathname) && !item.path.includes("?"))
-      );
-      if (matchingItem) {
-        setActiveTab(matchingItem.id);
-      }
+      // Normalize some legacy or alternate tab names so sidebar highlights correctly
+      const tabMap = {
+        "resume-builder": "applications",
+        resume: "resume",
+        applications: "applications",
+        profile: "profile",
+        dashboard: "dashboard",
+      };
+
+      const normalized = tabMap[currentTab] || currentTab;
+      setActiveTab(normalized);
+      return;
     }
-  }, [pathname, searchParams, setActiveTab]);
+
+    // Normalize base employee dashboard path with username
+    const baseEmployeePath = `/dashboard/employee/${username}`;
+
+    // If we're on the generic dashboard root (no username), set to dashboard
+    if (pathname === "/dashboard/employee") {
+      setActiveTab("dashboard");
+      return;
+    }
+
+    // Handle nested pages that should map to a sidebar section even without a tab param
+    if (pathname.startsWith(`${baseEmployeePath}/resume-builder`) || pathname.includes("/resume-builder")) {
+      // resume-builder pages belong to the Applications / Resume section
+      setActiveTab("applications");
+      return;
+    }
+
+    if (pathname.startsWith(`${baseEmployeePath}/mock-interview`) || pathname.includes("/mock-interview")) {
+      setActiveTab("interview");
+      return;
+    }
+
+    // If the exact username base path, set dashboard
+    if (pathname === baseEmployeePath) {
+      setActiveTab("dashboard");
+      return;
+    }
+
+    // Fallback: match menuItems by comparing pathname against their paths (ignoring query)
+    const matchingItem = menuItems.find((item) => {
+      const itemPath = item.path.split("?")[0];
+      return itemPath === pathname || pathname.startsWith(itemPath);
+    });
+
+    if (matchingItem) {
+      setActiveTab(matchingItem.id);
+    }
+  }, [pathname, searchParams, setActiveTab, username]);
 
   const handleItemClick = (itemId) => {
     const item = menuItems.find((i) => i.id === itemId);
@@ -193,13 +229,14 @@ const Sidebar = ({
       setActiveTab(itemId);
       localStorage.setItem("sidebarActiveTab", itemId);
 
-      // For external routes like mock-interview, navigate normally
-      if (item.id === "interview") {
-        router.push(item.path);
-      } else {
-        // For internal tabs, use tab-based routing
-        router.push(item.path);
-      }
+      // Handle navigation based on item type
+      const path = item.id === "settings" 
+        ? `/dashboard/employee/${username}/settings` // Use full path for settings
+        : item.external || item.id === "interview"
+          ? item.path // Use provided path for external routes
+          : `${item.path}`; // Use path as is for internal routes
+
+      router.push(path);
 
       if (isSidebarOpen) {
         toggleSidebar();

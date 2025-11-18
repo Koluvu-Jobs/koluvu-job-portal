@@ -1,7 +1,7 @@
 // src/app/main/dashboard/training/ContactUsPage.jsx
 'use client';
 import React from 'react';
-import { Card, CardContent } from './components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaClock, FaLinkedin, FaTwitter, FaFacebook } from 'react-icons/fa';
 
 const ContactUsPage = () => {

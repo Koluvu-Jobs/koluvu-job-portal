@@ -821,11 +821,15 @@ class SendOTPView(APIView):
                 ).first()
                 
                 if existing_otp:
-                    # Resend existing OTP if it's less than 1 minute old
-                    if timezone.now() - existing_otp.created_at < timezone.timedelta(minutes=1):
+                    # Check if it's within the 60-second cooldown period
+                    time_diff = timezone.now() - existing_otp.created_at
+                    if time_diff < timezone.timedelta(seconds=60):
+                        remaining_seconds = 60 - int(time_diff.total_seconds())
                         return Response({
                             'success': False,
-                            'message': 'Please wait before requesting a new OTP'
+                            'message': f'Please wait {remaining_seconds} seconds before requesting a new OTP',
+                            'retry_after': remaining_seconds,
+                            'countdown': remaining_seconds
                         }, status=status.HTTP_429_TOO_MANY_REQUESTS)
                     else:
                         # Delete old session and create new one
@@ -840,10 +844,15 @@ class SendOTPView(APIView):
                 ).first()
                 
                 if existing_otp:
-                    if timezone.now() - existing_otp.created_at < timezone.timedelta(minutes=1):
+                    # Check if it's within the 60-second cooldown period
+                    time_diff = timezone.now() - existing_otp.created_at
+                    if time_diff < timezone.timedelta(seconds=60):
+                        remaining_seconds = 60 - int(time_diff.total_seconds())
                         return Response({
                             'success': False,
-                            'message': 'Please wait before requesting a new OTP'
+                            'message': f'Please wait {remaining_seconds} seconds before requesting a new OTP',
+                            'retry_after': remaining_seconds,
+                            'countdown': remaining_seconds
                         }, status=status.HTTP_429_TOO_MANY_REQUESTS)
                     else:
                         existing_otp.delete()
@@ -922,6 +931,8 @@ class SendOTPView(APIView):
     def send_email_otp(self, email, otp_code, username=None):
         """Send OTP via email using professional HTML template"""
         try:
+            from .email_utils import get_logo_url
+            
             subject = 'Koluvu - Email Verification Code'
             
             # Try to get username from email if not provided
@@ -935,14 +946,15 @@ class SendOTPView(APIView):
                 'username': username,
                 'registration_url': f"{settings.FRONTEND_URL}/auth/register/employee",
                 'frontend_url': settings.FRONTEND_URL,
+                'logo_url': get_logo_url(),
                 'user_email': email,
                 'company_name': 'Koluvu',
                 'support_email': settings.DEFAULT_FROM_EMAIL,
                 'current_year': timezone.now().year
             }
             
-            # Render HTML content
-            html_content = render_to_string('emails/otp_verification.html', context)
+            # Render HTML content (using simple template to avoid Gmail clipping)
+            html_content = render_to_string('emails/otp_verification_simple.html', context)
             
             # Plain text fallback
             text_content = f"""
@@ -992,6 +1004,8 @@ About Koluvu: We are India's leading job portal connecting talented professional
     def send_password_reset_otp(self, email, otp_code):
         """Send password reset OTP via email using professional HTML template"""
         try:
+            from .email_utils import get_logo_url
+            
             subject = 'Koluvu - Password Reset Code'
             
             # Context for the template
@@ -999,6 +1013,7 @@ About Koluvu: We are India's leading job portal connecting talented professional
                 'otp_code': otp_code,
                 'user_email': email,
                 'frontend_url': settings.FRONTEND_URL,
+                'logo_url': get_logo_url(),
                 'reset_url': f"{settings.FRONTEND_URL}/auth/reset-password",
                 'login_url': f"{settings.FRONTEND_URL}/auth/login",
                 'current_year': timezone.now().year
@@ -1050,6 +1065,8 @@ Koluvu Team
     def send_login_otp(self, email, otp_code):
         """Send login OTP via email using professional HTML template"""
         try:
+            from .email_utils import get_logo_url
+            
             subject = 'Koluvu - Login Verification Code'
             
             # Context for the template
@@ -1057,6 +1074,7 @@ Koluvu Team
                 'otp_code': otp_code,
                 'user_email': email,
                 'frontend_url': settings.FRONTEND_URL,
+                'logo_url': get_logo_url(),
                 'login_url': f"{settings.FRONTEND_URL}/auth/login",
                 'current_year': timezone.now().year
             }
@@ -1107,6 +1125,8 @@ Koluvu Team
     def send_welcome_email(self, user_email, user_name=None):
         """Send welcome email after successful registration"""
         try:
+            from .email_utils import get_logo_url
+            
             subject = 'Welcome to Koluvu - Your Career Journey Begins!'
             
             # Context for the template
@@ -1114,6 +1134,7 @@ Koluvu Team
                 'user_name': user_name or user_email.split('@')[0].title(),
                 'user_email': user_email,
                 'frontend_url': settings.FRONTEND_URL,
+                'logo_url': get_logo_url(),
                 'profile_url': f"{settings.FRONTEND_URL}/dashboard/profile",
                 'jobs_url': f"{settings.FRONTEND_URL}/jobs",
                 'current_year': timezone.now().year

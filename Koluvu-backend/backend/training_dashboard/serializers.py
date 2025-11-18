@@ -15,8 +15,11 @@ class TrainingProviderProfileSerializer(serializers.ModelSerializer):
             'id', 'username', 'email', 'first_name', 'last_name',
             'organization_name', 'contact_person', 'phone', 'address',
             'website', 'certification_number', 'specialization', 'logo',
-            'is_verified', 'created_at'
+            'description', 'qualifications', 'experience_years', 
+            'founded_year', 'team_size', 'linkedin_url', 'facebook_url',
+            'twitter_url', 'youtube_url', 'is_verified', 'created_at', 'updated_at'
         ]
+        read_only_fields = ['username', 'email', 'first_name', 'last_name', 'is_verified', 'created_at', 'updated_at']
 
 
 class TrainingProviderRegistrationSerializer(serializers.ModelSerializer):
@@ -36,6 +39,7 @@ class TrainingProviderRegistrationSerializer(serializers.ModelSerializer):
 
 class TrainingProgramSerializer(serializers.ModelSerializer):
     provider_name = serializers.CharField(source='provider.organization_name', read_only=True)
+    provider = serializers.SerializerMethodField()
     enrolled_count = serializers.ReadOnlyField()
     available_slots = serializers.ReadOnlyField()
     
@@ -48,6 +52,20 @@ class TrainingProgramSerializer(serializers.ModelSerializer):
             'provider', 'provider_name', 'enrolled_count', 'available_slots',
             'created_at', 'updated_at'
         ]
+        read_only_fields = ['provider', 'provider_name', 'enrolled_count', 'available_slots', 'created_at', 'updated_at']
+    
+    def get_provider(self, obj):
+        """Include basic provider information with the program"""
+        if obj.provider:
+            return {
+                'id': obj.provider.id,
+                'organization_name': obj.provider.organization_name,
+                'contact_person': obj.provider.contact_person,
+                'website': obj.provider.website,
+                'specialization': obj.provider.specialization,
+                'is_verified': obj.provider.is_verified
+            }
+        return None
 
 
 class TrainingEnrollmentSerializer(serializers.ModelSerializer):

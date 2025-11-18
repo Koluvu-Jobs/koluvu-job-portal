@@ -52,6 +52,12 @@ const Sidebar = ({
       path: "/dashboard/training",
     },
     {
+      id: "Profile Setup",
+      label: "Profile Setup",
+      icon: User,
+      path: "/dashboard/training/profile",
+    },
+    {
       id: "Post Training",
       label: "Post Training",
       icon: FileText,

@@ -47,8 +47,28 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         position: relative;
         animation: logoFloat 3s ease-in-out infinite;
-        object-fit: cover;
+        object-fit: contain;
         background: #ffffff;
+        padding: 8px;
+      }
+      .logo-fallback {
+        width: 70px;
+        height: 70px;
+        border-radius: 16px;
+        margin: 0 auto 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        position: relative;
+        animation: logoFloat 3s ease-in-out infinite;
+        background: #ffffff;
+      }
+      .logo-text {
+        font-size: 26px;
+        font-weight: bold;
+        color: #ff6b35;
+        font-family: Arial, sans-serif;
         padding: 10px;
       }
 
@@ -330,10 +350,13 @@
           padding: 25px 20px;
         }
 
-        .logo {
+        .logo,
+        .logo-fallback {
           width: 60px;
           height: 60px;
-          font-size: 28px;
+        }
+        .logo-text {
+          font-size: 22px;
           margin-bottom: 12px;
         }
 
@@ -436,10 +459,14 @@
       <!-- Header -->
       <div class="header">
         <img
-          src="{{ frontend_url }}/images/koluvu_logo.jpg"
+          src="{{ logo_url }}"
           alt="Koluvu Logo"
           class="logo"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
         />
+        <div class="logo-fallback" style="display: none">
+          <div class="logo-text">K</div>
+        </div>
         <div class="company-name">KOLUVU</div>
         <div class="tagline">Secure Login Verification</div>
       </div>

@@ -571,7 +571,7 @@ class EmployerRegisterView(generics.CreateAPIView):
             
             # Verify CAPTCHA (prefer reCAPTCHA if provided)
             if recaptcha_token:
-                from authentication.captcha_views import verify_recaptcha_required
+                from backend.authentication.captcha_views import verify_recaptcha_required
                 is_valid, error_msg, score = verify_recaptcha_required(recaptcha_token, 'register')
                 if not is_valid:
                     return Response({
@@ -579,7 +579,7 @@ class EmployerRegisterView(generics.CreateAPIView):
                         'error': f'CAPTCHA verification failed: {error_msg}'
                     }, status=status.HTTP_400_BAD_REQUEST)
             else:
-                from authentication.captcha_views import verify_captcha_required
+                from backend.authentication.captcha_views import verify_captcha_required
                 is_valid, error_msg = verify_captcha_required(captcha_key, captcha_value)
                 if not is_valid:
                     return Response({
@@ -724,7 +724,7 @@ class EmployerProfileView(generics.RetrieveUpdateAPIView):
         data['social_accounts'] = []
         
         # Get associated social accounts
-        from authentication.models import SocialAccount
+        from backend.authentication.models import SocialAccount
         social_accounts = SocialAccount.objects.filter(user=request.user)
         for account in social_accounts:
             data['social_accounts'].append({
@@ -874,7 +874,7 @@ class EmployerLoginView(generics.GenericAPIView):
         
         # Verify CAPTCHA (prefer reCAPTCHA if provided)
         if recaptcha_token:
-            from authentication.captcha_views import verify_recaptcha_required
+            from backend.authentication.captcha_views import verify_recaptcha_required
             is_valid, error_msg, score = verify_recaptcha_required(recaptcha_token, 'login')
             if not is_valid:
                 return Response({
@@ -882,7 +882,7 @@ class EmployerLoginView(generics.GenericAPIView):
                     'error': f'CAPTCHA verification failed: {error_msg}'
                 }, status=status.HTTP_400_BAD_REQUEST)
         else:
-            from authentication.captcha_views import verify_captcha_required
+            from backend.authentication.captcha_views import verify_captcha_required
             is_valid, error_msg = verify_captcha_required(captcha_key, captcha_value)
             if not is_valid:
                 return Response({
@@ -1077,6 +1077,7 @@ class JobListCreateView(generics.ListCreateAPIView):
                 'job': serializer.data
             }, status=status.HTTP_201_CREATED)
         
+        print("[DEBUG] Job POST validation failed:", serializer.errors)
         return Response({
             'error': 'Validation failed',
             'details': serializer.errors

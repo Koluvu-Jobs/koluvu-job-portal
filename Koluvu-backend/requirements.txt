@@ -5,7 +5,9 @@ psycopg2-binary==2.9.10
 sqlparse==0.5.3
 tzdata==2025.2
 channels
-django-cors-headers
+channels
+# Optional for production real-time layer
+# channels-redis
 python-dotenv
 google-auth==2.23.3
 google-auth-oauthlib==1.1.0

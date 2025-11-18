@@ -15,7 +15,7 @@ const SuccessStories = dynamic(() =>
 );
 import SidebarContent from "@koluvu/components/home/SidebarContent";
 import MainContent from "@koluvu/components/home/MainContent";
-import SubscriptionPopup from "@koluvu/components/SubscriptionPopup";
+
 const FuturisticQRSection = dynamic(() =>
   import("@koluvu/components/home/QRCodeSection")
 );
@@ -37,7 +37,6 @@ export const metadata = {
 export default function Home() {
   return (
     <>
-      <SubscriptionPopup />
       <Header />
       <main className="overflow-hidden">
         <HeroSection />

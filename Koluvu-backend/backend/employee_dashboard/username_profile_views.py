@@ -20,7 +20,7 @@ class EmployeeProfileView(APIView):
         """Get current user's profile"""
         try:
             employee_profile = EmployeeProfile.objects.get(user=request.user)
-            serializer = EmployeeProfileSerializer(employee_profile)
+            serializer = EmployeeProfileSerializer(employee_profile, context={'request': request})
             return Response(serializer.data)
         except EmployeeProfile.DoesNotExist:
             # Return default profile structure
@@ -58,7 +58,8 @@ class EmployeeProfileView(APIView):
         serializer = EmployeeProfileSerializer(employee_profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+            resp = EmployeeProfileSerializer(employee_profile, context={'request': request})
+            return Response(resp.data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def patch(self, request):
@@ -71,7 +72,8 @@ class EmployeeProfileView(APIView):
         serializer = EmployeeProfileSerializer(employee_profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            resp = EmployeeProfileSerializer(employee_profile, context={'request': request})
+            return Response(resp.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -80,10 +82,19 @@ class UsernameBasedEmployeeProfileView(APIView):
     Username-based employee profile view for LinkedIn-style URLs
     GET /api/employee/{username}/profile - View any user's profile
     """
-    permission_classes = [IsAuthenticated]
+    # Public-facing profile should be viewable without authentication
+    permission_classes = [AllowAny]
     
     def get_user_by_username(self, username):
         """Get user by username or email prefix"""
+        # Support lookup by KJS- public identifier stored on EmployeeProfile
+        if isinstance(username, str) and username.upper().startswith("KJS-"):
+            try:
+                profile = EmployeeProfile.objects.get(public_identifier=username.upper())
+                return profile.user
+            except EmployeeProfile.DoesNotExist:
+                pass
+
         try:
             # First try exact username match
             user = User.objects.get(username=username)
@@ -104,7 +115,7 @@ class UsernameBasedEmployeeProfileView(APIView):
         
         try:
             employee_profile = EmployeeProfile.objects.get(user=target_user)
-            serializer = EmployeeProfileSerializer(employee_profile)
+            serializer = EmployeeProfileSerializer(employee_profile, context={'request': request})
             profile_data = serializer.data
             
             # Add username info for frontend
@@ -147,6 +158,14 @@ class UsernameBasedEmployeeProfileUpdateView(APIView):
     
     def get_user_by_username(self, username):
         """Get user by username or email prefix"""
+        # Support lookup by KJS- public identifier stored on EmployeeProfile
+        if isinstance(username, str) and username.upper().startswith("KJS-"):
+            try:
+                profile = EmployeeProfile.objects.get(public_identifier=username.upper())
+                return profile.user
+            except EmployeeProfile.DoesNotExist:
+                pass
+
         try:
             # First try exact username match
             user = User.objects.get(username=username)
@@ -181,7 +200,8 @@ class UsernameBasedEmployeeProfileUpdateView(APIView):
         serializer = EmployeeProfileSerializer(employee_profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            resp = EmployeeProfileSerializer(employee_profile, context={'request': request})
+            return Response(resp.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -194,6 +214,14 @@ class UsernameBasedEmployeeProfilePictureUploadView(APIView):
     
     def get_user_by_username(self, username):
         """Get user by username or email prefix"""
+        # Support lookup by public identifier as well
+        if isinstance(username, str) and username.upper().startswith("KJS-"):
+            try:
+                profile = EmployeeProfile.objects.get(public_identifier=username.upper())
+                return profile.user
+            except EmployeeProfile.DoesNotExist:
+                pass
+
         try:
             user = User.objects.get(username=username)
             return user
@@ -230,7 +258,7 @@ class UsernameBasedEmployeeProfilePictureUploadView(APIView):
         employee_profile.image_field_picture = request.FILES['profile_picture']
         employee_profile.save()
         
-        serializer = EmployeeProfileSerializer(employee_profile)
+        serializer = EmployeeProfileSerializer(employee_profile, context={'request': request})
         return Response({
             'message': 'Profile picture uploaded successfully',
             'profile_picture_url': serializer.data.get('image_field_picture'),

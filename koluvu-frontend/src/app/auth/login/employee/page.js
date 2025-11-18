@@ -26,10 +26,17 @@ import CaptchaVerification, {
   verifyCaptchaValue,
 } from "@koluvu/components/auth/CaptchaVerification";
 import VerificationForm from "@koluvu/app/auth/register/employee/VerificationForm";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated, user, clearAuthData } = useAuth();
+
+  // Apply authentication guard
+  const { isAllowed, isLoading: authLoading } = useAuthGuard("employee-login", {
+    enableRedirect: true,
+    showError: true,
+  });
   const [deviceType, setDeviceType] = useState("desktop");
   const videoRef = useRef(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -37,7 +44,7 @@ export default function LoginPage() {
   const [loginError, setLoginError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [captchaValue, setCaptchaValue] = useState("");
   const [captchaKey, setCaptchaKey] = useState("");
   const [loginStep, setLoginStep] = useState("credentials"); // "credentials", "otp", "complete"
@@ -62,7 +69,7 @@ export default function LoginPage() {
       console.log(
         "User is already authenticated, redirecting to employee dashboard..."
       );
-      const redirectPath = getRedirectPath(USER_TYPES.EMPLOYEE, user.username);
+      const redirectPath = getRedirectPath(USER_TYPES.EMPLOYEE, user);
       router.replace(redirectPath);
     }
   }, [isAuthenticated, user, router]);
@@ -99,14 +106,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSubmitting(true);
     setLoginError("");
 
     try {
       // Verify CAPTCHA first
       if (!captchaValue || !captchaKey) {
         setLoginError("Please complete the CAPTCHA verification.");
-        setIsLoading(false);
+        setIsSubmitting(false);
         return;
       }
 
@@ -116,20 +123,23 @@ export default function LoginPage() {
       );
       if (!captchaVerification.valid) {
         setLoginError("Invalid CAPTCHA. Please try again.");
-        setIsLoading(false);
+        setIsSubmitting(false);
         return;
       }
 
       if (loginStep === "credentials") {
         // Step 1: Send login OTP
-        const otpResponse = await fetch("http://127.0.0.1:8000/api/auth/send-otp/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: email,
-            type: "login",
-          }),
-        });
+        const otpResponse = await fetch(
+          "http://127.0.0.1:8000/api/auth/send-otp/",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: email,
+              type: "login",
+            }),
+          }
+        );
 
         const otpData = await otpResponse.json();
         if (otpData.success) {
@@ -145,12 +155,12 @@ export default function LoginPage() {
       setLoginError("An unexpected error occurred.");
       toast.error("Login step failed. Please try again.");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleOTPVerified = async () => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     setLoginError("");
 
     try {
@@ -184,15 +194,14 @@ export default function LoginPage() {
       // Get the redirect URL from query params or default to dashboard
       const params = new URLSearchParams(window.location.search);
       const from =
-        params.get("from") ||
-        getRedirectPath(USER_TYPES.EMPLOYEE, data.user.username);
+        params.get("from") || getRedirectPath(USER_TYPES.EMPLOYEE, data.user);
       router.push(from);
     } catch (error) {
       console.error("Login failed:", error);
       setLoginError("An unexpected error occurred.");
       toast.error("Login failed. Please try again.");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -203,7 +212,7 @@ export default function LoginPage() {
   };
 
   const handleForgotPassword = () => {
-    router.push("/auth/forgot-password");
+    router.push("/auth/forgot-password/employee");
   };
 
   const handleForgotEmail = () => {
@@ -474,6 +483,11 @@ export default function LoginPage() {
     },
   };
 
+  // Show loading or redirect if not allowed
+  if (!isAllowed) {
+    return null; // Auth guard handles redirect
+  }
+
   return (
     <div style={styles.pageContainer}>
       <Header />
@@ -594,7 +608,8 @@ export default function LoginPage() {
                     <div
                       style={{
                         color: "#ef4444",
-                        fontSize: deviceType === "mobile" ? "0.8rem" : "0.85rem",
+                        fontSize:
+                          deviceType === "mobile" ? "0.8rem" : "0.85rem",
                         marginBottom: "0.75rem",
                         textAlign: "center",
                         padding: "0.5rem",
@@ -611,26 +626,44 @@ export default function LoginPage() {
                     type="submit"
                     style={{
                       ...styles.loginBtn,
-                      ...(isLoading
+                      ...(isSubmitting
                         ? { opacity: 0.7, cursor: "not-allowed" }
                         : {}),
                     }}
-                    disabled={isLoading}
+                    disabled={isSubmitting}
                   >
-                    {isLoading ? "Sending Login OTP..." : "Continue to Login"}
+                    {isSubmitting
+                      ? "Sending Login OTP..."
+                      : "Continue to Login"}
                   </button>
                 </form>
               )}
 
               {loginStep === "otp" && (
-                <div style={{ marginBottom: deviceType === "mobile" ? "1.1rem" : "1.3rem" }}>
-                  <div style={{ textAlign: "center", marginBottom: "1rem", color: "#cbd5e1" }}>
-                    <p style={{ fontSize: deviceType === "mobile" ? "0.85rem" : "0.9rem" }}>
-                      We've sent a login verification code to<br />
+                <div
+                  style={{
+                    marginBottom: deviceType === "mobile" ? "1.1rem" : "1.3rem",
+                  }}
+                >
+                  <div
+                    style={{
+                      textAlign: "center",
+                      marginBottom: "1rem",
+                      color: "#cbd5e1",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize:
+                          deviceType === "mobile" ? "0.85rem" : "0.9rem",
+                      }}
+                    >
+                      We've sent a login verification code to
+                      <br />
                       <strong style={{ color: "#fff" }}>{email}</strong>
                     </p>
                   </div>
-                  
+
                   <VerificationForm
                     fieldName="loginOTP"
                     fieldLabel="Login OTP"
@@ -648,7 +681,8 @@ export default function LoginPage() {
                     <div
                       style={{
                         color: "#ef4444",
-                        fontSize: deviceType === "mobile" ? "0.8rem" : "0.85rem",
+                        fontSize:
+                          deviceType === "mobile" ? "0.8rem" : "0.85rem",
                         marginTop: "0.75rem",
                         textAlign: "center",
                         padding: "0.5rem",
@@ -670,7 +704,7 @@ export default function LoginPage() {
                       width: "100%",
                       background: "none",
                       border: "none",
-                      cursor: "pointer"
+                      cursor: "pointer",
                     }}
                   >
                     ← Back to Login
@@ -687,15 +721,6 @@ export default function LoginPage() {
                 >
                   <FaKey />
                   {deviceType !== "mobile" && "Forgot Password?"}
-                </a>
-                <a
-                  onClick={handleForgotEmail}
-                  role="button"
-                  tabIndex={0}
-                  style={styles.forgotLink}
-                >
-                  <FaEnvelope />
-                  {deviceType !== "mobile" && "Forgot Email ID?"}
                 </a>
               </div>
 

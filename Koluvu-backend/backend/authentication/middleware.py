@@ -87,7 +87,7 @@ class RateLimitMiddleware(MiddlewareMixin):
         rate_limits = {
             '/api/auth/login/': '5/m',  # 5 attempts per minute for login
             '/api/auth/register/': '3/m',  # 3 attempts per minute for registration
-            '/api/auth/send-otp/': '3/m',  # 3 OTP requests per minute
+            '/api/auth/send-otp/': '1/m',  # 1 OTP request per minute (60 second cooldown)
             '/api/auth/password/forgot/': '3/m',  # 3 password reset per minute
             '/api/': '100/m',  # 100 API calls per minute for general API
         }
@@ -100,7 +100,8 @@ class RateLimitMiddleware(MiddlewareMixin):
                     cache_key = f"ratelimit:{ip}:{path_pattern}"
                     
                     # Apply rate limiting logic
-                    if self.is_rate_limited(cache_key, limit):
+                    rate_limit_result = self.check_rate_limit(cache_key, limit)
+                    if rate_limit_result['is_limited']:
                         logger.warning(
                             f"Rate limit exceeded for IP {ip} on endpoint {request.path}",
                             extra={
@@ -113,7 +114,8 @@ class RateLimitMiddleware(MiddlewareMixin):
                         return HttpResponseForbidden(
                             json.dumps({
                                 'error': 'Rate limit exceeded. Please try again later.',
-                                'retry_after': 60
+                                'retry_after': rate_limit_result['retry_after'],
+                                'message': f'Please wait {rate_limit_result["retry_after"]} seconds before trying again.'
                             }),
                             content_type='application/json'
                         )
@@ -123,11 +125,12 @@ class RateLimitMiddleware(MiddlewareMixin):
         
         return None
     
-    def is_rate_limited(self, cache_key, limit):
+    def check_rate_limit(self, cache_key, limit):
         """
-        Simple rate limiting implementation using Django cache
+        Advanced rate limiting implementation with retry time
         """
         from django.core.cache import cache
+        import time
         
         # Parse limit (e.g., "5/m" means 5 per minute)
         count, period = limit.split('/')
@@ -140,15 +143,45 @@ class RateLimitMiddleware(MiddlewareMixin):
             'd': 86400
         }.get(period, 60)
         
-        # Get current count
-        current_count = cache.get(cache_key, 0)
+        # Create keys for count and timestamp
+        count_key = f"{cache_key}:count"
+        time_key = f"{cache_key}:time"
+        
+        current_time = int(time.time())
+        
+        # Get current count and first request time
+        current_count = cache.get(count_key, 0)
+        first_request_time = cache.get(time_key, current_time)
+        
+        # Calculate time elapsed since first request
+        time_elapsed = current_time - first_request_time
         
         if current_count >= count:
-            return True
+            # Calculate remaining time
+            retry_after = period_seconds - time_elapsed
+            if retry_after > 0:
+                return {
+                    'is_limited': True,
+                    'retry_after': retry_after,
+                    'current_count': current_count
+                }
+            else:
+                # Reset the counter if period has passed
+                cache.delete(count_key)
+                cache.delete(time_key)
+                current_count = 0
+                first_request_time = current_time
         
         # Increment count
-        cache.set(cache_key, current_count + 1, period_seconds)
-        return False
+        cache.set(count_key, current_count + 1, period_seconds)
+        if current_count == 0:
+            cache.set(time_key, current_time, period_seconds)
+        
+        return {
+            'is_limited': False,
+            'retry_after': 0,
+            'current_count': current_count + 1
+        }
 
 
 class ActivityTrackingMiddleware(MiddlewareMixin):

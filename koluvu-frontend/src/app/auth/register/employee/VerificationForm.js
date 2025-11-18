@@ -19,11 +19,20 @@ export default function VerificationForm({
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showOTPField, setShowOTPField] = useState(false);
+  const [countdown, setCountdown] = useState(0);
 
   const [otpValue, setOtpValue] = useState("");
   const [message, setMessage] = useState("");
   const [fieldValue, setFieldValue] = useState(presetEmail || "");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
 
   // Auto-send OTP if email is preset and input is hidden
   useEffect(() => {
@@ -97,8 +106,18 @@ export default function VerificationForm({
           setShowOTPField(true);
           setMessage("OTP sent successfully to your email!");
           setMessageType("success");
+          setCountdown(60); // Start 60-second countdown
         } else {
-          setMessage(result.message || "Failed to send OTP");
+          // Handle rate limiting with countdown
+          if (response.status === 429 && result.countdown) {
+            setCountdown(result.countdown);
+            setMessage(
+              result.message ||
+                `Please wait ${result.countdown} seconds before requesting a new OTP`
+            );
+          } else {
+            setMessage(result.message || "Failed to send OTP");
+          }
           setMessageType("error");
         }
       } else {
@@ -134,8 +153,18 @@ export default function VerificationForm({
             "OTP sent! Check PowerShell/Terminal for the code (development mode)"
           );
           setMessageType("success");
+          setCountdown(60); // Start 60-second countdown
         } else {
-          setMessage(result.message || "Failed to send OTP");
+          // Handle rate limiting with countdown
+          if (response.status === 429 && result.countdown) {
+            setCountdown(result.countdown);
+            setMessage(
+              result.message ||
+                `Please wait ${result.countdown} seconds before requesting a new OTP`
+            );
+          } else {
+            setMessage(result.message || "Failed to send OTP");
+          }
           setMessageType("error");
         }
       }
@@ -257,12 +286,22 @@ export default function VerificationForm({
                 : ""
             }`}
             onClick={sendOTP}
-            disabled={loading || isVerified || !captchaVerified}
+            disabled={
+              loading || isVerified || !captchaVerified || countdown > 0
+            }
             title={
-              !captchaVerified ? "Complete CAPTCHA verification first" : ""
+              !captchaVerified
+                ? "Complete CAPTCHA verification first"
+                : countdown > 0
+                ? `Wait ${countdown} seconds before resending`
+                : ""
             }
           >
-            {loading ? "Sending..." : "Send OTP"}
+            {loading
+              ? "Sending..."
+              : countdown > 0
+              ? `Resend OTP (${countdown}s)`
+              : "Send OTP"}
           </button>
         </div>
       )}
@@ -300,11 +339,18 @@ export default function VerificationForm({
           <div className="text-center">
             <button
               type="button"
-              className="text-blue-400 hover:text-blue-300 text-xs underline"
+              className={`text-xs underline ${
+                countdown > 0 || loading
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-blue-400 hover:text-blue-300"
+              }`}
               onClick={resendOTP}
-              disabled={loading}
+              disabled={loading || countdown > 0}
+              title={countdown > 0 ? `Wait ${countdown} seconds` : ""}
             >
-              Didn't receive OTP? Resend
+              {countdown > 0
+                ? `Resend OTP (${countdown}s)`
+                : "Didn't receive OTP? Resend"}
             </button>
           </div>
         </div>

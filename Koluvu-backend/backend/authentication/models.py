@@ -75,6 +75,7 @@ class OTPSession(models.Model):
     VERIFICATION_TYPES = [
         ('email', 'Email'),
         ('phone', 'Phone'),
+        ('login', 'Login'),
         ('password_reset', 'Password Reset'),
     ]
     
@@ -112,3 +113,73 @@ class OTPSession(models.Model):
             # OTP expires in 30 minutes
             self.expires_at = timezone.now() + timezone.timedelta(minutes=30)
         super().save(*args, **kwargs)
+    
+    @classmethod
+    def create_otp_session(cls, identifier, verification_type, user=None):
+        """Create a new OTP session for the given identifier and verification type"""
+        # Clean up expired sessions for this identifier
+        cls.objects.filter(
+            email=identifier if '@' in identifier else None,
+            phone=identifier if '@' not in identifier else None,
+            verification_type=verification_type,
+            expires_at__lt=timezone.now()
+        ).delete()
+        
+        # Check for existing valid session
+        existing_session = cls.objects.filter(
+            email=identifier if '@' in identifier else None,
+            phone=identifier if '@' not in identifier else None,
+            verification_type=verification_type,
+            is_verified=False,
+            expires_at__gt=timezone.now()
+        ).first()
+        
+        if existing_session and existing_session.can_attempt():
+            return existing_session
+        
+        # Create new session
+        session_data = {
+            'verification_type': verification_type,
+            'is_verified': False,
+            'attempts': 0
+        }
+        
+        if '@' in identifier:
+            session_data['email'] = identifier
+        else:
+            session_data['phone'] = identifier
+            
+        return cls.objects.create(**session_data)
+    
+    @classmethod
+    def verify_otp(cls, identifier, otp_code, verification_type):
+        """Verify OTP for the given identifier and verification type"""
+        # Find the latest OTP session
+        session = cls.objects.filter(
+            email=identifier if '@' in identifier else None,
+            phone=identifier if '@' not in identifier else None,
+            verification_type=verification_type,
+            is_verified=False
+        ).order_by('-created_at').first()
+        
+        if not session:
+            return None, "No valid OTP session found"
+        
+        if session.is_expired():
+            return None, "OTP has expired"
+        
+        if not session.can_attempt():
+            return None, "Maximum attempts exceeded"
+        
+        # Increment attempts
+        session.attempts += 1
+        session.save()
+        
+        if session.otp_code != otp_code:
+            return None, "Invalid OTP code"
+        
+        # Mark as verified
+        session.is_verified = True
+        session.save()
+        
+        return session, "OTP verified successfully"

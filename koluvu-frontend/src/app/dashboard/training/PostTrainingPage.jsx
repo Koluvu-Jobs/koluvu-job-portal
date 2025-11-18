@@ -1,67 +1,67 @@
 // src/app/main/dashboard/training/PostTrainingPage.jsx
-'use client';
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from './components/ui/card';
-import { Button } from './components/ui/button';
-import { Input } from './components/ui/input';
-import { Textarea } from './components/ui/textarea';
-import { Checkbox } from './components/ui/checkbox';
-import { Label } from './components/ui/label';
-import { useToast } from './components/ui/use-toast';
+"use client";
+import React, { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 const PostTrainingPage = () => {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    instituteName: '',
-    email: '',
-    contactPerson: '',
-    phone: '',
-    website: '',
-    courseTitle: '',
-    address: '',
-    category: '',
+    instituteName: "",
+    email: "",
+    contactPerson: "",
+    phone: "",
+    website: "",
+    courseTitle: "",
+    address: "",
+    category: "",
     courseType: [],
-    teachingMode: '',
+    teachingMode: "",
     batchType: [],
-    courseOverview: '',
-    curriculum: [''],
-    toolsCovered: [''],
-    certifications: [''],
+    courseOverview: "",
+    curriculum: [""],
+    toolsCovered: [""],
+    certifications: [""],
     liveProjects: false,
-    trainerName: '',
-    trainerExperience: '',
-    trainerSpecializations: [''],
-    trainerLinkedIn: '',
-    aboutTrainer: '',
-    duration: '',
-    startDate: '',
-    endDate: '',
-    classTiming: '',
-    courseFee: '',
+    trainerName: "",
+    trainerExperience: "",
+    trainerSpecializations: [""],
+    trainerLinkedIn: "",
+    aboutTrainer: "",
+    duration: "",
+    startDate: "",
+    endDate: "",
+    classTiming: "",
+    courseFee: "",
     discountAvailable: false,
-    discountPercent: '',
+    discountPercent: "",
     paymentModes: [],
-    refundPolicy: '',
+    refundPolicy: "",
     brochure: null,
-    introVideo: '',
+    introVideo: "",
     images: [],
     features: [],
     agreeTerms: false,
     confirmAccuracy: false,
-    tags: ['']
+    tags: [""],
   });
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleArrayChange = (name, index, value) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const newArray = [...prev[name]];
       newArray[index] = value;
       return { ...prev, [name]: newArray };
@@ -69,33 +69,33 @@ const PostTrainingPage = () => {
   };
 
   const addArrayItem = (name) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: [...prev[name], '']
+      [name]: [...prev[name], ""],
     }));
   };
 
   const removeArrayItem = (name, index) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: prev[name].filter((_, i) => i !== index)
+      [name]: prev[name].filter((_, i) => i !== index),
     }));
   };
 
   const handleMultiSelect = (name, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: prev[name].includes(value)
-        ? prev[name].filter(item => item !== value)
-        : [...prev[name], value]
+        ? prev[name].filter((item) => item !== value)
+        : [...prev[name], value],
     }));
   };
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: files[0]
+      [name]: files[0],
     }));
   };
 
@@ -106,39 +106,57 @@ const PostTrainingPage = () => {
       description: "Your training course has been submitted for approval!",
       variant: "default",
     });
-    console.log('Form submitted:', formData);
+    console.log("Form submitted:", formData);
   };
 
-  const nextStep = () => setStep(prev => Math.min(prev + 1, 5));
-  const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, 5));
+  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const StepIndicator = ({ stepNumber, current }) => {
     const stepLabels = {
-      1: 'Institute',
-      2: 'Course',
-      3: 'Schedule',
-      4: 'Media',
-      5: 'Review'
+      1: "Institute",
+      2: "Course",
+      3: "Schedule",
+      4: "Media",
+      5: "Review",
     };
-    
+
     const fullStepLabels = {
-      1: 'Institute Info',
-      2: 'Course Details',
-      3: 'Schedule & Pricing',
-      4: 'Media & Features',
-      5: 'Review & Submit'
+      1: "Institute Info",
+      2: "Course Details",
+      3: "Schedule & Pricing",
+      4: "Media & Features",
+      5: "Review & Submit",
     };
 
     return (
-      <div className={`flex flex-col items-center transition-all duration-300 ${current ? 'scale-105' : ''}`}>
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 shadow-md
-          ${current ? 'bg-gradient-to-br from-purple-500 to-indigo-600 text-white' : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-500'}`}>
+      <div
+        className={`flex flex-col items-center transition-all duration-300 ${
+          current ? "scale-105" : ""
+        }`}
+      >
+        <div
+          className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 shadow-md
+          ${
+            current
+              ? "bg-gradient-to-br from-purple-500 to-indigo-600 text-white"
+              : "bg-gradient-to-br from-gray-100 to-gray-200 text-gray-500"
+          }`}
+        >
           {stepNumber}
         </div>
-        <span className={`text-xs md:text-sm font-medium ${current ? 'text-indigo-600 font-bold' : 'text-gray-500'} hidden sm:block`}>
+        <span
+          className={`text-xs md:text-sm font-medium ${
+            current ? "text-indigo-600 font-bold" : "text-gray-500"
+          } hidden sm:block`}
+        >
           {fullStepLabels[stepNumber]}
         </span>
-        <span className={`text-xs font-medium ${current ? 'text-indigo-600 font-bold' : 'text-gray-500'} sm:hidden`}>
+        <span
+          className={`text-xs font-medium ${
+            current ? "text-indigo-600 font-bold" : "text-gray-500"
+          } sm:hidden`}
+        >
           {stepLabels[stepNumber]}
         </span>
       </div>
@@ -154,7 +172,9 @@ const PostTrainingPage = () => {
           <div className="absolute -right-5 -bottom-5 w-20 h-20 rounded-full bg-indigo-500 opacity-20"></div>
           <div className="relative z-10">
             <h1 className="text-3xl font-bold">Training Course Registration</h1>
-            <p className="text-purple-100 mt-2 text-base">Submit your training course details for approval</p>
+            <p className="text-purple-100 mt-2 text-base">
+              Submit your training course details for approval
+            </p>
           </div>
         </div>
 
@@ -162,15 +182,18 @@ const PostTrainingPage = () => {
         <div className="px-6 pt-6 pb-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
           <div className="flex justify-between items-center relative">
             <div className="absolute top-5 left-0 right-0 h-2 bg-gray-200 z-0 mx-16 rounded-full">
-              <div 
-                className="h-full bg-gradient-to-r from-purple-400 to-indigo-500 transition-all duration-500 rounded-full" 
+              <div
+                className="h-full bg-gradient-to-r from-purple-400 to-indigo-500 transition-all duration-500 rounded-full"
                 style={{ width: `${(step - 1) * 25}%` }}
               ></div>
             </div>
-            
+
             {[1, 2, 3, 4, 5].map((stepNumber) => (
               <div key={stepNumber} className="z-10">
-                <StepIndicator stepNumber={stepNumber} current={step === stepNumber} />
+                <StepIndicator
+                  stepNumber={stepNumber}
+                  current={step === stepNumber}
+                />
               </div>
             ))}
           </div>
@@ -182,16 +205,21 @@ const PostTrainingPage = () => {
             <div className="space-y-8">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">1</span>
+                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    1
+                  </span>
                   Institute & Course Information
                 </h2>
-                <p className="text-gray-500 text-base mt-2 ml-11">Tell us about your institute and the course you're offering</p>
+                <p className="text-gray-500 text-base mt-2 ml-11">
+                  Tell us about your institute and the course you're offering
+                </p>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                   <Label className="text-gray-700 font-medium flex items-center">
-                    <span className="text-purple-500 mr-1">*</span>Institute Name
+                    <span className="text-purple-500 mr-1">*</span>Institute
+                    Name
                   </Label>
                   <Input
                     name="instituteName"
@@ -204,7 +232,8 @@ const PostTrainingPage = () => {
 
                 <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                   <Label className="text-gray-700 font-medium flex items-center">
-                    <span className="text-purple-500 mr-1">*</span>Contact Person
+                    <span className="text-purple-500 mr-1">*</span>Contact
+                    Person
                   </Label>
                   <Input
                     name="contactPerson"
@@ -270,7 +299,8 @@ const PostTrainingPage = () => {
 
               <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                 <Label className="text-gray-700 font-medium flex items-center">
-                  <span className="text-purple-500 mr-1">*</span>Institute Address
+                  <span className="text-purple-500 mr-1">*</span>Institute
+                  Address
                 </Label>
                 <Textarea
                   name="address"
@@ -302,15 +332,20 @@ const PostTrainingPage = () => {
                     <span className="text-purple-500 mr-1">*</span>Course Type
                   </Label>
                   <div className="grid grid-cols-2 gap-3 mt-3">
-                    {['Online', 'Offline', 'Hybrid'].map(type => (
+                    {["Online", "Offline", "Hybrid"].map((type) => (
                       <div key={type} className="flex items-center space-x-2">
                         <Checkbox
                           id={`courseType-${type}`}
                           checked={formData.courseType.includes(type)}
-                          onCheckedChange={() => handleMultiSelect('courseType', type)}
+                          onCheckedChange={() =>
+                            handleMultiSelect("courseType", type)
+                          }
                           className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                         />
-                        <Label htmlFor={`courseType-${type}`} className="text-gray-700">
+                        <Label
+                          htmlFor={`courseType-${type}`}
+                          className="text-gray-700"
+                        >
                           {type}
                         </Label>
                       </div>
@@ -323,15 +358,26 @@ const PostTrainingPage = () => {
                     <span className="text-purple-500 mr-1">*</span>Batch Type
                   </Label>
                   <div className="grid grid-cols-2 gap-3 mt-3">
-                    {['Weekday', 'Weekend', 'Fast Track', 'Evening', 'Morning'].map(type => (
+                    {[
+                      "Weekday",
+                      "Weekend",
+                      "Fast Track",
+                      "Evening",
+                      "Morning",
+                    ].map((type) => (
                       <div key={type} className="flex items-center space-x-2">
                         <Checkbox
                           id={`batchType-${type}`}
                           checked={formData.batchType.includes(type)}
-                          onCheckedChange={() => handleMultiSelect('batchType', type)}
+                          onCheckedChange={() =>
+                            handleMultiSelect("batchType", type)
+                          }
                           className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                         />
-                        <Label htmlFor={`batchType-${type}`} className="text-gray-700">
+                        <Label
+                          htmlFor={`batchType-${type}`}
+                          className="text-gray-700"
+                        >
                           {type}
                         </Label>
                       </div>
@@ -346,12 +392,16 @@ const PostTrainingPage = () => {
             <div className="space-y-8">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">2</span>
+                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    2
+                  </span>
                   Course Details & Trainer
                 </h2>
-                <p className="text-gray-500 text-base mt-2 ml-11">Provide detailed information about the course and trainer</p>
+                <p className="text-gray-500 text-base mt-2 ml-11">
+                  Provide detailed information about the course and trainer
+                </p>
               </div>
-              
+
               <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                 <Label className="text-gray-700 font-medium flex items-center">
                   <span className="text-purple-500 mr-1">*</span>Course Overview
@@ -374,7 +424,9 @@ const PostTrainingPage = () => {
                   <div key={index} className="flex gap-3 mb-3">
                     <Input
                       value={item}
-                      onChange={(e) => handleArrayChange('curriculum', index, e.target.value)}
+                      onChange={(e) =>
+                        handleArrayChange("curriculum", index, e.target.value)
+                      }
                       className="flex-1 bg-white"
                       required
                     />
@@ -382,7 +434,7 @@ const PostTrainingPage = () => {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => removeArrayItem('curriculum', index)}
+                      onClick={() => removeArrayItem("curriculum", index)}
                       className="text-red-600 hover:bg-red-50 border-red-200"
                     >
                       Remove
@@ -393,7 +445,7 @@ const PostTrainingPage = () => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => addArrayItem('curriculum')}
+                  onClick={() => addArrayItem("curriculum")}
                   className="mt-2 text-indigo-600 hover:bg-indigo-50 border-indigo-200"
                 >
                   + Add Module
@@ -402,19 +454,27 @@ const PostTrainingPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
-                  <Label className="text-gray-700 font-medium">Tools/Software Covered</Label>
+                  <Label className="text-gray-700 font-medium">
+                    Tools/Software Covered
+                  </Label>
                   {formData.toolsCovered.map((item, index) => (
                     <div key={index} className="flex gap-3 mb-3">
                       <Input
                         value={item}
-                        onChange={(e) => handleArrayChange('toolsCovered', index, e.target.value)}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "toolsCovered",
+                            index,
+                            e.target.value
+                          )
+                        }
                         className="flex-1 bg-white"
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => removeArrayItem('toolsCovered', index)}
+                        onClick={() => removeArrayItem("toolsCovered", index)}
                         className="text-red-600 hover:bg-red-50 border-red-200"
                       >
                         Remove
@@ -425,7 +485,7 @@ const PostTrainingPage = () => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => addArrayItem('toolsCovered')}
+                    onClick={() => addArrayItem("toolsCovered")}
                     className="mt-2 text-indigo-600 hover:bg-indigo-50 border-indigo-200"
                   >
                     + Add Tool
@@ -433,19 +493,27 @@ const PostTrainingPage = () => {
                 </div>
 
                 <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
-                  <Label className="text-gray-700 font-medium">Certifications Offered</Label>
+                  <Label className="text-gray-700 font-medium">
+                    Certifications Offered
+                  </Label>
                   {formData.certifications.map((item, index) => (
                     <div key={index} className="flex gap-3 mb-3">
                       <Input
                         value={item}
-                        onChange={(e) => handleArrayChange('certifications', index, e.target.value)}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "certifications",
+                            index,
+                            e.target.value
+                          )
+                        }
                         className="flex-1 bg-white"
                       />
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => removeArrayItem('certifications', index)}
+                        onClick={() => removeArrayItem("certifications", index)}
                         className="text-red-600 hover:bg-red-50 border-red-200"
                       >
                         Remove
@@ -456,7 +524,7 @@ const PostTrainingPage = () => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => addArrayItem('certifications')}
+                    onClick={() => addArrayItem("certifications")}
                     className="mt-2 text-indigo-600 hover:bg-indigo-50 border-indigo-200"
                   >
                     + Add Certification
@@ -468,7 +536,9 @@ const PostTrainingPage = () => {
                 <Checkbox
                   id="liveProjects"
                   checked={formData.liveProjects}
-                  onCheckedChange={(checked) => setFormData({...formData, liveProjects: checked})}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, liveProjects: checked })
+                  }
                   className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <Label htmlFor="liveProjects" className="text-gray-700">
@@ -478,16 +548,28 @@ const PostTrainingPage = () => {
 
               <div className="pt-6 border-t border-blue-100">
                 <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 text-purple-500 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                   Trainer Details
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                     <Label className="text-gray-700 font-medium flex items-center">
-                      <span className="text-purple-500 mr-1">*</span>Trainer Name
+                      <span className="text-purple-500 mr-1">*</span>Trainer
+                      Name
                     </Label>
                     <Input
                       name="trainerName"
@@ -499,7 +581,8 @@ const PostTrainingPage = () => {
                   </div>
                   <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                     <Label className="text-gray-700 font-medium flex items-center">
-                      <span className="text-purple-500 mr-1">*</span>Experience (Years)
+                      <span className="text-purple-500 mr-1">*</span>Experience
+                      (Years)
                     </Label>
                     <Input
                       name="trainerExperience"
@@ -515,13 +598,20 @@ const PostTrainingPage = () => {
 
                 <div className="mt-4 bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                   <Label className="text-gray-700 font-medium flex items-center">
-                    <span className="text-purple-500 mr-1">*</span>Specializations
+                    <span className="text-purple-500 mr-1">*</span>
+                    Specializations
                   </Label>
                   {formData.trainerSpecializations.map((item, index) => (
                     <div key={index} className="flex gap-3 mb-3">
                       <Input
                         value={item}
-                        onChange={(e) => handleArrayChange('trainerSpecializations', index, e.target.value)}
+                        onChange={(e) =>
+                          handleArrayChange(
+                            "trainerSpecializations",
+                            index,
+                            e.target.value
+                          )
+                        }
                         className="flex-1 bg-white"
                         required
                       />
@@ -529,7 +619,9 @@ const PostTrainingPage = () => {
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => removeArrayItem('trainerSpecializations', index)}
+                        onClick={() =>
+                          removeArrayItem("trainerSpecializations", index)
+                        }
                         className="text-red-600 hover:bg-red-50 border-red-200"
                       >
                         Remove
@@ -540,7 +632,7 @@ const PostTrainingPage = () => {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => addArrayItem('trainerSpecializations')}
+                    onClick={() => addArrayItem("trainerSpecializations")}
                     className="mt-2 text-indigo-600 hover:bg-indigo-50 border-indigo-200"
                   >
                     + Add Specialization
@@ -548,7 +640,9 @@ const PostTrainingPage = () => {
                 </div>
 
                 <div className="mt-4 bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
-                  <Label className="text-gray-700 font-medium">LinkedIn / Profile Link</Label>
+                  <Label className="text-gray-700 font-medium">
+                    LinkedIn / Profile Link
+                  </Label>
                   <Input
                     name="trainerLinkedIn"
                     type="url"
@@ -560,7 +654,8 @@ const PostTrainingPage = () => {
 
                 <div className="mt-4 bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                   <Label className="text-gray-700 font-medium flex items-center">
-                    <span className="text-purple-500 mr-1">*</span>About Trainer (max 250 characters)
+                    <span className="text-purple-500 mr-1">*</span>About Trainer
+                    (max 250 characters)
                   </Label>
                   <Textarea
                     name="aboutTrainer"
@@ -580,12 +675,16 @@ const PostTrainingPage = () => {
             <div className="space-y-8">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">3</span>
+                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    3
+                  </span>
                   Schedule & Pricing
                 </h2>
-                <p className="text-gray-500 text-base mt-2 ml-11">Set the course schedule and pricing details</p>
+                <p className="text-gray-500 text-base mt-2 ml-11">
+                  Set the course schedule and pricing details
+                </p>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                   <Label className="text-gray-700 font-medium flex items-center">
@@ -642,7 +741,8 @@ const PostTrainingPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                   <Label className="text-gray-700 font-medium flex items-center">
-                    <span className="text-purple-500 mr-1">*</span>Total Course Fee (USD)
+                    <span className="text-purple-500 mr-1">*</span>Total Course
+                    Fee (USD)
                   </Label>
                   <Input
                     name="courseFee"
@@ -660,10 +760,15 @@ const PostTrainingPage = () => {
                     <Checkbox
                       id="discountAvailable"
                       checked={formData.discountAvailable}
-                      onCheckedChange={(checked) => setFormData({...formData, discountAvailable: checked})}
+                      onCheckedChange={(checked) =>
+                        setFormData({ ...formData, discountAvailable: checked })
+                      }
                       className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                     />
-                    <Label htmlFor="discountAvailable" className="text-gray-700">
+                    <Label
+                      htmlFor="discountAvailable"
+                      className="text-gray-700"
+                    >
                       Discount Available
                     </Label>
                   </div>
@@ -672,7 +777,9 @@ const PostTrainingPage = () => {
 
               {formData.discountAvailable && (
                 <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
-                  <Label className="text-gray-700 font-medium">Discount Percentage</Label>
+                  <Label className="text-gray-700 font-medium">
+                    Discount Percentage
+                  </Label>
                   <div className="flex items-center">
                     <Input
                       name="discountPercent"
@@ -693,15 +800,27 @@ const PostTrainingPage = () => {
                   <span className="text-purple-500 mr-1">*</span>Payment Modes
                 </Label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
-                  {['UPI', 'Bank Transfer', 'Credit Card', 'Debit Card', 'EMI', 'Cash'].map(mode => (
+                  {[
+                    "UPI",
+                    "Bank Transfer",
+                    "Credit Card",
+                    "Debit Card",
+                    "EMI",
+                    "Cash",
+                  ].map((mode) => (
                     <div key={mode} className="flex items-center space-x-2">
                       <Checkbox
                         id={`paymentMode-${mode}`}
                         checked={formData.paymentModes.includes(mode)}
-                        onCheckedChange={() => handleMultiSelect('paymentModes', mode)}
+                        onCheckedChange={() =>
+                          handleMultiSelect("paymentModes", mode)
+                        }
                         className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                       />
-                      <Label htmlFor={`paymentMode-${mode}`} className="text-gray-700">
+                      <Label
+                        htmlFor={`paymentMode-${mode}`}
+                        className="text-gray-700"
+                      >
                         {mode}
                       </Label>
                     </div>
@@ -729,30 +848,48 @@ const PostTrainingPage = () => {
             <div className="space-y-8">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">4</span>
+                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    4
+                  </span>
                   Media & Features
                 </h2>
-                <p className="text-gray-500 text-base mt-2 ml-11">Upload course materials and select additional features</p>
+                <p className="text-gray-500 text-base mt-2 ml-11">
+                  Upload course materials and select additional features
+                </p>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
-                  <Label className="text-gray-700 font-medium">Course Brochure (PDF)</Label>
+                  <Label className="text-gray-700 font-medium">
+                    Course Brochure (PDF)
+                  </Label>
                   <div className="mt-3">
                     <label className="flex flex-col items-center px-4 py-6 bg-white rounded-lg border-2 border-dashed border-indigo-300 cursor-pointer hover:border-indigo-500 transition-colors duration-200">
                       <div className="flex flex-col items-center justify-center">
-                        <svg className="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        <svg
+                          className="w-10 h-10 text-indigo-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                          ></path>
                         </svg>
                         <p className="mt-2 text-sm text-gray-600">
-                          {formData.brochure ? formData.brochure.name : 'Click to upload PDF'}
+                          {formData.brochure
+                            ? formData.brochure.name
+                            : "Click to upload PDF"}
                         </p>
                       </div>
-                      <input 
-                        type="file" 
-                        accept=".pdf" 
+                      <input
+                        type="file"
+                        accept=".pdf"
                         onChange={handleFileChange}
-                        className="hidden" 
+                        className="hidden"
                         name="brochure"
                       />
                     </label>
@@ -760,7 +897,9 @@ const PostTrainingPage = () => {
                 </div>
 
                 <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
-                  <Label className="text-gray-700 font-medium">Intro Video / YouTube Link</Label>
+                  <Label className="text-gray-700 font-medium">
+                    Intro Video / YouTube Link
+                  </Label>
                   <Input
                     name="introVideo"
                     type="url"
@@ -773,53 +912,77 @@ const PostTrainingPage = () => {
               </div>
 
               <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
-                <Label className="text-gray-700 font-medium">Course Images</Label>
+                <Label className="text-gray-700 font-medium">
+                  Course Images
+                </Label>
                 <div className="mt-3">
                   <label className="flex flex-col items-center px-4 py-6 bg-white rounded-lg border-2 border-dashed border-indigo-300 cursor-pointer hover:border-indigo-500 transition-colors duration-200">
                     <div className="flex flex-col items-center justify-center">
-                      <svg className="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      <svg
+                        className="w-10 h-10 text-indigo-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        ></path>
                       </svg>
                       <p className="mt-2 text-sm text-gray-600">
-                        {formData.images.length > 0 
-                          ? `${formData.images.length} files selected` 
-                          : 'Click to upload images'}
+                        {formData.images.length > 0
+                          ? `${formData.images.length} files selected`
+                          : "Click to upload images"}
                       </p>
                     </div>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
+                    <input
+                      type="file"
+                      accept="image/*"
                       multiple
-                      onChange={(e) => setFormData({...formData, images: Array.from(e.target.files)})}
-                      className="hidden" 
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          images: Array.from(e.target.files),
+                        })
+                      }
+                      className="hidden"
                     />
                   </label>
                 </div>
               </div>
 
               <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
-                <Label className="text-gray-700 font-medium">Additional Features</Label>
+                <Label className="text-gray-700 font-medium">
+                  Additional Features
+                </Label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-3">
                   {[
-                    'Internship Opportunity',
-                    'Placement Support',
-                    'Resume Building Assistance',
-                    'Mock Interviews',
-                    'One-on-One Mentoring',
-                    'Certificate of Completion',
-                    'AI Tools Integration',
-                    'Industry Expert Sessions',
-                    'Lifetime Access',
-                    'Community Support'
-                  ].map(feature => (
+                    "Internship Opportunity",
+                    "Placement Support",
+                    "Resume Building Assistance",
+                    "Mock Interviews",
+                    "One-on-One Mentoring",
+                    "Certificate of Completion",
+                    "AI Tools Integration",
+                    "Industry Expert Sessions",
+                    "Lifetime Access",
+                    "Community Support",
+                  ].map((feature) => (
                     <div key={feature} className="flex items-center space-x-2">
                       <Checkbox
                         id={`feature-${feature}`}
                         checked={formData.features.includes(feature)}
-                        onCheckedChange={() => handleMultiSelect('features', feature)}
+                        onCheckedChange={() =>
+                          handleMultiSelect("features", feature)
+                        }
                         className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                       />
-                      <Label htmlFor={`feature-${feature}`} className="text-gray-700">
+                      <Label
+                        htmlFor={`feature-${feature}`}
+                        className="text-gray-700"
+                      >
                         {feature}
                       </Label>
                     </div>
@@ -833,19 +996,27 @@ const PostTrainingPage = () => {
             <div className="space-y-8">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">5</span>
+                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                    5
+                  </span>
                   Review & Submit
                 </h2>
-                <p className="text-gray-500 text-base mt-2 ml-11">Review your information before submission</p>
+                <p className="text-gray-500 text-base mt-2 ml-11">
+                  Review your information before submission
+                </p>
               </div>
-              
+
               <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
-                <Label className="text-gray-700 font-medium">Tags & Keywords</Label>
+                <Label className="text-gray-700 font-medium">
+                  Tags & Keywords
+                </Label>
                 {formData.tags.map((item, index) => (
                   <div key={index} className="flex gap-3 mb-3">
                     <Input
                       value={item}
-                      onChange={(e) => handleArrayChange('tags', index, e.target.value)}
+                      onChange={(e) =>
+                        handleArrayChange("tags", index, e.target.value)
+                      }
                       className="flex-1 bg-white"
                       placeholder="e.g., HR, Excel, Digital Marketing"
                     />
@@ -853,7 +1024,7 @@ const PostTrainingPage = () => {
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => removeArrayItem('tags', index)}
+                      onClick={() => removeArrayItem("tags", index)}
                       className="text-red-600 hover:bg-red-50 border-red-200"
                     >
                       Remove
@@ -864,7 +1035,7 @@ const PostTrainingPage = () => {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => addArrayItem('tags')}
+                  onClick={() => addArrayItem("tags")}
                   className="mt-2 text-indigo-600 hover:bg-indigo-50 border-indigo-200"
                 >
                   + Add Tag
@@ -873,40 +1044,67 @@ const PostTrainingPage = () => {
 
               <div className="bg-gradient-to-br from-white to-blue-50 rounded-lg p-6 border border-blue-100 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-purple-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-purple-500 mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   Review Summary
                 </h3>
                 <div className="space-y-4">
                   <div className="flex justify-between py-2 border-b border-blue-100">
                     <span className="text-gray-600">Institute:</span>
-                    <span className="font-medium text-gray-800">{formData.instituteName || 'Not provided'}</span>
+                    <span className="font-medium text-gray-800">
+                      {formData.instituteName || "Not provided"}
+                    </span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-blue-100">
                     <span className="text-gray-600">Trainer:</span>
-                    <span className="font-medium text-gray-800">{formData.trainerName || 'Not provided'}</span>
+                    <span className="font-medium text-gray-800">
+                      {formData.trainerName || "Not provided"}
+                    </span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-blue-100">
                     <span className="text-gray-600">Fee:</span>
                     <span className="font-medium text-gray-800">
-                      {formData.courseFee ? `$${formData.courseFee}` : 'Not provided'}
-                      {formData.discountAvailable && formData.discountPercent && 
-                        <span className="text-green-600 ml-2">({formData.discountPercent}% discount)</span>}
+                      {formData.courseFee
+                        ? `$${formData.courseFee}`
+                        : "Not provided"}
+                      {formData.discountAvailable &&
+                        formData.discountPercent && (
+                          <span className="text-green-600 ml-2">
+                            ({formData.discountPercent}% discount)
+                          </span>
+                        )}
                     </span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-blue-100">
                     <span className="text-gray-600">Duration:</span>
-                    <span className="font-medium text-gray-800">{formData.duration || 'Not provided'}</span>
+                    <span className="font-medium text-gray-800">
+                      {formData.duration || "Not provided"}
+                    </span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-blue-100">
                     <span className="text-gray-600">Start Date:</span>
-                    <span className="font-medium text-gray-800">{formData.startDate || 'Not provided'}</span>
+                    <span className="font-medium text-gray-800">
+                      {formData.startDate || "Not provided"}
+                    </span>
                   </div>
                   <div className="flex justify-between py-2">
                     <span className="text-gray-600">Course Type:</span>
                     <span className="font-medium text-gray-800">
-                      {formData.courseType.length > 0 ? formData.courseType.join(', ') : 'Not provided'}
+                      {formData.courseType.length > 0
+                        ? formData.courseType.join(", ")
+                        : "Not provided"}
                     </span>
                   </div>
                 </div>
@@ -917,7 +1115,9 @@ const PostTrainingPage = () => {
                   <Checkbox
                     id="agreeTerms"
                     checked={formData.agreeTerms}
-                    onCheckedChange={(checked) => setFormData({...formData, agreeTerms: checked})}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, agreeTerms: checked })
+                    }
                     className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-0.5"
                     required
                   />
@@ -929,12 +1129,15 @@ const PostTrainingPage = () => {
                   <Checkbox
                     id="confirmAccuracy"
                     checked={formData.confirmAccuracy}
-                    onCheckedChange={(checked) => setFormData({...formData, confirmAccuracy: checked})}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, confirmAccuracy: checked })
+                    }
                     className="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-0.5"
                     required
                   />
                   <Label htmlFor="confirmAccuracy" className="text-gray-700">
-                    I confirm that all the information provided above is accurate and complete
+                    I confirm that all the information provided above is
+                    accurate and complete
                   </Label>
                 </div>
               </div>
@@ -947,7 +1150,11 @@ const PostTrainingPage = () => {
               variant="outline"
               onClick={prevStep}
               disabled={step === 1}
-              className={`px-6 py-3 rounded-lg ${step === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 border-gray-300 text-gray-700'}`}
+              className={`px-6 py-3 rounded-lg ${
+                step === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-gray-50 border-gray-300 text-gray-700"
+              }`}
             >
               <span className="hidden sm:inline">Back</span>
               <span className="sm:hidden">←</span>
@@ -965,7 +1172,9 @@ const PostTrainingPage = () => {
                 onClick={handleSubmit}
                 disabled={!formData.agreeTerms || !formData.confirmAccuracy}
                 className={`px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-md ${
-                  (!formData.agreeTerms || !formData.confirmAccuracy) ? 'opacity-50 cursor-not-allowed' : ''
+                  !formData.agreeTerms || !formData.confirmAccuracy
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
                 }`}
               >
                 <span className="hidden sm:inline">Submit Training Course</span>

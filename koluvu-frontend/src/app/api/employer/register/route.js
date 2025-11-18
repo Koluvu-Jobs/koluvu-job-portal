@@ -1,6 +1,5 @@
 // src/app/api/employer/register/route.js
 
-import supabase from "../../../../lib/supabaseClient";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
@@ -17,24 +16,9 @@ export async function POST(request) {
       );
     }
 
-    // Step 1: Register user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { companyName },
-      },
-    });
-    if (authError || !authData.user) {
-      return NextResponse.json(
-        { error: authError?.message || "Failed to register user." },
-        { status: 500 }
-      );
-    }
-
-    // Step 2: Send all employer details to Django API using snake_case keys
+    // Send employer details directly to Django API (Supabase removed)
     const djangoFormData = new FormData();
-    djangoFormData.append("user_id", authData.user.id); // Supabase user id
+    djangoFormData.append("password", password);
     djangoFormData.append("email", email);
     djangoFormData.append("company_name", companyName);
     // Map camelCase to snake_case for Django
@@ -85,7 +69,7 @@ export async function POST(request) {
     return NextResponse.json(
       {
         message: "Employer registered successfully!",
-        user: authData.user,
+        user: djangoResult.user,
         djangoResult,
       },
       { status: 201 }

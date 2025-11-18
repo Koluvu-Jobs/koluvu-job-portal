@@ -20,6 +20,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+logs/
 downloads/
 eggs/
 .eggs/
@@ -85,7 +86,7 @@ next-env.d.ts
 # LOGS
 # ===========================================
 *.log
-logs/
+**/logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

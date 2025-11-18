@@ -4,7 +4,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Card, CardContent } from "./components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   BarChart,
   Bar,
@@ -29,6 +29,7 @@ import DraftTrainingPostPage from "./DraftTrainingPostPage";
 import PlacementsPage from "./PlacementsPage";
 import InternshipPage from "./InternshipPage";
 import NotificationsPage from "./NotificationsPage";
+import ProfileSetupPage from "./ProfileSetupPage";
 import Sidebar from "./Sidebar";
 import Header from "@koluvu/components/Header/Header";
 import Footer from "@koluvu/components/Footer/Footer";
@@ -39,10 +40,13 @@ import LogoutPage from "./LogoutPage";
 import BillingsPage from "./BillingsPage";
 import AdvancedSearch from "./advancedsearch";
 import KoluvuBusiness from "./koluvu-business.jsx";
+import LoginPage from "./LoginPage";
+import RegisterPage from "./RegisterPage";
 
 // ---------------- Tab mapping ----------------
 const tabToSlug = {
   Dashboard: "",
+  "Profile Setup": "profile",
   "Post Training": "post",
   "Active Training post": "active",
   "Expired Training post": "expired",
@@ -57,6 +61,8 @@ const tabToSlug = {
   "account settings": "account-settings",
   "contact us": "contact-us",
   logout: "logout",
+  login: "login",
+  register: "register",
 };
 const slugToTab = Object.fromEntries(
   Object.entries(tabToSlug).map(([k, v]) => [v, k])
@@ -269,6 +275,50 @@ export default function TrainingInstituteDashboard() {
   const [isMobile, setIsMobile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check for authentication
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("access_token");
+      const userType = localStorage.getItem("user_type");
+
+      if (token && userType === "training_provider") {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, []);
+
+  // Handle special routing for login/register
+  const currentSlug = searchParams.get("tab") ?? "";
+
+  // Show login page if not authenticated or explicitly requesting login
+  if (!isLoading && (!isAuthenticated || currentSlug === "login")) {
+    return <LoginPage />;
+  }
+
+  // Show register page if explicitly requesting register
+  if (currentSlug === "register") {
+    return <RegisterPage />;
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // ---- Keep activeTab synced with URL ----
   useEffect(() => {
@@ -326,6 +376,8 @@ export default function TrainingInstituteDashboard() {
     switch (activeTab) {
       case "Dashboard":
         return <DashboardContent />;
+      case "Profile Setup":
+        return <ProfileSetupPage />;
       case "Post Training":
         return <PostTrainingPage />;
       case "Active Training post":
@@ -356,6 +408,10 @@ export default function TrainingInstituteDashboard() {
         return <ContactUsPage />;
       case "logout":
         return <LogoutPage />;
+      case "login":
+        return <LoginPage />;
+      case "register":
+        return <RegisterPage />;
       default:
         return <DashboardContent />;
     }

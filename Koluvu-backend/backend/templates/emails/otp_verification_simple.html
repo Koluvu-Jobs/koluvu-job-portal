@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verification - Koluvu</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .email-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+        padding: 20px;
+        text-align: center;
+        color: white;
+      }
+      .logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        margin: 0 auto 10px;
+        display: block;
+        background: white;
+        padding: 5px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        object-fit: contain;
+      }
+      .logo-fallback {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        margin: 0 auto 10px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+      .logo-text {
+        font-size: 24px;
+        font-weight: bold;
+        color: #ff6b35;
+        font-family: Arial, sans-serif;
+      }
+      .company-name {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 0;
+      }
+      .tagline {
+        font-size: 14px;
+        margin: 5px 0 0 0;
+      }
+      .content {
+        padding: 30px 20px;
+        text-align: center;
+      }
+      .greeting {
+        color: #333;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .title {
+        color: #ff6b35;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+      .message {
+        color: #666;
+        font-size: 16px;
+        margin-bottom: 25px;
+        line-height: 1.5;
+      }
+      .otp-container {
+        background: #f8f9fa;
+        border: 2px solid #ff8c42;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+      .otp-label {
+        color: #ff6b35;
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      .otp-code {
+        font-size: 32px;
+        font-weight: bold;
+        color: #333;
+        letter-spacing: 3px;
+        font-family: "Courier New", monospace;
+        background: white;
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        display: inline-block;
+      }
+      .expiry-info {
+        color: #ff6b35;
+        font-size: 14px;
+        font-weight: bold;
+        margin-top: 15px;
+      }
+      .security-note {
+        background: #f8f9fa;
+        border-left: 4px solid #ff8c42;
+        padding: 15px;
+        margin: 20px 0;
+        text-align: left;
+      }
+      .security-text {
+        color: #666;
+        font-size: 14px;
+      }
+      .cta-button {
+        background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        display: inline-block;
+        margin-top: 10px;
+      }
+      .footer {
+        background: #f8f9fa;
+        padding: 20px;
+        text-align: center;
+        border-top: 1px solid #eee;
+      }
+      .footer-text {
+        color: #666;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      .footer-links {
+        margin: 15px 0;
+      }
+      .footer-links a {
+        color: #ff8c42;
+        text-decoration: none;
+        font-size: 12px;
+        margin: 0 10px;
+      }
+      .copyright {
+        color: #999;
+        font-size: 11px;
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <!-- Header -->
+      <div class="header">
+        <img
+          src="{{ logo_url }}"
+          alt="Koluvu Logo"
+          class="logo"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+        />
+        <div class="logo-fallback" style="display: none">
+          <div class="logo-text">K</div>
+        </div>
+        <h1 class="company-name">KOLUVU</h1>
+        <p class="tagline">Your Career Journey Starts Here</p>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <h2 class="greeting">Hello {{ username }}! 👋</h2>
+        <h3 class="title">Email Verification</h3>
+        <p class="message">
+          Welcome to Koluvu! To complete your registration and secure your
+          account, please use the verification code below.
+        </p>
+
+        <div class="otp-container">
+          <div class="otp-label">Your Verification Code</div>
+          <div class="otp-code">{{ otp_code }}</div>
+          <div class="expiry-info">⏰ Expires in 30 minutes</div>
+        </div>
+
+        <div class="security-note">
+          <div class="security-text">
+            <strong>🔐 Security Notice:</strong> Never share this code. Koluvu
+            will never ask for your verification code.
+          </div>
+        </div>
+
+        <a href="{{ frontend_url }}/auth/login/employee" class="cta-button">
+          Complete Registration
+        </a>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <div class="footer-links">
+          <a href="{{ frontend_url }}/about">About Us</a>
+          <a href="{{ frontend_url }}/career-opportunities">Careers</a>
+          <a href="{{ frontend_url }}/legal/privacy-policy">Privacy Policy</a>
+          <a href="{{ frontend_url }}/contact">Contact</a>
+        </div>
+
+        <div class="footer-text">
+          <strong>About Koluvu:</strong> India's leading job portal connecting
+          talented professionals with dream careers.
+        </div>
+
+        <div class="copyright">
+          © {{ current_year }} Koluvu Jobs. All rights reserved.<br />
+          Building careers, connecting futures.
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

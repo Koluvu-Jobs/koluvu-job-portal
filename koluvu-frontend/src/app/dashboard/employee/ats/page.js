@@ -1,3 +1,5 @@
+//src/app/dashboard/employee/ats/page.js
+
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import {
@@ -277,7 +279,7 @@ const ATSScoreSystem = () => {
     };
 
     return (
-      <div className="w-full max-w-5xl relative">
+      <div className="w-full max-w-full md:max-w-6xl relative">
         <div className="absolute inset-0 -z-10 bg-gradient-to-br from-orange-50/40 via-white to-green-50/40 rounded-2xl" />
         <div className="rounded-2xl border border-orange-100/60 shadow-sm bg-white/80 backdrop-blur-sm p-8 md:p-10">
           <h2 className="font-bold mb-8">
@@ -293,35 +295,19 @@ const ATSScoreSystem = () => {
 
           {/* Carousel Wrapper */}
           <div className="relative">
-            {/* Arrows */}
-            <button
-              aria-label="Previous"
-              onClick={() => scrollTo(activeIndex - 1)}
-              disabled={activeIndex === 0}
-              className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full shadow-md flex items-center justify-center bg-white/90 border border-gray-200 text-gray-600 hover:text-[#104210] hover:border-[#104210]/50 transition disabled:opacity-40 disabled:cursor-not-allowed`}
-            >
-              ‹
-            </button>
-            <button
-              aria-label="Next"
-              onClick={() => scrollTo(activeIndex + 1)}
-              disabled={activeIndex === featureCards.length - 1}
-              className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full shadow-md flex items-center justify-center bg-white/90 border border-gray-200 text-gray-600 hover:text-[#104210] hover:border-[#104210]/50 transition disabled:opacity-40 disabled:cursor-not-allowed`}
-            >
-              ›
-            </button>
+            {/* Removed manual arrow buttons; carousel auto-advances */}
 
             {/* Track */}
             <div
               ref={trackRef}
               onScroll={handleScroll}
-              className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 px-12 -mx-2 hide-scrollbar"
+              className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 px-6 md:px-12 -mx-2 hide-scrollbar"
               style={{ scrollBehavior: "smooth" }}
             >
               {featureCards.map((card, i) => (
                 <div
                   key={card.title}
-                  className={`snap-center shrink-0 w-[250px] md:w-[280px] rounded-2xl p-5 bg-gradient-to-br ${
+                  className={`snap-center shrink-0 w-[300px] md:w-[340px] rounded-2xl p-5 bg-gradient-to-br ${
                     card.color
                   } text-white relative shadow-sm ring-1 ring-black/5 transition transform duration-300 ${
                     activeIndex === i
@@ -393,6 +379,14 @@ const ATSScoreSystem = () => {
 
   const AppliedView = () => (
     <div className="w-full max-w-5xl space-y-8">
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => updateView("home")}
+          className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm text-gray-800"
+        >
+          ← Back
+        </button>
+      </div>
       <div className="rounded-2xl border border-green-100/70 bg-white/80 backdrop-blur-sm p-6 md:p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-gray-800 mb-4 tracking-tight">
           Application Summary
@@ -505,7 +499,7 @@ const ATSScoreSystem = () => {
   );
 
   const ATSScoreView = () => (
-    <div className="w-full flex gap-6">
+    <div className="w-full flex flex-col lg:flex-row gap-6">
       {/* Main ATS Content */}
       <div className="flex-1 max-w-6xl space-y-8">
         <div className="rounded-2xl border border-lime-200/70 bg-white/80 backdrop-blur-sm p-6 md:p-8 shadow-sm">
@@ -603,7 +597,7 @@ const ATSScoreSystem = () => {
                         {item.label}
                       </span>
                     </div>
-                    <div className="flex items-center space-x-4 w-56">
+                    <div className="flex items-center space-x-4 w-full sm:w-56">
                       <div className="flex-1 bg-gray-200/70 rounded-full h-2 overflow-hidden">
                         <div
                           className={`h-2 rounded-full ${
@@ -616,7 +610,7 @@ const ATSScoreSystem = () => {
                           style={{ width: `${item.score}%` }}
                         />
                       </div>
-                      <div className="flex items-center space-x-1 min-w-[70px] justify-end">
+                      <div className="flex items-center space-x-1 min-w-[50px] sm:min-w-[70px] justify-end">
                         {getScoreIcon(item.score)}
                         <span
                           className={`font-semibold px-2 py-1 rounded-md text-xs ${getScoreColor(
@@ -718,8 +712,8 @@ const ATSScoreSystem = () => {
         </div>
       </div>
 
-      {/* Training Institutions Sidebar */}
-      <div className="w-80 space-y-4">
+  {/* Training Institutions Sidebar */}
+  <div className="w-full lg:w-80 space-y-4">
         <div className="bg-white rounded-2xl shadow-md border p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg">
@@ -879,6 +873,18 @@ const ATSScoreSystem = () => {
   );
 
   const TrainingView = () => {
+    useEffect(() => {
+      // Auto-advance carousel every 4 seconds
+      const id = setInterval(() => {
+        setActiveIndex((prev) => {
+          const next = (prev + 1) % featureCards.length;
+          scrollTo(next);
+          return next;
+        });
+      }, 4000);
+      return () => clearInterval(id);
+    }, []);
+
     return (
       <div className="w-full max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow-lg border p-8">
@@ -1060,106 +1066,13 @@ const ATSScoreSystem = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <main className="flex-1 overflow-auto flex p-4 gap-6">
-        {/* Main ATS Content */}
-        <div className="flex-1 flex items-center justify-center">
+      <main className="flex-1 overflow-auto p-4">
+        <div className="flex-1 flex items-start justify-center w-full">
           {currentView === "home" && <HomeView />}
           {currentView === "applied" && selectedCandidate && <AppliedView />}
           {currentView === "ats-score" && selectedCandidate && <ATSScoreView />}
           {currentView === "training" && <TrainingView />}
         </div>
-
-        {/* Location-Based Jobs Sidebar - Only show when not in training view */}
-        {currentView !== "training" && (
-          <div className="w-80 bg-white rounded-lg shadow-sm p-6 h-fit">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-green-600" />
-              Location-Based Jobs
-            </h3>
-            <div className="space-y-4">
-              {[
-                {
-                  title: "React Developer",
-                  company: "Bangalore Tech Hub",
-                  location: "Bangalore",
-                  salary: "₹18-25 LPA",
-                  match: 92,
-                  type: "On-site",
-                },
-                {
-                  title: "Full Stack Engineer",
-                  company: "Remote Solutions",
-                  location: "Remote",
-                  salary: "₹20-28 LPA",
-                  match: 88,
-                  type: "Remote",
-                },
-                {
-                  title: "Frontend Lead",
-                  company: "Hyderabad Innovations",
-                  location: "Hyderabad",
-                  salary: "₹22-30 LPA",
-                  match: 85,
-                  type: "On-site",
-                },
-                {
-                  title: "Senior Developer",
-                  company: "Mumbai FinTech",
-                  location: "Mumbai",
-                  salary: "₹25-35 LPA",
-                  match: 80,
-                  type: "Hybrid",
-                },
-              ].map((job, index) => (
-                <div
-                  key={index}
-                  className="p-4 border border-gray-200 rounded-lg hover:border-green-500 transition-colors cursor-pointer"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-gray-900 text-sm">
-                      {job.title}
-                    </h4>
-                    <span
-                      className={`text-xs px-2 py-1 rounded text-white ${
-                        job.type === "Remote"
-                          ? "bg-blue-500"
-                          : job.type === "Hybrid"
-                          ? "bg-purple-500"
-                          : "bg-green-500"
-                      }`}
-                    >
-                      {job.type}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-2">{job.company}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {job.location}
-                    </div>
-                    <span className="font-medium text-green-600">
-                      {job.salary}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-xs text-gray-600">
-                        {job.match}% match
-                      </span>
-                    </div>
-                    <button className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 transition-colors">
-                      Apply Now
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <button className="w-full mt-4 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
-              View All Jobs
-            </button>
-          </div>
-        )}
       </main>
     </div>
   );

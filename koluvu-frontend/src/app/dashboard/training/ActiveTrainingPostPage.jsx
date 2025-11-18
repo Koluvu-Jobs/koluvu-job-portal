@@ -3,7 +3,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent } from './components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,

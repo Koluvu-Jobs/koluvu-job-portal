@@ -158,7 +158,7 @@ export default function LoginPage() {
   };
 
   const handleForgotPassword = () => {
-    router.push("/auth/forgot-password");
+    router.push("/auth/forgot-password/partner");
   };
 
   const handleForgotEmail = () => {
@@ -558,15 +558,6 @@ export default function LoginPage() {
                 >
                   <FaKey />
                   {deviceType !== "mobile" && "Forgot Password?"}
-                </a>
-                <a
-                  onClick={handleForgotEmail}
-                  role="button"
-                  tabIndex={0}
-                  style={styles.forgotLink}
-                >
-                  <FaEnvelope />
-                  {deviceType !== "mobile" && "Forgot Email ID?"}
                 </a>
               </div>
 

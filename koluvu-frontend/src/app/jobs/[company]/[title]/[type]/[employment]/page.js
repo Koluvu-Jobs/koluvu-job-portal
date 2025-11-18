@@ -78,15 +78,51 @@ export default function JobDetailPage() {
           console.log("=== JOB DATA DEBUG ===");
           console.log("Full job object:", found);
           console.log("Job fields check:");
-          console.log("- job_brief:", found.job_brief);
-          console.log("- description:", found.description);
-          console.log("- responsibilities:", found.responsibilities);
-          console.log("- requirements:", found.requirements);
-          console.log("- skills:", found.skills);
+          console.log(
+            "- job_brief:",
+            found.job_brief,
+            "type:",
+            typeof found.job_brief
+          );
+          console.log(
+            "- description:",
+            found.description,
+            "type:",
+            typeof found.description
+          );
+          console.log(
+            "- responsibilities:",
+            found.responsibilities,
+            "type:",
+            typeof found.responsibilities,
+            "isArray:",
+            Array.isArray(found.responsibilities)
+          );
+          console.log(
+            "- requirements:",
+            found.requirements,
+            "type:",
+            typeof found.requirements,
+            "isArray:",
+            Array.isArray(found.requirements)
+          );
+          console.log("- skills:", found.skills, "type:", typeof found.skills);
           console.log("- skills_required:", found.skills_required);
-          console.log("- benefits:", found.benefits);
-          console.log("- perks:", found.perks);
-          console.log("- faqs:", found.faqs);
+          console.log(
+            "- benefits:",
+            found.benefits,
+            "type:",
+            typeof found.benefits
+          );
+          console.log("- perks:", found.perks, "type:", typeof found.perks);
+          console.log(
+            "- faqs:",
+            found.faqs,
+            "type:",
+            typeof found.faqs,
+            "isArray:",
+            Array.isArray(found.faqs)
+          );
           console.log("- screening_questions:", found.screening_questions);
           console.log("- hiring_process_stages:", found.hiring_process_stages);
           console.log("- language_proficiency:", found.language_proficiency);
@@ -96,6 +132,17 @@ export default function JobDetailPage() {
           console.log("- company_benefits:", found.company_benefits);
           console.log("- company_size:", found.company_size);
           console.log("- industry:", found.industry);
+          console.log("=== PARSED DATA CHECK ===");
+          console.log(
+            "- parsed responsibilities:",
+            parseList(found.responsibilities)
+          );
+          console.log("- parsed requirements:", parseList(found.requirements));
+          console.log(
+            "- parsed skills:",
+            parseList(found.skills || found.skills_required)
+          );
+          console.log("- parsed benefits:", parseList(found.benefits));
           console.log("=== END DEBUG ===");
 
           // Initialize screening answers
@@ -569,6 +616,21 @@ export default function JobDetailPage() {
                   <div className="prose prose-sm max-w-none">
                     <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                       {job.description}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Job Brief Section */}
+              {job.job_brief && job.job_brief.trim() && (
+                <div className="mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg">
+                  <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Briefcase className="w-6 h-6 text-blue-600" />
+                    Job Brief
+                  </h2>
+                  <div className="prose prose-sm max-w-none">
+                    <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                      {job.job_brief}
                     </p>
                   </div>
                 </div>
@@ -1293,9 +1355,23 @@ export default function JobDetailPage() {
                 Apply Now
               </button>
 
-              <div className="text-center text-xs text-gray-500">
-                Powered by{" "}
-                <span className="font-semibold text-blue-600">Teera</span>
+              <div className="text-center">
+                {job.employer_logo_display ? (
+                  <img
+                    src={job.employer_logo_display}
+                    alt={`${job.company_name} logo`}
+                    className="h-8 w-auto mx-auto object-contain"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-8 w-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg mx-auto">
+                    <span className="text-white font-bold text-sm">
+                      {job.company_name?.charAt(0) || "C"}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
