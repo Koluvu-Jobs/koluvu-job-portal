@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { NextResponse } from "next/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 // Store conversation sessions in memory (in production, use Redis or database)
 const conversationSessions = new Map();
@@ -11,24 +11,27 @@ const conversationSessions = new Map();
 export async function POST(req) {
   try {
     const { scriptId, action, userMessage, sessionId } = await req.json();
-    
+
     switch (action) {
-      case 'start':
+      case "start":
         return await startConversationalInterview(scriptId, sessionId);
-      
-      case 'chat':
+
+      case "chat":
         return await handleConversation(scriptId, sessionId, userMessage);
-      
-      case 'end':
+
+      case "end":
         return await endConversationalInterview(scriptId, sessionId);
-      
+
       default:
-        return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+        return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error('Conversational Interview API Error:', error);
+    console.error("Conversational Interview API Error:", error);
     return NextResponse.json(
-      { error: 'Failed to process conversational interview', details: error.message },
+      {
+        error: "Failed to process conversational interview",
+        details: error.message,
+      },
       { status: 500 }
     );
   }
@@ -37,26 +40,29 @@ export async function POST(req) {
 async function startConversationalInterview(scriptId, sessionId) {
   try {
     // Get script and candidate data
-    const scriptResult = await query(`
+    const scriptResult = await query(
+      `
       SELECT s.*, m.name, m.role, m.experience, m.interview_types, m.skills
       FROM interview_scripts s
       JOIN mock_interview_setups m ON s.setup_id = m.id
       WHERE s.id = $1
-    `, [scriptId]);
-    
+    `,
+      [scriptId]
+    );
+
     if (scriptResult.rows.length === 0) {
-      return NextResponse.json({ error: 'Script not found' }, { status: 404 });
+      return NextResponse.json({ error: "Script not found" }, { status: 404 });
     }
-    
+
     const script = scriptResult.rows[0];
     const candidateInfo = {
       name: script.name,
       role: script.role,
       experience: script.experience,
       interviewTypes: script.interview_types,
-      skills: script.skills
+      skills: script.skills,
     };
-    
+
     // Initialize conversation context
     const conversationContext = {
       scriptId,
@@ -65,15 +71,15 @@ async function startConversationalInterview(scriptId, sessionId) {
       questions: script.script_data,
       currentQuestionIndex: 0,
       conversationHistory: [],
-      interviewPhase: 'greeting', // greeting, questioning, deep_dive, closing
+      interviewPhase: "greeting", // greeting, questioning, deep_dive, closing
       askedFollowUps: 0,
       maxFollowUps: 2,
-      startTime: new Date().toISOString()
+      startTime: new Date().toISOString(),
     };
-    
+
     // Store session
     conversationSessions.set(sessionId, conversationContext);
-      // Generate opening greeting
+    // Generate opening greeting
     const greetingPrompt = `You are an experienced, warm, and professional human interviewer named Sarah. You have a natural conversational style and make candidates feel comfortable while maintaining professionalism.
 
 IMPORTANT PERSONALITY TRAITS:
@@ -101,26 +107,28 @@ Respond as if you're a real human interviewer speaking naturally.`;
 
     const greetingResult = await model.generateContent(greetingPrompt);
     const greeting = await greetingResult.response.text();
-    
+
     // Save greeting to conversation history
     conversationContext.conversationHistory.push({
-      speaker: 'interviewer',
+      speaker: "interviewer",
       message: greeting,
       timestamp: new Date().toISOString(),
-      phase: 'greeting'
+      phase: "greeting",
     });
-    
+
     return NextResponse.json({
       success: true,
       sessionId,
       message: greeting,
-      phase: 'greeting',
-      totalQuestions: conversationContext.questions.length
+      phase: "greeting",
+      totalQuestions: conversationContext.questions.length,
     });
-    
   } catch (error) {
-    console.error('Error starting conversational interview:', error);
-    return NextResponse.json({ error: 'Failed to start interview' }, { status: 500 });
+    console.error("Error starting conversational interview:", error);
+    return NextResponse.json(
+      { error: "Failed to start interview" },
+      { status: 500 }
+    );
   }
 }
 
@@ -128,56 +136,63 @@ async function handleConversation(scriptId, sessionId, userMessage) {
   try {
     const context = conversationSessions.get(sessionId);
     if (!context) {
-      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
-    
+
     // Add user message to history
     context.conversationHistory.push({
-      speaker: 'candidate',
+      speaker: "candidate",
       message: userMessage,
       timestamp: new Date().toISOString(),
-      phase: context.interviewPhase
+      phase: context.interviewPhase,
     });
-    
+
     let aiResponse;
     let nextPhase = context.interviewPhase;
-    
+
     switch (context.interviewPhase) {
-      case 'greeting':
+      case "greeting":
         aiResponse = await handleGreetingPhase(context, userMessage);
-        nextPhase = 'questioning';
+        nextPhase = "questioning";
         break;
-        
-      case 'questioning':
+
+      case "questioning":
         aiResponse = await handleQuestioningPhase(context, userMessage);
         break;
-        
-      case 'deep_dive':
+
+      case "deep_dive":
         aiResponse = await handleDeepDivePhase(context, userMessage);
         break;
-        
-      case 'closing':
+
+      case "closing":
         aiResponse = await handleClosingPhase(context, userMessage);
         break;
-        
+
       default:
-        aiResponse = "I'm sorry, I didn't understand. Could you please repeat that?";
+        aiResponse =
+          "I'm sorry, I didn't understand. Could you please repeat that?";
     }
-    
+
     // Update phase
     context.interviewPhase = nextPhase;
-    
+
     // Add AI response to history
     context.conversationHistory.push({
-      speaker: 'interviewer',
+      speaker: "interviewer",
       message: aiResponse.message,
       timestamp: new Date().toISOString(),
-      phase: nextPhase
+      phase: nextPhase,
     });
-    
+
     // Save conversation to database
-    await saveConversationTurn(scriptId, sessionId, userMessage, aiResponse.message, nextPhase);
-    
+    await saveConversationTurn(
+      scriptId,
+      sessionId,
+      userMessage,
+      aiResponse.message,
+      nextPhase
+    );
+
     return NextResponse.json({
       success: true,
       message: aiResponse.message,
@@ -185,12 +200,14 @@ async function handleConversation(scriptId, sessionId, userMessage) {
       progress: aiResponse.progress || calculateProgress(context),
       completed: aiResponse.completed || false,
       currentQuestion: context.currentQuestionIndex + 1,
-      totalQuestions: context.questions.length
+      totalQuestions: context.questions.length,
     });
-    
   } catch (error) {
-    console.error('Error handling conversation:', error);
-    return NextResponse.json({ error: 'Failed to process conversation' }, { status: 500 });
+    console.error("Error handling conversation:", error);
+    return NextResponse.json(
+      { error: "Failed to process conversation" },
+      { status: 500 }
+    );
   }
 }
 
@@ -219,16 +236,16 @@ Make it sound like a real person is responding, not an AI.`;
 
   const result = await model.generateContent(prompt);
   const response = await result.response.text();
-  
+
   return {
     message: response,
-    progress: 10
+    progress: 10,
   };
 }
 
 async function handleQuestioningPhase(context, userMessage) {
   const currentQuestion = context.questions[context.currentQuestionIndex];
-    // Determine if we should ask follow-up or move to next question
+  // Determine if we should ask follow-up or move to next question
   const analysisPrompt = `You are analyzing a candidate's answer as a human interviewer would.
 
 Question asked: "${currentQuestion.question}"
@@ -250,8 +267,11 @@ Respond with ONLY one word:
 
   const analysisResult = await model.generateContent(analysisPrompt);
   const decision = (await analysisResult.response.text()).trim().toUpperCase();
-  
-  if (decision === "FOLLOWUP" && context.askedFollowUps < context.maxFollowUps) {
+
+  if (
+    decision === "FOLLOWUP" &&
+    context.askedFollowUps < context.maxFollowUps
+  ) {
     // Generate follow-up question
     const followUpPrompt = `You are Sarah, a natural human interviewer. The candidate answered: "${userMessage}" to: "${currentQuestion.question}"
 
@@ -272,30 +292,30 @@ Make it sound conversational and natural, like how a real person would respond i
 
     const followUpResult = await model.generateContent(followUpPrompt);
     const followUpResponse = await followUpResult.response.text();
-    
+
     context.askedFollowUps++;
-    context.interviewPhase = 'deep_dive';
-    
+    context.interviewPhase = "deep_dive";
+
     return {
       message: followUpResponse,
-      progress: calculateProgress(context)
+      progress: calculateProgress(context),
     };
   } else {
     // Move to next question
     context.currentQuestionIndex++;
     context.askedFollowUps = 0;
-    
+
     if (context.currentQuestionIndex >= context.questions.length) {
       // Interview completed
-      context.interviewPhase = 'closing';
+      context.interviewPhase = "closing";
       const closingMessage = `Great, ${context.candidateInfo.name}! You've given me some really thoughtful answers today. I think we've covered all the main questions I had prepared. 
 
 Before we wrap up - is there anything you'd like to ask me about the role, the team, or anything else? Or maybe something about your experience that you feel we haven't touched on yet that you'd like to share?`;
-      
+
       return {
         message: closingMessage,
         progress: 95,
-        completed: false
+        completed: false,
       };
     } else {
       // Ask next question
@@ -317,10 +337,10 @@ Make it natural and conversational.`;
 
       const transitionResult = await model.generateContent(transitionPrompt);
       const transitionResponse = await transitionResult.response.text();
-      
+
       return {
         message: transitionResponse,
-        progress: calculateProgress(context)
+        progress: calculateProgress(context),
       };
     }
   }
@@ -328,7 +348,7 @@ Make it natural and conversational.`;
 
 async function handleDeepDivePhase(context, userMessage) {
   // After follow-up, usually move to next question
-  context.interviewPhase = 'questioning';
+  context.interviewPhase = "questioning";
   return await handleQuestioningPhase(context, userMessage);
 }
 
@@ -351,21 +371,28 @@ Make it sound genuine and human, like how you'd actually end a real interview.`;
 
   const result = await model.generateContent(closingPrompt);
   const response = await result.response.text();
-  
+
   return {
     message: response,
     progress: 100,
-    completed: true
+    completed: true,
   };
 }
 
 function calculateProgress(context) {
-  const questionProgress = (context.currentQuestionIndex / context.questions.length) * 80;
-  const phaseProgress = context.interviewPhase === 'closing' ? 15 : 5;
+  const questionProgress =
+    (context.currentQuestionIndex / context.questions.length) * 80;
+  const phaseProgress = context.interviewPhase === "closing" ? 15 : 5;
   return Math.min(95, questionProgress + phaseProgress);
 }
 
-async function saveConversationTurn(scriptId, sessionId, userMessage, aiResponse, phase) {
+async function saveConversationTurn(
+  scriptId,
+  sessionId,
+  userMessage,
+  aiResponse,
+  phase
+) {
   try {
     await query(`
       CREATE TABLE IF NOT EXISTS conversation_turns (
@@ -378,7 +405,7 @@ async function saveConversationTurn(scriptId, sessionId, userMessage, aiResponse
         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    
+
     await query(
       `INSERT INTO conversation_turns 
        (script_id, session_id, user_message, ai_response, phase, timestamp) 
@@ -386,7 +413,7 @@ async function saveConversationTurn(scriptId, sessionId, userMessage, aiResponse
       [scriptId, sessionId, userMessage, aiResponse, phase]
     );
   } catch (error) {
-    console.error('Error saving conversation turn:', error);
+    console.error("Error saving conversation turn:", error);
   }
 }
 
@@ -396,7 +423,7 @@ async function endConversationalInterview(scriptId, sessionId) {
     if (context) {
       // Clean up session
       conversationSessions.delete(sessionId);
-      
+
       // Save final session data
       await query(`
         CREATE TABLE IF NOT EXISTS interview_sessions (
@@ -409,21 +436,30 @@ async function endConversationalInterview(scriptId, sessionId) {
           conversation_data JSONB
         )
       `);
-      
+
       await query(
         `INSERT INTO interview_sessions 
          (script_id, session_id, total_questions, questions_answered, conversation_data) 
          VALUES ($1, $2, $3, $4, $5)`,
-        [scriptId, sessionId, context.questions.length, context.currentQuestionIndex, JSON.stringify(context.conversationHistory)]
+        [
+          scriptId,
+          sessionId,
+          context.questions.length,
+          context.currentQuestionIndex,
+          JSON.stringify(context.conversationHistory),
+        ]
       );
     }
-    
+
     return NextResponse.json({
       success: true,
-      message: 'Interview session ended successfully'
+      message: "Interview session ended successfully",
     });
   } catch (error) {
-    console.error('Error ending interview:', error);
-    return NextResponse.json({ error: 'Failed to end interview' }, { status: 500 });
+    console.error("Error ending interview:", error);
+    return NextResponse.json(
+      { error: "Failed to end interview" },
+      { status: 500 }
+    );
   }
 }

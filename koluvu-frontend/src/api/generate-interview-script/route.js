@@ -1,75 +1,105 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
 
 // Helper function to get setup details from the database
 async function getSetupDetails(setupId) {
-  const result = await query('SELECT * FROM mock_interview_setups WHERE id = $1', [setupId]);
+  const result = await query(
+    "SELECT * FROM mock_interview_setups WHERE id = $1",
+    [setupId]
+  );
   return result.rows[0];
 }
 
 export async function POST(req) {
-  console.log('--- Generate Script API Start ---');
+  console.log("--- Generate Script API Start ---");
   try {
     const { setupId } = await req.json();
     console.log(`[API] Processing setupId: ${setupId}`);
 
     if (!setupId) {
-      return NextResponse.json({ error: 'Setup ID is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Setup ID is required" },
+        { status: 400 }
+      );
     }
 
     const setupDetails = await getSetupDetails(setupId);
     if (!setupDetails) {
       console.error(`[API] Setup not found for ID: ${setupId}`);
-      return NextResponse.json({ error: 'Setup not found' }, { status: 404 });
+      return NextResponse.json({ error: "Setup not found" }, { status: 404 });
     }
-    console.log('[API] Fetched setup details from DB.');
+    console.log("[API] Fetched setup details from DB.");
 
-    const { name, role, experience, interview_types, skills, language, resume_filename } = setupDetails;    // Format lists for the new prompt
-    const interviewTypesList = interview_types ? interview_types.join(', ') : 'Not specified';
-    const skillsList = skills ? skills.join(', ') : 'Not specified';
-    
-    let resumeContent = '';
+    const {
+      name,
+      role,
+      experience,
+      interview_types,
+      skills,
+      language,
+      resume_filename,
+    } = setupDetails; // Format lists for the new prompt
+    const interviewTypesList = interview_types
+      ? interview_types.join(", ")
+      : "Not specified";
+    const skillsList = skills ? skills.join(", ") : "Not specified";
+
+    let resumeContent = "";
     if (resume_filename) {
       console.log(`[API] Attempting to read resume file: ${resume_filename}`);
       try {
-        const filePath = path.join(process.cwd(), 'public', 'uploads', 'resumes', resume_filename);
-        
+        const filePath = path.join(
+          process.cwd(),
+          "public",
+          "uploads",
+          "resumes",
+          resume_filename
+        );
+
         // Check if file exists before trying to read it
         try {
           await fs.access(filePath);
         } catch (accessError) {
-          console.error(`[API] Resume file does not exist: ${filePath}. Continuing without resume content.`);
+          console.error(
+            `[API] Resume file does not exist: ${filePath}. Continuing without resume content.`
+          );
           // Set resume_filename to null since file doesn't exist, to prevent future errors
-          await query('UPDATE mock_interview_setups SET resume_filename = NULL WHERE id = $1', [setupId]);
+          await query(
+            "UPDATE mock_interview_setups SET resume_filename = NULL WHERE id = $1",
+            [setupId]
+          );
           resume_filename = null; // Clear the variable so we don't try to read it again
-        }        if (resume_filename) {
+        }
+        if (resume_filename) {
           const dataBuffer = await fs.readFile(filePath);
-          
+
           try {
             // Use pdf2json for more reliable PDF parsing
-            const PDFParser = (await import('pdf2json')).default;
-            
+            const PDFParser = (await import("pdf2json")).default;
+
             const pdfParser = new PDFParser();
-            
+
             // Create a promise to handle the async PDF parsing
             const parsePDF = new Promise((resolve, reject) => {
-              pdfParser.on('pdfParser_dataReady', (pdfData) => {
+              pdfParser.on("pdfParser_dataReady", (pdfData) => {
                 try {
-                  let fullText = '';
-                  
+                  let fullText = "";
+
                   // Extract text from all pages
                   if (pdfData.Pages) {
-                    pdfData.Pages.forEach(page => {
+                    pdfData.Pages.forEach((page) => {
                       if (page.Texts) {
-                        page.Texts.forEach(text => {
+                        page.Texts.forEach((text) => {
                           if (text.R) {
-                            text.R.forEach(textRun => {
+                            text.R.forEach((textRun) => {
                               if (textRun.T) {
                                 // Decode URI component and clean up
-                                const decodedText = decodeURIComponent(textRun.T);
-                                fullText += decodedText + ' ';
+                                const decodedText = decodeURIComponent(
+                                  textRun.T
+                                );
+                                fullText += decodedText + " ";
                               }
                             });
                           }
@@ -77,46 +107,59 @@ export async function POST(req) {
                       }
                     });
                   }
-                  
+
                   resolve(fullText.trim());
                 } catch (extractError) {
                   reject(extractError);
                 }
               });
-              
-              pdfParser.on('pdfParser_dataError', (error) => {
+
+              pdfParser.on("pdfParser_dataError", (error) => {
                 reject(error);
               });
             });
-            
+
             // Parse the PDF
             pdfParser.parseBuffer(dataBuffer);
-            
+
             // Wait for parsing to complete
             resumeContent = await parsePDF;
-            
+
             if (resumeContent && resumeContent.length > 0) {
-              console.log('[API] ✅ Successfully parsed resume PDF with pdf2json.');
-              console.log(`[API] Resume content length: ${resumeContent.length} characters`);
-              console.log('[API] First 500 characters of resume:', resumeContent.substring(0, 500));
+              console.log(
+                "[API] ✅ Successfully parsed resume PDF with pdf2json."
+              );
+              console.log(
+                `[API] Resume content length: ${resumeContent.length} characters`
+              );
+              console.log(
+                "[API] First 500 characters of resume:",
+                resumeContent.substring(0, 500)
+              );
             } else {
-              console.log('[API] ⚠️ PDF parsing completed but no text was extracted');
-              resumeContent = '';
+              console.log(
+                "[API] ⚠️ PDF parsing completed but no text was extracted"
+              );
+              resumeContent = "";
             }
-            
           } catch (pdfError) {
-            console.error('[API] Error parsing PDF with pdf2json:', pdfError.message);
-            console.log('[API] Continuing without resume content...');
-            resumeContent = '';
+            console.error(
+              "[API] Error parsing PDF with pdf2json:",
+              pdfError.message
+            );
+            console.log("[API] Continuing without resume content...");
+            resumeContent = "";
           }
         }
       } catch (fileError) {
-        console.error(`[API] Error reading or parsing resume file: ${fileError.message}. Continuing without resume content.`);
+        console.error(
+          `[API] Error reading or parsing resume file: ${fileError.message}. Continuing without resume content.`
+        );
       }
     }
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     let prompt = `You are a seasoned technical interviewer conducting a realistic interview simulation. Your goal is to create questions that mirror actual industry interviews, with heavy emphasis on the candidate's resume, projects, and practical experience.
 
@@ -128,7 +171,7 @@ export async function POST(req) {
 - Experience Level: ${experience}
 - Interview Types: ${interviewTypesList}
 - Key Skills: ${skillsList}
-- Language: ${language || 'English'}
+- Language: ${language || "English"}
 
 =====================
 🎯 INTERVIEW SIMULATION OBJECTIVE
@@ -210,10 +253,13 @@ Structure:
 - Make questions feel conversational, not robotic
 - Focus on practical experience over theoretical knowledge
 - Ensure questions test both technical skills and thought process
-- At least 4-5 questions should directly reference resume/project details when resume is available`;    if (resumeContent) {
-      console.log('[API] ✅ RESUME CONTENT FOUND - Adding to prompt');
-      console.log(`[API] Resume content preview: ${resumeContent.substring(0, 200)}...`);
-      
+- At least 4-5 questions should directly reference resume/project details when resume is available`;
+    if (resumeContent) {
+      console.log("[API] ✅ RESUME CONTENT FOUND - Adding to prompt");
+      console.log(
+        `[API] Resume content preview: ${resumeContent.substring(0, 200)}...`
+      );
+
       prompt += `\n\n=====================\n📄 CANDIDATE'S ACTUAL RESUME CONTENT\n=====================\n${resumeContent}\n\n=====================\n🚨 MANDATORY RESUME-BASED REQUIREMENTS\n=====================\n
 **YOU MUST ANALYZE THE RESUME ABOVE AND:**
 
@@ -239,8 +285,8 @@ Structure:
 - Reference specific job titles and companies from the resume
 - Ask about technologies listed in the skills section with context from their work history`;
     } else {
-      console.log('[API] ❌ NO RESUME CONTENT - Using generic questions');
-      
+      console.log("[API] ❌ NO RESUME CONTENT - Using generic questions");
+
       prompt += `\n\n=====================\n⚠️ NO RESUME PROVIDED\n=====================\nSince no resume is available, focus on:
 1. General project-based questions for their experience level
 2. Common technology scenarios for their target role
@@ -250,80 +296,107 @@ Structure:
 
     prompt += `\n\n🔥 **FINAL REMINDER**: If resume content was provided above, you MUST create questions that directly reference specific details from that resume. Do not use generic placeholders - use the actual project names, company names, and technologies mentioned in the candidate's resume.
 
-Generate the questions now in **pure JSON array format**:`;    console.log("--------------------");
+Generate the questions now in **pure JSON array format**:`;
+    console.log("--------------------");
     console.log("[API] RESUME DEBUG INFO:");
     console.log(`[API] Resume filename: ${resume_filename}`);
-    console.log(`[API] Resume content available: ${resumeContent ? 'YES' : 'NO'}`);
-    console.log(`[API] Resume content length: ${resumeContent ? resumeContent.length : 0} characters`);
+    console.log(
+      `[API] Resume content available: ${resumeContent ? "YES" : "NO"}`
+    );
+    console.log(
+      `[API] Resume content length: ${
+        resumeContent ? resumeContent.length : 0
+      } characters`
+    );
     console.log("[API] -------- FULL PROMPT BEING SENT TO AI --------");
     console.log(prompt);
     console.log("[API] -------- END OF PROMPT --------");
     console.log("--------------------");
 
-    console.log('[API] Sending prompt to Gemini...');
+    console.log("[API] Sending prompt to Gemini...");
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    
+
     const text = await response.text();
-    console.log('[API] Received response from Gemini.');
+    console.log("[API] Received response from Gemini.");
 
     let generatedScript;
     try {
       // More robust JSON extraction to find the array within the response
-      const jsonStart = text.indexOf('[');
-      const jsonEnd = text.lastIndexOf(']');
+      const jsonStart = text.indexOf("[");
+      const jsonEnd = text.lastIndexOf("]");
 
       if (jsonStart === -1 || jsonEnd === -1) {
-        console.error("[API] No valid JSON array found in the AI's response. Response was:", text);
+        console.error(
+          "[API] No valid JSON array found in the AI's response. Response was:",
+          text
+        );
         throw new Error("No valid JSON array found in the AI's response.");
       }
 
       // Extract and parse only the JSON array part of the response
       const jsonString = text.substring(jsonStart, jsonEnd + 1);
       generatedScript = JSON.parse(jsonString);
-
     } catch (parseError) {
-      console.error('[API] CRITICAL: Failed to parse Gemini response as JSON. Response was:', text);
-      return NextResponse.json({ error: 'Failed to parse AI response. The response was not valid JSON.', details: text }, { status: 500 });
+      console.error(
+        "[API] CRITICAL: Failed to parse Gemini response as JSON. Response was:",
+        text
+      );
+      return NextResponse.json(
+        {
+          error:
+            "Failed to parse AI response. The response was not valid JSON.",
+          details: text,
+        },
+        { status: 500 }
+      );
     }
-    
-    console.log('[API] Successfully parsed Gemini JSON response.');    const scriptInsertResult = await query(
-      'INSERT INTO interview_scripts (setup_id, script_data, questions_count, language) VALUES ($1, $2, $3, $4) RETURNING id',
-      [setupId, JSON.stringify(generatedScript), generatedScript.length, language || 'English']
+
+    console.log("[API] Successfully parsed Gemini JSON response.");
+    const scriptInsertResult = await query(
+      "INSERT INTO interview_scripts (setup_id, script_data, questions_count, language) VALUES ($1, $2, $3, $4) RETURNING id",
+      [
+        setupId,
+        JSON.stringify(generatedScript),
+        generatedScript.length,
+        language || "English",
+      ]
     );
     const scriptId = scriptInsertResult.rows[0].id;
     console.log(`[API] Script saved to DB with ID: ${scriptId}`);
-    console.log('--- Generate Script API End ---');
+    console.log("--- Generate Script API End ---");
 
     return NextResponse.json({
-      message: 'Interview script generated and saved successfully',
+      message: "Interview script generated and saved successfully",
       scriptId: scriptId,
       setupId: setupId,
     });
-
   } catch (error) {
-    console.error('--- CRITICAL ERROR in Generate Script API ---', error);
-    return NextResponse.json({ error: 'Failed to generate interview script', details: error.message }, { status: 500 });
+    console.error("--- CRITICAL ERROR in Generate Script API ---", error);
+    return NextResponse.json(
+      { error: "Failed to generate interview script", details: error.message },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const scriptId = searchParams.get('scriptId');
-    const sessionId = searchParams.get('sessionId');
-    const setupId = searchParams.get('setupId');
+    const scriptId = searchParams.get("scriptId");
+    const sessionId = searchParams.get("sessionId");
+    const setupId = searchParams.get("setupId");
 
     if (scriptId) {
       // Get specific script by ID
       const result = await query(
-        'SELECT * FROM interview_scripts WHERE id = $1',
+        "SELECT * FROM interview_scripts WHERE id = $1",
         [scriptId]
       );
 
       if (result.rows.length === 0) {
         return NextResponse.json(
-          { error: 'Script not found' },
+          { error: "Script not found" },
           { status: 404 }
         );
       }
@@ -339,20 +412,19 @@ export async function GET(req) {
           questionsCount: script.questions_count,
           estimatedDuration: script.estimated_duration,
           language: script.language,
-          generatedAt: script.generated_at
-        }
+          generatedAt: script.generated_at,
+        },
       });
-
     } else if (sessionId) {
       // Get script by session ID
       const result = await query(
-        'SELECT * FROM interview_scripts WHERE session_id = $1',
+        "SELECT * FROM interview_scripts WHERE session_id = $1",
         [sessionId]
       );
 
       if (result.rows.length === 0) {
         return NextResponse.json(
-          { error: 'No script found for this session' },
+          { error: "No script found for this session" },
           { status: 404 }
         );
       }
@@ -368,9 +440,10 @@ export async function GET(req) {
           questionsCount: script.questions_count,
           estimatedDuration: script.estimated_duration,
           language: script.language,
-          generatedAt: script.generated_at
-        }
-      });    } else {
+          generatedAt: script.generated_at,
+        },
+      });
+    } else {
       // Get all scripts (for admin view)
       const result = await query(`
         SELECT 
@@ -392,7 +465,7 @@ export async function GET(req) {
 
       return NextResponse.json({
         success: true,
-        scripts: result.rows.map(row => ({
+        scripts: result.rows.map((row) => ({
           id: row.id,
           setupId: row.setup_id,
           sessionId: row.session_id,
@@ -401,18 +474,17 @@ export async function GET(req) {
           language: row.language,
           generatedAt: row.generated_at,
           candidate: {
-            name: row.name || 'Unknown',
-            role: row.role || 'No Role',
-            experience: row.experience || 'Not specified'
-          }
-        }))
+            name: row.name || "Unknown",
+            role: row.role || "No Role",
+            experience: row.experience || "Not specified",
+          },
+        })),
       });
     }
-
   } catch (error) {
-    console.error('❌ Error fetching interview scripts:', error);
+    console.error("❌ Error fetching interview scripts:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch interview scripts', details: error.message },
+      { error: "Failed to fetch interview scripts", details: error.message },
       { status: 500 }
     );
   }
