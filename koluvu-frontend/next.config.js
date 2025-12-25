@@ -8,6 +8,9 @@ const nextConfig = {
     ],
   },
 
+  // Turbopack configuration (Next.js 16+ default)
+  turbopack: {},
+
   // Transpile packages
   transpilePackages: ["animejs"],
 
