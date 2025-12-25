@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 export async function PATCH(request, { params }) {
   try {
     const { username } = await params;
-    
+
     // Extract Access Token
     const authHeader = request.headers.get("authorization");
     const tokenFromHeader = authHeader?.replace("Bearer ", "");
@@ -24,10 +24,39 @@ export async function PATCH(request, { params }) {
 
     // Verify that the requested username matches the authenticated user
     try {
-      const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
-      const userFromToken = tokenPayload.username || tokenPayload.email?.split('@')[0];
-      
-      if (userFromToken !== username) {
+      const tokenPayload = JSON.parse(atob(accessToken.split(".")[1]));
+      const userIdFromToken = tokenPayload.user_id;
+
+      if (!userIdFromToken) {
+        return NextResponse.json(
+          { error: "Invalid token format" },
+          { status: 401 }
+        );
+      }
+
+      // Fetch user details from backend
+      const userCheckUrl = `${
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"
+      }/api/auth/user/`;
+      const userCheckResponse = await fetch(userCheckUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (!userCheckResponse.ok) {
+        return NextResponse.json(
+          { error: "Failed to verify user identity" },
+          { status: 401 }
+        );
+      }
+
+      const userData = await userCheckResponse.json();
+      const emailPrefix = userData.email?.split("@")[0];
+      const isAuthorized =
+        userData.username === username ||
+        emailPrefix === username ||
+        String(userData.id) === username;
+
+      if (!isAuthorized) {
         return NextResponse.json(
           { error: "Unauthorized access to this profile" },
           { status: 403 }
@@ -35,23 +64,25 @@ export async function PATCH(request, { params }) {
       }
     } catch (tokenError) {
       console.error("Token verification error:", tokenError);
-      return NextResponse.json(
-        { error: "Invalid token" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     const requestBody = await request.json();
-    console.log(`Profile update request received for ${username}:`, requestBody);
+    console.log(
+      `Profile update request received for ${username}:`,
+      requestBody
+    );
 
     // Forward request to Django backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000'}/api/employer/${username}/profile/update/`;
-    
+    const backendUrl = `${
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"
+    }/api/employer/${username}/profile/update/`;
+
     const backendResponse = await fetch(backendUrl, {
-      method: 'PATCH',
+      method: "PATCH",
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
     });
@@ -59,8 +90,8 @@ export async function PATCH(request, { params }) {
     if (!backendResponse.ok) {
       console.error(`Backend update request failed: ${backendResponse.status}`);
       const errorText = await backendResponse.text();
-      console.error('Backend error:', errorText);
-      
+      console.error("Backend error:", errorText);
+
       return NextResponse.json(
         { error: "Failed to update profile in backend" },
         { status: backendResponse.status }
@@ -72,9 +103,8 @@ export async function PATCH(request, { params }) {
 
     return NextResponse.json({
       message: "Profile updated successfully",
-      profile: updatedProfile
+      profile: updatedProfile,
     });
-
   } catch (error) {
     console.error("Profile update error:", error);
     return NextResponse.json(

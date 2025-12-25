@@ -416,10 +416,10 @@ const DraftTrainingPostPage = () => {
 
         {/* View Modal */}
         {showViewModal && selectedDraft && (
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
             <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center border-b p-5">
-                <h3 className="text-xl font-bold text-blue-700">Draft Program Details</h3>
+              <div className="flex justify-between items-center border-b p-3 sm:p-5">
+                <h3 className="text-lg sm:text-xl font-bold text-blue-700">Draft Program Details</h3>
                 <button 
                   className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
                   onClick={() => setShowViewModal(false)}
@@ -500,7 +500,7 @@ const DraftTrainingPostPage = () => {
                 </button>
                 {selectedDraft.status === "Draft" && (
                   <button
-                    className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg hover:from-emerald-700 hover:to-emerald-800 text-sm font-medium transition-all"
+                    className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg hover:from-emerald-700 hover:to-emerald-800 text-sm font-medium transition-all w-full sm:w-auto"
                     onClick={() => {
                       handlePublish(selectedDraft.id);
                       setShowViewModal(false);
@@ -516,10 +516,10 @@ const DraftTrainingPostPage = () => {
 
         {/* Edit Modal */}
         {showEditModal && editingDraft && (
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
             <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center border-b p-5">
-                <h3 className="text-xl font-bold text-blue-700">Edit Draft Program</h3>
+              <div className="flex justify-between items-center border-b p-3 sm:p-5">
+                <h3 className="text-lg sm:text-xl font-bold text-blue-700">Edit Draft Program</h3>
                 <button 
                   className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
                   onClick={() => setShowEditModal(false)}

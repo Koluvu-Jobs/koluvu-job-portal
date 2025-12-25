@@ -53,13 +53,30 @@ class GoogleOAuthView(APIView):
         token_to_verify = credential or access_token
 
         try:
+            # Enhanced debug logging
+            logger.info(f"=== GOOGLE OAUTH DEBUG ===")
+            logger.info(f"Attempting to verify Google token for user_type: {user_type}")
+            logger.info(f"Token present: {'Yes' if token_to_verify else 'No'}")
+            logger.info(f"Token length: {len(token_to_verify) if token_to_verify else 0}")
+            logger.info(f"Token first 50 chars: {token_to_verify[:50] if token_to_verify else 'None'}...")
+            logger.info(f"GOOGLE_CLIENT_ID present: {'Yes' if settings.GOOGLE_CLIENT_ID else 'No'}")
+            logger.info(f"GOOGLE_CLIENT_ID full: {settings.GOOGLE_CLIENT_ID}")
+            
+            if not token_to_verify:
+                raise ValueError("No token provided")
+            
+            if not settings.GOOGLE_CLIENT_ID:
+                raise ValueError("Google Client ID not configured")
+            
             # Verify the Google token with clock tolerance
+            logger.info("Starting token verification...")
             idinfo = id_token.verify_oauth2_token(
                 token_to_verify, 
                 requests.Request(), 
                 settings.GOOGLE_CLIENT_ID,
-                clock_skew_in_seconds=60  # Allow 60 seconds of clock skew
+                clock_skew_in_seconds=120  # Increased clock skew tolerance
             )
+            logger.info(f"Token verification successful. User: {idinfo.get('email', 'Unknown')}")
             
             if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
                 raise ValueError('Wrong issuer.')
@@ -206,23 +223,15 @@ class GoogleOAuthView(APIView):
                             user.last_name = last_name
                         user.save()
                 elif user_type == 'employer':
-                    logger.info(f"Entered employer profile creation block")
+                    logger.info(f"Checking employer profile for user {user.email}")
+                    # DO NOT auto-create profile for new Google OAuth users
+                    # They will be redirected to setup-profile page to create it manually
+                    # Only check if existing profile exists
                     try:
                         employer_profile = EmployerProfile.objects.get(user=user)
                         logger.info(f"Found existing employer profile for user {user.email}")
                     except EmployerProfile.DoesNotExist:
-                        employer_profile = EmployerProfile.objects.create(
-                            user=user,
-                            company_name=f'{first_name} {last_name} Company' if first_name or last_name else 'Company',
-                            contact_person=f'{first_name} {last_name}' if first_name or last_name else email.split('@')[0],
-                            company_location='Location not specified',
-                            phone='',
-                            website='',
-                            company_size='',
-                            industry_type='',
-                            designation='',
-                        )
-                        logger.info(f"Created new employer profile for user {user.email}")
+                        logger.info(f"No employer profile exists for user {user.email} - will redirect to setup")
                 elif user_type == 'partner':
                     logger.info(f"Entered partner profile creation block")
                     try:
@@ -290,22 +299,51 @@ class GoogleOAuthView(APIView):
             
             logger.info(f"Authentication successful for {email} as {response_user_type}")
             
+            # Check profile completion for employers
+            is_new_user = created
+            profile_completion_percentage = 0
+            
+            if user_type == 'employer':
+                try:
+                    employer_profile = EmployerProfile.objects.get(user=user)
+                    profile_completion_percentage = employer_profile.profile_completion_percentage or 0
+                    # Consider it a new user if profile doesn't exist or is incomplete
+                    is_new_user = profile_completion_percentage < 20
+                except EmployerProfile.DoesNotExist:
+                    # No profile exists - definitely a new user who needs to complete setup
+                    is_new_user = True
+                    profile_completion_percentage = 0
+            
             response_data = {
                 'user': UserSerializer(user).data,
                 'access_token': access_token,
                 'refresh_token': refresh_token,
                 'user_type': response_user_type,
-                'created': created
+                'created': created,
+                'is_new_user': is_new_user,
+                'profile_completion_percentage': profile_completion_percentage,
+                'username': user.username
             }
             
             return Response(response_data, status=status.HTTP_200_OK)
             
         except ValueError as e:
-            logger.error(f"Google OAuth error: {str(e)}")
-            return Response(
-                {'error': 'Invalid Google token'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            logger.error(f"=== GOOGLE OAUTH ERROR ===")
+            logger.error(f"ValueError during Google token verification: {str(e)}")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Token being verified (length {len(token_to_verify) if token_to_verify else 0}): {token_to_verify[:100] if token_to_verify else 'None'}...")
+            logger.error(f"GOOGLE_CLIENT_ID: {settings.GOOGLE_CLIENT_ID}")
+            
+            # More specific error messages
+            error_msg = str(e).lower()
+            if 'wrong issuer' in error_msg:
+                return Response({'error': 'Invalid token issuer'}, status=status.HTTP_400_BAD_REQUEST)
+            elif 'expired' in error_msg:
+                return Response({'error': 'Token expired'}, status=status.HTTP_400_BAD_REQUEST)
+            elif 'invalid' in error_msg:
+                return Response({'error': 'Invalid token format'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': f'Token verification failed: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Unexpected error during Google OAuth: {str(e)}")
             return Response(
@@ -1297,3 +1335,22 @@ class VerifyOTPView(APIView):
                 'success': False,
                 'message': 'Failed to verify OTP. Please try again.'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class CurrentUserView(APIView):
+    """
+    Get current authenticated user's details
+    Used for authorization checks in Next.js API routes
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Return current user's basic information"""
+        user = request.user
+        return Response({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+        })

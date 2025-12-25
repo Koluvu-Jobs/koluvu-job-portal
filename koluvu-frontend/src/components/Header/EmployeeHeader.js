@@ -1,4 +1,5 @@
 // src/components/Header/EmployeeHeader.js
+
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -736,10 +737,10 @@ export const EmployeeHeader = ({
               onClick={async () => {
                 setIsProfileMenuOpen(false);
                 try {
-                  await logout("/auth/login/employee");
+                  await logout("/");
                 } catch (error) {
                   console.error("Logout error:", error);
-                  window.location.href = "/auth/login/employee";
+                  window.location.href = "/";
                 }
               }}
               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"

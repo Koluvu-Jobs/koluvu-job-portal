@@ -224,12 +224,12 @@ const PaymentPage = () => {
               <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
               <div className="flex justify-between mb-2">
                 <span>{selectedPlan.title} Plan</span>
-                <span className="font-medium">₹{selectedPlan.price}</span>
+                <span className="font-medium">₹{selectedPlan.price - 49}+49</span>
               </div>
               <div className="border-t pt-3 flex justify-between">
                 <span className="font-semibold">Total</span>
                 <span className="font-bold text-blue-600">
-                  ₹{selectedPlan.price}
+                  ₹{selectedPlan.price - 49}+49
                 </span>
               </div>
             </div>
@@ -272,7 +272,7 @@ const PaymentPage = () => {
             disabled={processing}
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
           >
-            {processing ? "Processing..." : `Pay ₹${selectedPlan.price}`}
+            {processing ? "Processing..." : `Pay ₹${selectedPlan.price - 49}+49`}
           </button>
         </div>
       </div>

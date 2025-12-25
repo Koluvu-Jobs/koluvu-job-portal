@@ -1,18 +1,18 @@
 from django.db import models
-import uuid
-
-
-def generate_public_identifier():
-    """Generate a readable public identifier for job seekers.
-
-    Format: KJS-<12 hex chars> (uppercase). Using UUID4 hex truncated to 12
-    characters gives a compact, collision-resistant identifier.
-    """
-    return f"KJS-{uuid.uuid4().hex[:12].upper()}"
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+import uuid
+import secrets
+import string
+
+
+def generate_public_identifier():
+    """Generate a unique public identifier for employee profiles"""
+    # Use a combination of alphanumeric characters
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(12))
 
 
 class EmployeeProfile(models.Model):
@@ -40,19 +40,6 @@ class EmployeeProfile(models.Model):
     is_profile_complete = models.BooleanField(default=False)  # Track onboarding completion
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # Public identifier to avoid exposing username or sequential DB id in public URLs
-    # NOTE: initially allow NULL and not unique so migrations can be applied safely
-    public_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=False, null=True, blank=True)
-    # Human-friendly public identifier used for public/profile URLs
-    # Initially allow null/non-unique so migration can be applied safely.
-    public_identifier = models.CharField(
-        max_length=40,
-        unique=False,
-        default=generate_public_identifier,
-        editable=False,
-        null=True,
-        blank=True,
-    )
 
     class Meta:
         db_table = 'employee_dashboard_employeeprofile'
@@ -222,8 +209,6 @@ class CandidateSearchProfile(models.Model):
     # Additional Details
     languages = models.CharField(max_length=255, blank=True, default='')  # Comma-separated
     achievements = models.TextField(blank=True, default='')  # JSON or newline-separated
-    # Canonical strengths for search and matching; store as JSON list of strings
-    strengths = models.JSONField(default=list, blank=True)
     availability_schedule = models.CharField(max_length=255, blank=True, default='')
     
     # Contact preferences

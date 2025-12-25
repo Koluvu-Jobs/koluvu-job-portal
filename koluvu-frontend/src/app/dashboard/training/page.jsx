@@ -2,7 +2,7 @@
 
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -14,13 +14,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBell,
-  faEnvelope,
-  faBars,
-  faEnvelopeOpen,
-} from "@fortawesome/free-solid-svg-icons";
+import { TrainingHeader } from "@/components/Header/TrainingHeader";
+import Footer from "@/components/Footer/Footer";
+import InstituteSetupModal from "@koluvu/components/training/InstituteSetupModal";
 import PostTrainingPage from "./PostTrainingPage";
 import CoursesOfferedPage from "./CoursesOfferedPage";
 import ActiveTrainingPostPage from "./ActiveTrainingPostPage";
@@ -31,8 +27,6 @@ import InternshipPage from "./InternshipPage";
 import NotificationsPage from "./NotificationsPage";
 import ProfileSetupPage from "./ProfileSetupPage";
 import Sidebar from "./Sidebar";
-import Header from "@koluvu/components/Header/Header";
-import Footer from "@koluvu/components/Footer/Footer";
 import InboxPage from "./InboxPage";
 import AccountSettingsPage from "./AccountSettingsPage";
 import ContactUsPage from "./ContactUsPage";
@@ -77,8 +71,106 @@ const data = [
   { name: "Week 6", enrollments: 65 },
 ];
 
-const DashboardContent = () => (
+const DashboardContent = ({ profileData, dashboardStats }) => {
+  // Use dashboard stats from API or fallback to defaults
+  const stats = dashboardStats || {
+    programs: { total: 0, active: 0, expired: 0, draft: 0 },
+    enrollments: { total: 0, active: 0, completed: 0 },
+    monthly_views: 0,
+    enrollment_trend: data
+  };
+
+  return (
   <>
+    {/* Institute Profile Info */}
+    {profileData && (
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">{profileData.organization_name || "Your Institute"}</h2>
+              <p className="text-gray-600 mt-1">{profileData.contact_person && `Contact: ${profileData.contact_person}`}</p>
+            </div>
+            {profileData.website && (
+              <a 
+                href={profileData.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 text-sm"
+              >
+                🌐 Visit Website
+              </a>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            {profileData.phone && (
+              <div>
+                <span className="text-gray-500">📞 Phone:</span>
+                <p className="font-medium">{profileData.phone}</p>
+              </div>
+            )}
+            {profileData.email && (
+              <div>
+                <span className="text-gray-500">📧 Email:</span>
+                <p className="font-medium">{profileData.email}</p>
+              </div>
+            )}
+            {profileData.address && (
+              <div>
+                <span className="text-gray-500">📍 Address:</span>
+                <p className="font-medium">{profileData.address}</p>
+              </div>
+            )}
+          </div>
+
+          {(profileData.founded_year || profileData.team_size || profileData.experience_years) && (
+            <div className="flex gap-6 mt-4 pt-4 border-t border-gray-200 text-sm">
+              {profileData.founded_year && (
+                <div>
+                  <span className="text-gray-500">Founded:</span>
+                  <span className="font-medium ml-1">{profileData.founded_year}</span>
+                </div>
+              )}
+              {profileData.team_size && (
+                <div>
+                  <span className="text-gray-500">Team Size:</span>
+                  <span className="font-medium ml-1">{profileData.team_size}</span>
+                </div>
+              )}
+              {profileData.experience_years && (
+                <div>
+                  <span className="text-gray-500">Experience:</span>
+                  <span className="font-medium ml-1">{profileData.experience_years} years</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Social Links */}
+          {(profileData.linkedin || profileData.twitter || profileData.facebook) && (
+            <div className="flex gap-4 mt-4">
+              {profileData.linkedin && (
+                <a href={profileData.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-900">
+                  LinkedIn
+                </a>
+              )}
+              {profileData.twitter && (
+                <a href={profileData.twitter} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
+                  Twitter
+                </a>
+              )}
+              {profileData.facebook && (
+                <a href={profileData.facebook} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                  Facebook
+                </a>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    )}
+
     {/* Stats Cards - Responsive Grid */}
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
       <Card className="h-full">
@@ -87,7 +179,7 @@ const DashboardContent = () => (
             <span className="text-xl">📄</span>
             <div>
               <p className="text-sm text-gray-500">Total Programs</p>
-              <h3 className="text-xl font-bold">8</h3>
+              <h3 className="text-xl font-bold">{stats.programs.total}</h3>
             </div>
           </div>
         </CardContent>
@@ -98,7 +190,7 @@ const DashboardContent = () => (
             <span className="text-xl">✅</span>
             <div>
               <p className="text-sm text-gray-500">Active Programs</p>
-              <h3 className="text-xl font-bold">5</h3>
+              <h3 className="text-xl font-bold">{stats.programs.active}</h3>
             </div>
           </div>
         </CardContent>
@@ -108,8 +200,8 @@ const DashboardContent = () => (
           <div className="flex items-center gap-3">
             <span className="text-xl">📊</span>
             <div>
-              <p className="text-sm text-gray-500">Monthly Views</p>
-              <h3 className="text-xl font-bold">3,200</h3>
+              <p className="text-sm text-gray-500">Total Enrollments</p>
+              <h3 className="text-xl font-bold">{stats.enrollments.total}</h3>
             </div>
           </div>
         </CardContent>
@@ -119,13 +211,13 @@ const DashboardContent = () => (
     {/* Chart and Notifications - Responsive Layout */}
     <div className="flex flex-col lg:flex-row gap-4">
       <div className="lg:flex-1">
-        <Card>
+        <Card className="h-full">
           <CardContent className="p-4">
             <h2 className="text-lg font-semibold mb-3">Enrollments Trend</h2>
             <div className="h-60 sm:h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={data}
+                  data={stats.enrollment_trend}
                   margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -153,7 +245,7 @@ const DashboardContent = () => (
 
       {/* Notifications - Responsive Width */}
       <div className="w-full lg:w-80 flex-shrink-0">
-        <Card>
+        <Card className="h-full">
           <CardContent className="p-4">
             <h2 className="text-lg font-semibold mb-3">Recent Notifications</h2>
             <div className="space-y-4">
@@ -234,108 +326,146 @@ const DashboardContent = () => (
       </Card>
     </div>
   </>
-);
-
-// Sample messages data for the dropdown
-const recentMessages = [
-  {
-    id: 1,
-    sender: "John Smith",
-    subject: "Regarding Course Enrollment",
-    preview:
-      "I came across it on your website and it seems like exactly what I'm looking for...",
-    time: "10:30 AM",
-    unread: true,
-  },
-  {
-    id: 2,
-    sender: "Sarah Johnson",
-    subject: "Payment Confirmation",
-    preview: "Thank you for your prompt processing of my payment...",
-    time: "Yesterday",
-    unread: false,
-  },
-  {
-    id: 3,
-    sender: "Training Department",
-    subject: "New Course Announcement",
-    preview:
-      'We\'re excited to announce our new "React Native Mobile Development" course...',
-    time: "Jul 25",
-    unread: false,
-  },
-];
+)};
 
 export default function TrainingInstituteDashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Memoize searchParams parsing to prevent hook order changes
+  const currentSlug = useMemo(
+    () => searchParams.get("tab") ?? "",
+    [searchParams]
+  );
+
   const [activeTab, setActiveTab] = useState("Dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
+
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Profile setup modal states
+  const [showSetupModal, setShowSetupModal] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [isCheckingProfile, setIsCheckingProfile] = useState(true);
+  const [dashboardStats, setDashboardStats] = useState(null);
 
-  // Check for authentication
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+  // Check profile completeness on mount
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("access_token");
-      const userType = localStorage.getItem("user_type");
+    const checkProfileCompleteness = async () => {
+      console.log("🔍 Starting profile completeness check...");
+      try {
+        console.log("📡 Calling API: /api/training/profile/check-completeness");
+        const response = await fetch("/api/training/profile/check-completeness", {
+          method: "GET",
+          credentials: 'include', // Important: send cookies with the request
+        });
 
-      if (token && userType === "training_provider") {
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
+        console.log("📥 Response status:", response.status);
+        if (response.ok) {
+          const data = await response.json();
+          console.log("✅ Profile data received:", data);
+          setProfileData(data.profile);
+          
+          // Show modal if profile is incomplete
+          if (!data.is_complete) {
+            console.log("🚨 Profile incomplete! Showing modal. Missing fields:", data.missing_fields);
+            setShowSetupModal(true);
+          } else {
+            console.log("✅ Profile is complete!");
+          }
+        } else {
+          console.error("❌ Failed to check profile completeness. Status:", response.status);
+          const errorText = await response.text();
+          console.error("Error response:", errorText);
+        }
+      } catch (error) {
+        console.error("💥 Error checking profile:", error);
+      } finally {
+        setIsCheckingProfile(false);
+        console.log("🏁 Profile check complete");
       }
+    };
+
+    checkProfileCompleteness();
+  }, []);
+
+  // Fetch dashboard statistics
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        const response = await fetch("/api/training/dashboard/statistics", {
+          method: "GET",
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("✅ Dashboard statistics loaded:", data);
+          setDashboardStats(data);
+        } else {
+          console.error("❌ Failed to fetch dashboard statistics");
+        }
+      } catch (error) {
+        console.error("💥 Error fetching dashboard statistics:", error);
+      }
+    };
+
+    fetchDashboardStats();
+  }, []);
+
+  const handleProfileSubmit = async (formData) => {
+    try {
+      console.log("💾 Submitting profile data...");
+      const response = await fetch("/api/training/profile/update", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: 'include',
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("❌ Failed to save profile:", error);
+        throw new Error(error.message || "Failed to save profile");
+      }
+
+      const updatedProfile = await response.json();
+      console.log("✅ Profile saved successfully:", updatedProfile);
+      setProfileData(updatedProfile);
+      setShowSetupModal(false);
+      
+      // Show success message
+      alert("Profile setup completed successfully!");
+    } catch (error) {
+      console.error("💥 Error submitting profile:", error);
+      throw error;
+    }
+  };
+
+  // Check for training_provider/partner authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Since user_type is in httpOnly cookies, we trust the middleware
+      // If we reached this page, we're authenticated as partner
+      console.log("✅ Authentication check: User is authenticated as partner");
+      setIsAuthenticated(true);
       setIsLoading(false);
     };
 
     checkAuth();
-  }, []);
-
-  // Handle special routing for login/register
-  const currentSlug = searchParams.get("tab") ?? "";
-
-  // Show login page if not authenticated or explicitly requesting login
-  if (!isLoading && (!isAuthenticated || currentSlug === "login")) {
-    return <LoginPage />;
-  }
-
-  // Show register page if explicitly requesting register
-  if (currentSlug === "register") {
-    return <RegisterPage />;
-  }
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  }, [router]);
 
   // ---- Keep activeTab synced with URL ----
   useEffect(() => {
-    const tabSlug = searchParams.get("tab") ?? "";
-    const tabName = slugToTab[tabSlug] || "Dashboard";
+    const tabName = slugToTab[currentSlug] || "Dashboard";
     setActiveTab(tabName);
-  }, [searchParams]);
-
-  // ---- Function to navigate when sidebar calls setActiveTab ----
-  const navigateToTab = (tabName) => {
-    const slug = tabToSlug[tabName] ?? "";
-    const href = slug
-      ? `/dashboard/training?tab=${slug}`
-      : "/dashboard/training";
-    router.push(href);
-    setActiveTab(tabName);
-  };
+  }, [currentSlug]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -354,28 +484,44 @@ export default function TrainingInstituteDashboard() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Close notifications and messages dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        showNotifications &&
-        !event.target.closest(".notifications-dropdown")
-      ) {
-        setShowNotifications(false);
-      }
-      if (showMessages && !event.target.closest(".messages-dropdown")) {
-        setShowMessages(false);
-      }
-    };
+  // Show login page only if explicitly requesting login
+  if (!isLoading && currentSlug === "login") {
+    return <LoginPage />;
+  }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showNotifications, showMessages]);
+  // Show register page if explicitly requesting register
+  if (currentSlug === "register") {
+    return <RegisterPage />;
+  }
+
+  // Show loading state
+  if (isLoading || isCheckingProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">
+            {isCheckingProfile ? "Checking your profile..." : "Loading..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Function to navigate when sidebar calls setActiveTab ----
+  const navigateToTab = (tabName) => {
+    const slug = tabToSlug[tabName] ?? "";
+    const href = slug
+      ? `/dashboard/training?tab=${slug}`
+      : "/dashboard/training";
+    router.push(href);
+    setActiveTab(tabName);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case "Dashboard":
-        return <DashboardContent />;
+        return <DashboardContent profileData={profileData} dashboardStats={dashboardStats} />;
       case "Profile Setup":
         return <ProfileSetupPage />;
       case "Post Training":
@@ -413,17 +559,52 @@ export default function TrainingInstituteDashboard() {
       case "register":
         return <RegisterPage />;
       default:
-        return <DashboardContent />;
+        return <DashboardContent profileData={profileData} dashboardStats={dashboardStats} />;
     }
   };
 
+  // Page title mapping
+  const pageTitles = {
+    "Dashboard": "Training Institute Dashboard",
+    "Profile Setup": "Institute Profile",
+    "Post Training": "Post Training",
+    "Active Training post": "Active Trainings",
+    "Expired Training post": "Expired Trainings",
+    "Draft Training post": "Draft Trainings",
+    "Courses offered": "Courses Offered",
+    "Advanced Search": "Advanced Search",
+    "placements": "Placements",
+    "internship": "Internships",
+    "notifications": "Notifications",
+    "inbox": "Inbox",
+    "billings": "Billing",
+    "account settings": "Account Settings",
+    "contact us": "Contact Us",
+  };
+
+  const currentPageTitle = pageTitles[activeTab] || "Training Institute Dashboard";
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* Site Header */}
-      <Header />
+    <div className="flex flex-col min-h-screen">
+      {/* Institute Setup Modal */}
+      <InstituteSetupModal
+        isOpen={showSetupModal}
+        onClose={() => {}} // Prevent closing until setup is complete
+        onSubmit={handleProfileSubmit}
+        existingData={profileData}
+      />
+
+      {/* Training Header - At the very top */}
+      <TrainingHeader
+        pageTitle={currentPageTitle}
+        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        showSidebarToggle={true}
+        isSidebarOpen={sidebarOpen}
+        profileData={profileData}
+      />
 
       {/* Main Content Area with Sidebar */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 bg-gray-100">
         <Sidebar
           activeTab={activeTab}
           setActiveTab={navigateToTab}
@@ -434,227 +615,12 @@ export default function TrainingInstituteDashboard() {
 
         {/* Content Area */}
         <main className="flex-1 min-w-0">
-          {/* Dashboard Header with Hamburger Menu and Profile Section */}
-          <div className="sticky top-0 z-30 bg-white shadow-sm">
-            {/* Top Header Bar */}
-            <div className="p-4 flex items-center justify-between">
-              {isMobile && (
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="mr-3 text-gray-600 hover:text-gray-900 focus:outline-none"
-                  aria-label="Toggle sidebar"
-                >
-                  <FontAwesomeIcon icon={faBars} size="lg" />
-                </button>
-              )}
-              <h1 className="text-2xl sm:text-3xl font-bold flex-1 bg-gradient-to-r from-blue-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
-                {isMobile
-                  ? "Training Dashboard"
-                  : "Training Institute Dashboard"}
-              </h1>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="relative notifications-dropdown">
-                  <button
-                    className="relative p-3 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200 group"
-                    onClick={() => {
-                      setShowNotifications(!showNotifications);
-                      setShowMessages(false);
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={faBell}
-                      className="text-lg group-hover:animate-pulse"
-                    />
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center shadow-lg">
-                      <span className="text-white text-xs font-bold">3</span>
-                    </span>
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping opacity-75"></span>
-                  </button>
-
-                  {/* Notifications Dropdown */}
-                  {showNotifications && (
-                    <div className="fixed sm:absolute right-4 sm:right-0 left-4 sm:left-auto mt-2 w-auto sm:w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
-                      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-3 sm:p-4">
-                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                          <FontAwesomeIcon
-                            icon={faBell}
-                            className="text-white/80"
-                          />
-                          Notifications
-                        </h3>
-                      </div>
-                      <div className="max-h-[60vh] sm:max-h-[50vh] overflow-y-auto">
-                        <div className="p-3 sm:p-4 hover:bg-blue-50 border-b border-gray-100 transition-colors duration-200">
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                              <span className="text-blue-600 text-sm sm:text-lg">
-                                📩
-                              </span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-gray-800 text-sm sm:text-base">
-                                New Enrollment
-                              </p>
-                              <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                                You have a new enrollment request
-                              </p>
-                              <p className="text-xs text-blue-500 mt-1 font-medium">
-                                1 hour ago
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-3 sm:p-4 hover:bg-yellow-50 border-b border-gray-100 transition-colors duration-200">
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                              <span className="text-yellow-600 text-sm sm:text-lg">
-                                ⚡
-                              </span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-gray-800 text-sm sm:text-base">
-                                Subscription Alert
-                              </p>
-                              <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                                Your subscription expires in 3 days
-                              </p>
-                              <p className="text-xs text-yellow-600 mt-1 font-medium">
-                                3 hours ago
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-3 sm:p-4 hover:bg-purple-50 transition-colors duration-200">
-                          <div className="flex items-start gap-3">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                              <span className="text-purple-600 text-sm sm:text-lg">
-                                💬
-                              </span>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-gray-800 text-sm sm:text-base">
-                                Student Message
-                              </p>
-                              <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                                New message from student
-                              </p>
-                              <p className="text-xs text-purple-600 mt-1 font-medium">
-                                4 hours ago
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="p-3 sm:p-4 bg-gray-50 border-t border-gray-200">
-                        <button
-                          className="w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
-                          onClick={() => {
-                            setActiveTab("notifications");
-                            setShowNotifications(false);
-                          }}
-                        >
-                          View All Notifications
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Messages Dropdown */}
-                <div className="relative messages-dropdown">
-                  <button
-                    className="relative p-3 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-all duration-200 group"
-                    onClick={() => {
-                      setShowMessages(!showMessages);
-                      setShowNotifications(false);
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={faEnvelope}
-                      className="text-lg group-hover:animate-bounce"
-                    />
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                      <span className="text-white text-xs font-bold">2</span>
-                    </span>
-                  </button>
-
-                  {showMessages && (
-                    <div className="fixed sm:absolute right-4 sm:right-0 left-4 sm:left-auto mt-2 w-auto sm:w-80 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 overflow-hidden">
-                      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-3 sm:p-4">
-                        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                          <FontAwesomeIcon
-                            icon={faEnvelope}
-                            className="text-white/80"
-                          />
-                          Messages
-                        </h3>
-                      </div>
-                      <div className="max-h-[60vh] sm:max-h-[50vh] overflow-y-auto">
-                        {recentMessages.map((message) => (
-                          <div
-                            key={message.id}
-                            className={`p-3 sm:p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors duration-200 ${
-                              message.unread ? "bg-blue-50" : ""
-                            }`}
-                            onClick={() => {
-                              setActiveTab("inbox");
-                              setShowMessages(false);
-                            }}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                <span className="text-purple-600 text-sm sm:text-lg">
-                                  <FontAwesomeIcon
-                                    icon={
-                                      message.unread
-                                        ? faEnvelope
-                                        : faEnvelopeOpen
-                                    }
-                                  />
-                                </span>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-gray-800 text-sm sm:text-base">
-                                  {message.sender}
-                                </p>
-                                <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                                  {message.subject}
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1 truncate">
-                                  {message.preview}
-                                </p>
-                                <p className="text-xs text-purple-500 mt-1 font-medium">
-                                  {message.time}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="p-3 sm:p-4 bg-gray-50 border-t border-gray-200">
-                        <button
-                          className="w-full text-center bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-2 px-4 rounded-lg hover:from-purple-700 hover:to-indigo-700 text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
-                          onClick={() => {
-                            setActiveTab("inbox");
-                            setShowMessages(false);
-                          }}
-                        >
-                          View All Messages
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Content Container with Responsive Padding */}
           <div className="p-3 sm:p-4 md:p-6">{renderContent()}</div>
         </main>
       </div>
 
-      {/* Site Footer */}
+      {/* Original Footer */}
       <Footer />
     </div>
   );

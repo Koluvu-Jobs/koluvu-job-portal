@@ -41,6 +41,21 @@ class DataEncryptionMiddleware(MiddlewareMixin):
             return None
         
         try:
+            # Get content type and normalize to lowercase
+            content_type = request.META.get('CONTENT_TYPE', '').lower()
+            
+            # Skip multipart/form-data requests (file uploads)
+            if content_type.startswith('multipart/'):
+                return None
+            
+            # Skip binary data requests
+            if 'application/octet-stream' in content_type:
+                return None
+            
+            # Only process JSON requests
+            if 'application/json' not in content_type:
+                return None
+            
             if request.method in ['POST', 'PUT', 'PATCH'] and request.body:
                 # Parse JSON body
                 try:
@@ -51,6 +66,9 @@ class DataEncryptionMiddleware(MiddlewareMixin):
                     request._body = json.dumps(decrypted_data).encode('utf-8')
                 except json.JSONDecodeError:
                     pass  # Not JSON, skip
+                except UnicodeDecodeError:
+                    logger.warning(f"Skipping encryption middleware - binary data detected")
+                    pass  # Binary data, skip
         except Exception as e:
             logger.error(f"Encryption middleware request error: {e}")
         

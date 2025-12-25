@@ -5,6 +5,9 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Header from "@koluvu/components/Header/Header";
 import Footer from "@koluvu/components/Footer/Footer";
+import { useAuth } from "@/contexts/AuthContext";
+import { getRedirectPath } from "@/utils/auth";
+import { useRouter } from "next/navigation";
 
 export default function InstituteRegistrationPage() {
   const [formData, setFormData] = useState({
@@ -23,8 +26,21 @@ export default function InstituteRegistrationPage() {
 
   const videoRef = useRef(null);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const { user, userType, loading: authLoading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
+    // Redirect authenticated users to their dashboard
+    if (!authLoading && user && userType) {
+      const redirectPath = getRedirectPath(userType, user.username);
+      console.log(
+        `Authenticated ${userType} accessing partner registration. Redirecting to:`,
+        redirectPath
+      );
+      router.push(redirectPath);
+      return;
+    }
+
     const video = videoRef.current;
     if (video) {
       const playPromise = video.play();
@@ -40,7 +56,7 @@ export default function InstituteRegistrationPage() {
           });
       }
     }
-  }, []);
+  }, [authLoading, user, userType, router]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;

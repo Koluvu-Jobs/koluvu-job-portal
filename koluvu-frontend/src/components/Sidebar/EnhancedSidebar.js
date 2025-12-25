@@ -255,7 +255,10 @@ export const EnhancedSidebar = ({ isOpen, onToggle }) => {
           isOpen ? "w-80" : "w-0 lg:w-80"
         } overflow-hidden lg:block`}
         // Ensure the sidebar sits below the fixed header and doesn't get hidden
-        style={{ top: "var(--header-height)", height: "calc(100% - var(--header-height))" }}
+        style={{
+          top: "var(--header-height)",
+          height: "calc(100% - var(--header-height))",
+        }}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -495,7 +498,7 @@ export const EnhancedSidebar = ({ isOpen, onToggle }) => {
               </Link>
 
               <button
-                onClick={logout}
+                onClick={() => logout("/")}
                 className="w-full flex items-center space-x-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               >
                 <svg

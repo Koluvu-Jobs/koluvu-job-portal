@@ -12,6 +12,7 @@ import AICandidates from "./ai-candidates/page";
 import RecentActivities from "./components/RecentActivites";
 import { useTheme } from "./context/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
+import ProfileCompletionBanner from "@/components/ProfileCompletionBanner";
 
 // Tab mapping for employer dashboard
 const tabToSlug = {
@@ -28,7 +29,6 @@ const tabToSlug = {
   "Proxying Detector": "proxying-detector",
   "Feedback Form": "feedback-form",
   "Candidate Status": "candidate-status",
-  Verification: "verification",
   "Subscription Plans": "subscription-plans",
   "Help Center": "help-center",
   Settings: "settings",
@@ -87,10 +87,6 @@ const CandidateStatusComponent = dynamic(
   }
 );
 
-const VerificationComponent = dynamic(() => import("./verification/page"), {
-  loading: () => <div className="p-8">Loading verification...</div>,
-});
-
 const SubscriptionPlansComponent = dynamic(
   () => import("./subscription/plans/page"),
   {
@@ -142,6 +138,9 @@ const DashboardContent = () => {
 
   return (
     <div className="space-y-8 p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 via-white to-blue-50/30 min-h-screen animate-fadeIn">
+      {/* Profile Completion Banner */}
+      <ProfileCompletionBanner user={user} />
+
       {/* Enhanced Welcome Header */}
       <div className="relative overflow-hidden bg-gradient-to-r from-[#1E3B8B] via-[#2563EB] to-[#1E40AF] min-h-[200px] text-white shadow-xl rounded-2xl">
         {/* Background Pattern with enhanced opacity and animation */}
@@ -396,10 +395,13 @@ export default function DashboardPage() {
   const params = useParams();
   const username = params?.username ?? null;
   const [activeTab, setActiveTab] = useState("Dashboard");
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading, isAuthenticated, employerProfile } = useAuth();
 
   // If we're on the base route and have a username prop, don't redirect
   const isUsernameRoute = !!username;
+
+  // REMOVED: Profile completion check and automatic redirects
+  // Users will now see a banner instead
 
   // Redirect to username-based URL if user is authenticated and we're not already on a username route
   useEffect(() => {
@@ -524,8 +526,6 @@ export default function DashboardPage() {
                 return <FeedbackFormComponent />;
               case "Candidate Status":
                 return <CandidateStatusComponent />;
-              case "Verification":
-                return <VerificationComponent />;
               case "Subscription Plans":
                 return <SubscriptionPlansComponent />;
               case "Settings":

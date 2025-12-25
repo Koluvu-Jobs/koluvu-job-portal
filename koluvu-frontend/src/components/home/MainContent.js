@@ -56,31 +56,31 @@ const StatCard = ({ icon, title, value, description, delay }) => {
   return (
     <div
       ref={cardRef}
-      className={`relative group p-3 md:p-4 lg:p-6 rounded-2xl bg-gradient-to-br from-slate-800/40 to-slate-900/60 backdrop-blur-xl border border-slate-700/50 hover:border-blue-500/30 transition-all duration-500 transform hover:scale-105 cursor-pointer ${
+      className={`relative group p-3 md:p-4 lg:p-6 rounded-2xl bg-white border border-slate-200 hover:border-orange-300 hover:shadow-lg transition-all duration-500 transform hover:scale-105 cursor-pointer ${
         isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
       }`}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/20 to-orange-600/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
 
       <div className="relative">
         <div className="flex items-center justify-between mb-2 lg:mb-3">
-          <div className="p-1.5 md:p-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+          <div className="p-1.5 md:p-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white">
             {icon}
           </div>
           <div className="text-right">
-            <div className="text-lg md:text-2xl lg:text-3xl font-bold text-white">
+            <div className="text-lg md:text-2xl lg:text-3xl font-bold text-orange-500">
               {count.toLocaleString()}
             </div>
             <div
-              className="text-xs md:text-sm text-slate-400"
+              className="text-xs md:text-sm text-slate-600"
               style={{ fontSize: "12px" }}
             >
               {title}
             </div>
           </div>
         </div>
-        <p className="text-slate-300" style={{ fontSize: "10px" }}>
+        <p className="text-slate-500" style={{ fontSize: "10px" }}>
           {description}
         </p>
       </div>
@@ -285,9 +285,9 @@ const JobSection = ({ title, jobs, delay }) => {
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-1 w-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+        <div className="h-1 w-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full"></div>
         <h3
-          className="text-xl md:text-2xl font-bold text-white"
+          className="text-xl md:text-2xl font-bold text-slate-900"
           style={{ fontSize: "20px" }}
         >
           {title}
@@ -331,17 +331,17 @@ export default function MainContent() {
 
       {/* Header Section with responsive spacing */}
       <div className="relative z-10 text-center pb-8 md:pb-12 transition-all duration-1000 mt-0 sm:mt-28 md:mt-48 lg:mt-32">
-        <div className="inline-flex items-center gap-2 md:gap-3 mb-4 px-3 md:px-4 py-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full border border-blue-400/30 backdrop-blur-sm">
-          <Sparkles className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-blue-400" />
-          <span className="text-blue-300 font-medium text-xs md:text-sm lg:text-base">
+        <div className="inline-flex items-center gap-2 md:gap-3 mb-4 px-3 md:px-4 py-2 bg-orange-50 rounded-full border border-orange-200">
+          <Sparkles className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 text-orange-500" />
+          <span className="text-orange-600 font-medium text-xs md:text-sm lg:text-base">
             Latest Job Opportunities
           </span>
         </div>
-        <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-4">
+        <h2 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-slate-900 mb-4">
           Discover Your Dream Career
         </h2>
         <p
-          className="text-slate-300 text-sm md:text-base lg:text-lg max-w-2xl mx-auto leading-relaxed"
+          className="text-slate-600 text-sm md:text-base lg:text-lg max-w-2xl mx-auto leading-relaxed"
           style={{ fontSize: "14px" }}
         >
           Connect with top companies and find opportunities that match your

@@ -170,16 +170,16 @@ const NotificationsPage = () => {
         </div>
 
         {/* Notifications List */}
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {filteredNotifications.length === 0 ? (
-            <div className="text-center py-8">
+            <div className="text-center py-6 sm:py-8">
               <p className="text-gray-500">No notifications found</p>
             </div>
           ) : (
             filteredNotifications.map((notification) => (
               <div 
                 key={notification.id} 
-                className={`p-4 rounded-lg cursor-pointer transition-colors ${!notification.read ? 'bg-blue-50 border-blue-200' : 'bg-white hover:bg-gray-50 border-gray-200'} border shadow-sm`}
+                className={`p-3 sm:p-4 rounded-lg cursor-pointer transition-colors ${!notification.read ? 'bg-blue-50 border-blue-200' : 'bg-white hover:bg-gray-50 border-gray-200'} border shadow-sm`}
                 onClick={() => handleView(notification)}
               >
                 <div className="flex justify-between items-start">
@@ -250,9 +250,9 @@ const NotificationsPage = () => {
 
         {/* Clear All Button */}
         {notifications.length > 0 && (
-          <div className="mt-6 flex justify-end">
+          <div className="mt-4 sm:mt-6 flex justify-end">
             <button 
-              className="text-sm text-red-600 hover:text-red-800 flex items-center font-medium"
+              className="text-xs sm:text-sm text-red-600 hover:text-red-800 flex items-center font-medium"
               onClick={deleteAll}
             >
               <FontAwesomeIcon icon={faTrash} className="mr-2 w-4 h-4" />
@@ -263,10 +263,10 @@ const NotificationsPage = () => {
 
         {/* View Modal */}
         {showViewModal && selectedNotification && (
-          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
             <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-              <div className="flex justify-between items-center border-b p-5">
-                <h3 className="text-xl font-bold text-blue-700">Notification Details</h3>
+              <div className="flex justify-between items-center border-b p-3 sm:p-5">
+                <h3 className="text-lg sm:text-xl font-bold text-blue-700">Notification Details</h3>
                 <button 
                   className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
                   onClick={() => setShowViewModal(false)}
@@ -274,7 +274,7 @@ const NotificationsPage = () => {
                   <FontAwesomeIcon icon={faTimes} className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-5 sm:p-6">
+              <div className="p-3 sm:p-5 md:p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="text-2xl">
                     {getNotificationIcon(selectedNotification.type)}
@@ -303,15 +303,15 @@ const NotificationsPage = () => {
                   <span>{selectedNotification.read ? 'Read' : 'Unread'}</span>
                 </div>
               </div>
-              <div className="border-t p-5 flex justify-end space-x-3">
+              <div className="border-t p-3 sm:p-5 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
                 <button
-                  className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors"
+                  className="px-4 sm:px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors w-full sm:w-auto"
                   onClick={() => setShowViewModal(false)}
                 >
                   Close
                 </button>
                 <button
-                  className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors"
+                  className="px-4 sm:px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors w-full sm:w-auto"
                   onClick={() => {
                     deleteNotification(selectedNotification.id);
                     setShowViewModal(false);

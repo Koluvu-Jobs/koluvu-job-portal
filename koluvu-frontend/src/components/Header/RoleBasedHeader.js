@@ -35,10 +35,6 @@ export const RoleBasedHeader = ({
 
   // Get username for URL routing
   const getUsername = () => {
-    // For employees, use public_identifier (KJS-) if available, else fallback to username
-    if (userType === "employee" && user?.public_identifier) {
-      return user.public_identifier;
-    }
     if (user?.username) return user.username;
     if (user?.email) return user.email.split("@")[0];
     return "user";
@@ -504,16 +500,11 @@ export const RoleBasedHeader = ({
               onClick={async () => {
                 setIsProfileMenuOpen(false);
                 try {
-                  // Determine correct login page based on user type
-                  const loginPage =
-                    userType === "employee"
-                      ? "/auth/login/employee"
-                      : "/auth/login/employer";
-                  await logout(loginPage);
+                  await logout("/");
                 } catch (error) {
                   console.error("Logout error:", error);
                   // Fallback: force redirect
-                  window.location.href = "/auth/login/employer";
+                  window.location.href = "/";
                 }
               }}
               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
@@ -553,10 +544,9 @@ export const RoleBasedHeader = ({
             setIsOpen(!isOpen);
           }}
           className="text-white hover:bg-white/20 w-full text-left px-2.5 py-2 sm:px-3 sm:py-2.5 md:px-4 md:py-3 rounded-lg font-medium flex justify-between items-center transition-all duration-300 hover:scale-105 group relative overflow-hidden"
+          style={{ fontSize: "clamp(14px, 3.5vw, 15px)" }}
         >
-          <span className="relative z-10 text-xs sm:text-sm md:text-base">
-            Koluvu Labs
-          </span>
+          <span className="relative z-10">Koluvu Labs</span>
           <svg
             className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 transition-all duration-300 relative z-10 ${
               isOpen ? "transform rotate-180" : ""

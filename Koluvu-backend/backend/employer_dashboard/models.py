@@ -492,10 +492,30 @@ class Job(models.Model):
             return self.employer_logo_url
         else:
             return self.employer.get_company_logo()
+    
+    def extract_keywords_from_description(self):
+        """Extract keywords from job description, requirements, and skills for ATS matching"""
+        keywords = set()
+        
+        # Add skills
+        if isinstance(self.skills, list):
+            keywords.update([skill.lower().strip() for skill in self.skills if skill])
+        
+        # Add requirements keywords
+        if isinstance(self.requirements, list):
+            for req in self.requirements:
+                if req:
+                    # Extract tech terms (simple extraction, can be enhanced)
+                    words = req.lower().split()
+                    keywords.update([w.strip('.,!?;:') for w in words if len(w) > 3])
+        
+        # Save to ats_keywords field
+        self.ats_keywords = ', '.join(sorted(keywords))
+        return list(keywords)
 
 
 class JobApplication(models.Model):
-    """Job application model"""
+    """Job application model - Enhanced with employee link and ATS scoring"""
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('reviewed', 'Reviewed'),
@@ -504,18 +524,60 @@ class JobApplication(models.Model):
         ('hired', 'Hired'),
     ]
     
+    # Foreign Keys
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
+    employee = models.ForeignKey('employee_dashboard.EmployeeProfile', on_delete=models.CASCADE, 
+                                related_name='job_applications', null=True, blank=True)
+    
+    # Legacy fields (for backward compatibility)
     candidate_name = models.CharField(max_length=255)
     candidate_email = models.EmailField()
-    candidate_phone = models.CharField(max_length=20)
-    resume = models.FileField(upload_to='resumes/', null=True, blank=True)
-    cover_letter = models.TextField(blank=True)
+    candidate_phone = models.CharField(max_length=20, blank=True, default='')
+    
+    # Application Data
+    resume = models.FileField(upload_to='application_resumes/', null=True, blank=True)
+    resume_file_name = models.CharField(max_length=255, blank=True, default='')
+    resume_file_size = models.IntegerField(default=0, help_text='File size in bytes')
+    cover_letter = models.TextField(blank=True, default='')
+    
+    # Screening Questions
+    screening_answers = models.JSONField(default=list, blank=True, 
+                                        help_text='[{"question": "", "answer": ""}]')
+    
+    # ATS Scoring
+    ats_score = models.FloatField(default=0.0, help_text='ATS match score 0-100')
+    matching_keywords = models.JSONField(default=list, blank=True, 
+                                        help_text='Keywords matched from job requirements')
+    missing_keywords = models.JSONField(default=list, blank=True,
+                                       help_text='Important keywords missing from resume')
+    
+    # Status & Tracking
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    viewed_by_employer = models.BooleanField(default=False)
+    viewed_at = models.DateTimeField(null=True, blank=True)
     applied_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-applied_at']
+        indexes = [
+            models.Index(fields=['job', '-ats_score']),
+            models.Index(fields=['employee', '-applied_at']),
+            models.Index(fields=['status', '-applied_at']),
+        ]
+
     def __str__(self):
+        if self.employee:
+            return f"{self.employee.user.get_full_name() or self.employee.user.username} - {self.job.title}"
         return f"{self.candidate_name} - {self.job.title}"
+    
+    def mark_as_viewed(self):
+        """Mark application as viewed by employer"""
+        if not self.viewed_by_employer:
+            from django.utils import timezone
+            self.viewed_by_employer = True
+            self.viewed_at = timezone.now()
+            self.save(update_fields=['viewed_by_employer', 'viewed_at'])
 
 
 class Candidate(models.Model):

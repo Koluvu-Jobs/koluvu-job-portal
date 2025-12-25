@@ -1,3 +1,5 @@
+// src/contexts/AuthContext.js
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
@@ -35,30 +37,49 @@ export const AuthProvider = ({ children }) => {
         const storedAuth = getStoredAuth();
 
         if (storedAuth?.user && storedAuth?.accessToken) {
-          console.log("Loading stored auth data:", storedAuth);
-          setUser(storedAuth.user);
-          setUserType(storedAuth.userType);
-          setAccessToken(storedAuth.accessToken);
-          setRefreshToken(storedAuth.refreshToken);
+          console.log("Found stored auth data, validating...");
 
-          // Skip token verification for fresh logins (tokens less than 1 minute old)
-          const tokenPayload = JSON.parse(
-            atob(storedAuth.accessToken.split(".")[1])
-          );
-          const tokenAge = Date.now() / 1000 - tokenPayload.iat; // Token age in seconds
+          // First check if token is expired
+          if (isTokenExpired(storedAuth.accessToken)) {
+            console.log("❌ Token is expired, clearing auth data");
+            clearAuthData();
+            setLoading(false);
+            return;
+          }
 
-          if (!isTokenExpired(storedAuth.accessToken)) {
+          // Validate token structure
+          try {
+            const tokenPayload = JSON.parse(
+              atob(storedAuth.accessToken.split(".")[1])
+            );
+            const tokenAge = Date.now() / 1000 - tokenPayload.iat;
+
+            console.log("✅ Token is valid, loading user data", {
+              userType: storedAuth.userType,
+              tokenAge: `${Math.round(tokenAge / 60)} minutes`,
+            });
+
+            setUser(storedAuth.user);
+            setUserType(storedAuth.userType);
+            setAccessToken(storedAuth.accessToken);
+            setRefreshToken(storedAuth.refreshToken);
+
             // Only verify token if it's older than 1 minute (not a fresh login)
             if (tokenAge > 60) {
-              console.log("Token is older than 1 minute, verifying...");
+              console.log(
+                "Token is older than 1 minute, verifying with backend..."
+              );
               verifyToken(storedAuth.accessToken);
-            } else {
-              console.log("Fresh token detected, skipping verification");
             }
-          } else {
-            console.log("Token is expired, clearing auth data");
+          } catch (tokenError) {
+            console.error(
+              "❌ Invalid token format, clearing auth data:",
+              tokenError
+            );
             clearAuthData();
           }
+        } else {
+          console.log("No stored auth data found");
         }
       } catch (error) {
         console.error("Error loading user data:", error);
@@ -177,11 +198,16 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
+    console.log("🚪 Starting logout process...");
     setIsLoggingOut(true);
+
+    // Store tokens before clearing for backend call
+    const currentAccessToken = accessToken;
+    const currentRefreshToken = refreshToken;
 
     try {
       // Call backend logout
-      if (refreshToken && accessToken) {
+      if (currentRefreshToken && currentAccessToken) {
         try {
           await fetch(
             `${
@@ -191,15 +217,16 @@ export const AuthProvider = ({ children }) => {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${accessToken}`,
+                Authorization: `Bearer ${currentAccessToken}`,
               },
               body: JSON.stringify({
-                refresh_token: refreshToken,
+                refresh_token: currentRefreshToken,
               }),
             }
           );
+          console.log("✅ Backend logout successful");
         } catch (backendError) {
-          console.warn("Backend logout failed:", backendError);
+          console.warn("⚠️ Backend logout failed:", backendError);
           // Continue with logout even if backend fails
         }
       }
@@ -207,19 +234,20 @@ export const AuthProvider = ({ children }) => {
       // Sign out from Google
       try {
         await signOutFromGoogle();
+        console.log("✅ Google sign out successful");
       } catch (googleError) {
-        console.warn("Google logout failed:", googleError);
+        console.warn("⚠️ Google logout failed:", googleError);
         // Continue with logout even if Google fails
       }
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("❌ Logout error:", error);
     } finally {
-      clearAuthData();
       setIsLoggingOut(false);
 
-      // Force navigation to login or home page
+      // Redirect to force-logout page which will handle all cleanup
       if (typeof window !== "undefined") {
-        window.location.href = redirectTo;
+        console.log("🔄 Redirecting to force-logout page...");
+        window.location.href = "/auth/force-logout";
       }
     }
   };
@@ -227,12 +255,14 @@ export const AuthProvider = ({ children }) => {
   const clearAuthData = () => {
     console.log("🧹 Clearing authentication data...");
 
+    // Clear state immediately
     setUser(null);
     setUserType(null);
     setAccessToken(null);
     setRefreshToken(null);
     setIsLoggingOut(false);
 
+    // Clear localStorage
     clearStoredAuth();
 
     // Clear ALL auth cookies (including potential stale ones)
@@ -247,11 +277,18 @@ export const AuthProvider = ({ children }) => {
         "authToken",
         "jwt",
         "token",
+        "sb-auth-token",
       ];
 
+      // Clear cookies with different path and domain combinations
       authCookies.forEach((cookieName) => {
+        // Clear for localhost
         document.cookie = `${cookieName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=localhost`;
         document.cookie = `${cookieName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        // Clear for current domain
+        document.cookie = `${cookieName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${window.location.hostname}`;
+        // Clear without domain
+        document.cookie = `${cookieName}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
       });
 
       // Clear registration cache from localStorage
@@ -265,7 +302,9 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem(key);
       });
 
-      console.log("✅ All auth cookies and registration cache cleared");
+      console.log(
+        "✅ All auth cookies, localStorage, and registration cache cleared"
+      );
     }
   };
 

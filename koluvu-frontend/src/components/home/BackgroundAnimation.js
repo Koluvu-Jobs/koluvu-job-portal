@@ -31,8 +31,8 @@ const BackgroundAnimation = () => {
         vx: (Math.random() - 0.5) * 0.5,
         vy: (Math.random() - 0.5) * 0.5,
         size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.5 + 0.1,
-        color: Math.random() > 0.5 ? 'rgba(59, 130, 246, ' : 'rgba(147, 51, 234, '
+        opacity: Math.random() * 0.3 + 0.05,
+        color: Math.random() > 0.7 ? 'rgba(249, 115, 22, ' : 'rgba(203, 213, 225, '
       });
     }
     

@@ -213,3 +213,112 @@ class ATSAnalyzerService:
             return 'Fair'
         else:
             return 'Needs Improvement'
+    
+    def match_resume_to_job(self, resume_text: str, job) -> Dict[str, Any]:
+        """
+        Match resume against specific job requirements
+        
+        Args:
+            resume_text: Extracted text from resume
+            job: Job model instance with requirements and skills
+            
+        Returns:
+            Dictionary with match score and keyword analysis
+        """
+        try:
+            resume_text_lower = resume_text.lower()
+            
+            # Extract keywords from job
+            job_keywords = set()
+            
+            # Get skills from job
+            if hasattr(job, 'skills') and isinstance(job.skills, list):
+                job_keywords.update([skill.lower().strip() for skill in job.skills if skill])
+            
+            # Get requirements keywords
+            if hasattr(job, 'requirements') and isinstance(job.requirements, list):
+                for req in job.requirements:
+                    if req:
+                        words = str(req).lower().split()
+                        job_keywords.update([w.strip('.,!?;:') for w in words if len(w) > 3])
+            
+            # Get ATS keywords if available
+            if hasattr(job, 'ats_keywords') and job.ats_keywords:
+                ats_words = job.ats_keywords.split(',')
+                job_keywords.update([w.strip().lower() for w in ats_words if w.strip()])
+            
+            # Match keywords
+            matched_keywords = []
+            missing_keywords = []
+            
+            for keyword in job_keywords:
+                if keyword in resume_text_lower:
+                    matched_keywords.append(keyword)
+                else:
+                    missing_keywords.append(keyword)
+            
+            # Calculate match score
+            if len(job_keywords) > 0:
+                match_percentage = (len(matched_keywords) / len(job_keywords)) * 100
+            else:
+                match_percentage = 50.0  # Default if no keywords
+            
+            # Bonus points for experience, education mentions
+            bonus_score = 0
+            if 'experience' in resume_text_lower or 'years' in resume_text_lower:
+                bonus_score += 5
+            if 'education' in resume_text_lower or 'degree' in resume_text_lower:
+                bonus_score += 5
+            if 'project' in resume_text_lower:
+                bonus_score += 3
+            
+            final_score = min(match_percentage + bonus_score, 100.0)
+            
+            return {
+                'ats_score': round(final_score, 2),
+                'matching_keywords': matched_keywords[:20],  # Top 20
+                'missing_keywords': missing_keywords[:10],   # Top 10 missing
+                'total_job_keywords': len(job_keywords),
+                'matched_count': len(matched_keywords),
+                'match_percentage': round(match_percentage, 2)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in resume-job matching: {str(e)}")
+            return {
+                'ats_score': 0,
+                'matching_keywords': [],
+                'missing_keywords': [],
+                'total_job_keywords': 0,
+                'matched_count': 0,
+                'match_percentage': 0
+            }
+    
+    def extract_text_from_pdf(self, pdf_file) -> str:
+        """
+        Extract text from PDF file
+        
+        Args:
+            pdf_file: File object or path to PDF
+            
+        Returns:
+            Extracted text as string
+        """
+        try:
+            import pdfplumber
+            
+            text = ""
+            with pdfplumber.open(pdf_file) as pdf:
+                for page in pdf.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
+            
+            return text.strip()
+            
+        except ImportError:
+            logger.warning("pdfplumber not installed, cannot extract PDF text")
+            return ""
+        except Exception as e:
+            logger.error(f"Error extracting PDF text: {str(e)}")
+            return ""

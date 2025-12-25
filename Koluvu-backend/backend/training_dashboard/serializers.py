@@ -20,6 +20,24 @@ class TrainingProviderProfileSerializer(serializers.ModelSerializer):
             'twitter_url', 'youtube_url', 'is_verified', 'created_at', 'updated_at'
         ]
         read_only_fields = ['username', 'email', 'first_name', 'last_name', 'is_verified', 'created_at', 'updated_at']
+    
+    def validate(self, data):
+        """Validate required fields for initial profile setup"""
+        required_fields = ['organization_name', 'contact_person', 'phone', 'address']
+        
+        # Only validate if this is an initial setup (new profile without organization_name)
+        if not self.instance or not self.instance.organization_name:
+            missing_fields = []
+            for field in required_fields:
+                if field not in data or not data[field]:
+                    missing_fields.append(field)
+            
+            if missing_fields:
+                raise serializers.ValidationError({
+                    'missing_fields': f"The following fields are required: {', '.join(missing_fields)}"
+                })
+        
+        return data
 
 
 class TrainingProviderRegistrationSerializer(serializers.ModelSerializer):

@@ -1,5 +1,7 @@
 // src/app/page.js
 
+"use client";
+
 import Header from "@koluvu/components/Header/Header";
 import dynamic from "next/dynamic";
 import HeroSection from "@koluvu/components/home/HeroSection";
@@ -15,26 +17,45 @@ const SuccessStories = dynamic(() =>
 );
 import SidebarContent from "@koluvu/components/home/SidebarContent";
 import MainContent from "@koluvu/components/home/MainContent";
-
 const FuturisticQRSection = dynamic(() =>
   import("@koluvu/components/home/QRCodeSection")
 );
-
-// Metadata for SEO and performance
-export const metadata = {
-  title: "Koluvu - Connecting Jobs, Creating Futures | Job Portal India",
-  description:
-    "Find your dream job with Koluvu - India's leading job portal. Connect with top companies, build your career, and create your future.",
-  keywords: "jobs, careers, employment, job search, hiring, recruitment, India",
-  openGraph: {
-    title: "Koluvu - Connecting Jobs, Creating Futures",
-    description:
-      "Find your dream job with Koluvu - India's leading job portal.",
-    type: "website",
-  },
-};
+import { useAuth } from "@/contexts/AuthContext";
+import { getRedirectPath } from "@/utils/auth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
+  const { user, userType, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Only redirect if we have valid auth data and we're not loading
+    if (!loading && user && userType) {
+      const redirectPath = getRedirectPath(userType, user.username);
+      console.log(`Redirecting authenticated ${userType} to:`, redirectPath);
+      router.push(redirectPath);
+    }
+  }, [loading, user, userType, router]);
+
+  // Show loading spinner while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500 mx-auto"></div>
+          <p className="mt-4 text-white text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If user is authenticated, show nothing (will redirect)
+  if (user && userType) {
+    return null;
+  }
+
+  // Show main page for non-authenticated users
   return (
     <>
       <Header />
@@ -51,7 +72,7 @@ export default function Home() {
 
         {/* Main content section with centered headings */}
         <div
-          className="w-full px-4 py-12"
+          className="w-full px-4 py-12 bg-slate-50"
           style={{ height: "auto", overflow: "visible" }}
         >
           {" "}

@@ -7,13 +7,10 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import (
-    EmployeeProfile, Education, Experience, Skill, Resume, ResumeTemplate, ResumeSharingLink,
-    CandidateSearchProfile, CandidateAchievement
-)
+from .models import EmployeeProfile, Education, Experience, Skill, Resume, ResumeTemplate, ResumeSharingLink
 from .serializers import (
     EmployeeProfileSerializer, UserRegistrationSerializer, EducationSerializer, ExperienceSerializer,
-    SkillSerializer, ResumeSerializer, CandidateAchievementSerializer, CandidateSearchProfileSerializer
+    SkillSerializer, ResumeSerializer
 )
 # Import username-based profile views
 from .username_profile_views import (
@@ -194,12 +191,6 @@ class EmployeeProfileView(generics.RetrieveUpdateAPIView):
         profile, created = EmployeeProfile.objects.get_or_create(user=self.request.user)
         return profile
     
-    def get_serializer_context(self):
-        """Ensure request context is passed to serializer for absolute URLs"""
-        context = super().get_serializer_context()
-        context['request'] = self.request
-        return context
-    
     def update(self, request, *args, **kwargs):
         """Custom update method with better error handling"""
         try:
@@ -359,34 +350,6 @@ class SkillDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         profile, created = EmployeeProfile.objects.get_or_create(user=self.request.user)
         return Skill.objects.filter(employee=profile)
-
-
-class AchievementListCreateView(generics.ListCreateAPIView):
-    """List and create candidate achievements"""
-    serializer_class = CandidateAchievementSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        profile, created = EmployeeProfile.objects.get_or_create(user=self.request.user)
-        # Ensure CandidateSearchProfile exists
-        candidate_profile, _ = CandidateSearchProfile.objects.get_or_create(employee=profile)
-        return CandidateAchievement.objects.filter(candidate=candidate_profile)
-
-    def perform_create(self, serializer):
-        profile, created = EmployeeProfile.objects.get_or_create(user=self.request.user)
-        candidate_profile, _ = CandidateSearchProfile.objects.get_or_create(employee=profile)
-        serializer.save(candidate=candidate_profile)
-
-
-class AchievementDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """Retrieve, update or delete a candidate achievement"""
-    serializer_class = CandidateAchievementSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        profile, created = EmployeeProfile.objects.get_or_create(user=self.request.user)
-        candidate_profile, _ = CandidateSearchProfile.objects.get_or_create(employee=profile)
-        return CandidateAchievement.objects.filter(candidate=candidate_profile)
 
 
 class ResumeListCreateView(generics.ListCreateAPIView):
@@ -636,43 +599,19 @@ def upload_profile_picture(request):
     try:
         profile, created = EmployeeProfile.objects.get_or_create(user=request.user)
         
-        # Validate uploaded file
         if 'profile_picture' in request.FILES:
-            file = request.FILES['profile_picture']
-
-            # Basic content type check
-            allowed_types = ['image/jpeg', 'image/png', 'image/webp']
-            content_type = getattr(file, 'content_type', '')
-            if content_type not in allowed_types:
-                return Response({'error': 'Unsupported file type'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # File size limit: 5 MB
-            max_size = 5 * 1024 * 1024
-            if file.size > max_size:
-                return Response({'error': 'File too large (max 5MB)'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Sanitize filename and prefix with UUID to avoid collisions
-            from django.utils.text import get_valid_filename
-            import uuid
-
-            cleaned = get_valid_filename(file.name)
-            name = f"{uuid.uuid4().hex}_{cleaned}"
-            file.name = name
-
-            profile.image_field_picture = file
+            profile.image_field_picture = request.FILES['profile_picture']
             profile.save()
-
-            request_url = profile.image_field_picture.url if profile.image_field_picture else None
-            # Build absolute uri if request available
-            if request and request.build_absolute_uri and request_url:
-                request_url = request.build_absolute_uri(request_url)
-
+            
             return Response({
                 'message': 'Profile picture uploaded successfully',
-                'profile_picture_url': request_url
+                'profile_picture_url': profile.image_field_picture.url if profile.image_field_picture else None
             })
-
-        return Response({'error': 'No profile picture provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(
+            {'error': 'No profile picture provided'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
         
     except Exception as e:
         return Response(
@@ -712,14 +651,10 @@ def upload_background_image(request):
         if 'background_image' in request.FILES:
             profile.background_image = request.FILES['background_image']
             profile.save()
-            request_url = profile.background_image.url if profile.background_image else None
-            # Build absolute uri if request available
-            if request and getattr(request, 'build_absolute_uri', None) and request_url:
-                request_url = request.build_absolute_uri(request_url)
-
+            
             return Response({
                 'message': 'Background image uploaded successfully',
-                'background_image_url': request_url
+                'background_image_url': profile.background_image.url if profile.background_image else None
             })
         
         return Response(
@@ -990,49 +925,6 @@ def job_recommendations(request):
             {'error': f'Failed to fetch job recommendations: {str(e)}'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-
-@api_view(['PUT', 'POST'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-def update_candidate_strengths(request):
-    """Update the CandidateSearchProfile.strengths list for the authenticated user.
-
-    Accepts JSON body with `strengths`: either a list of strings or a single
-    string (comma/newline separated). Returns the updated CandidateSearchProfile.
-    """
-    try:
-        profile, _ = EmployeeProfile.objects.get_or_create(user=request.user)
-        candidate_profile, _ = CandidateSearchProfile.objects.get_or_create(employee=profile)
-
-        strengths = request.data.get('strengths')
-        if strengths is None:
-            return Response({'error': 'Missing `strengths` in request body'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Normalize strengths into a list of trimmed strings
-        if isinstance(strengths, str):
-            # split on commas or newlines
-            parts = [s.strip() for s in strengths.replace('\r', '\n').split('\n') if s.strip()]
-            # if comma separated in single line, split further
-            if len(parts) == 1 and ',' in parts[0]:
-                parts = [s.strip() for s in parts[0].split(',') if s.strip()]
-            normalized = parts
-        elif isinstance(strengths, list):
-            normalized = [str(s).strip() for s in strengths if str(s).strip()]
-        else:
-            return Response({'error': '`strengths` must be a list or string'}, status=status.HTTP_400_BAD_REQUEST)
-
-        candidate_profile.strengths = normalized
-        candidate_profile.save()
-
-        serializer = CandidateSearchProfileSerializer(candidate_profile, context={'request': request})
-        return Response({'message': 'Strengths updated successfully', 'candidate_profile': serializer.data})
-
-    except Exception as e:
-        import traceback
-        print(f"Failed to update strengths: {str(e)}")
-        print(traceback.format_exc())
-        return Response({'error': f'Failed to update strengths: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])

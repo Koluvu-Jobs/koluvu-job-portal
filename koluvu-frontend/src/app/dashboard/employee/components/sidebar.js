@@ -195,13 +195,19 @@ const Sidebar = ({
     }
 
     // Handle nested pages that should map to a sidebar section even without a tab param
-    if (pathname.startsWith(`${baseEmployeePath}/resume-builder`) || pathname.includes("/resume-builder")) {
+    if (
+      pathname.startsWith(`${baseEmployeePath}/resume-builder`) ||
+      pathname.includes("/resume-builder")
+    ) {
       // resume-builder pages belong to the Applications / Resume section
       setActiveTab("applications");
       return;
     }
 
-    if (pathname.startsWith(`${baseEmployeePath}/mock-interview`) || pathname.includes("/mock-interview")) {
+    if (
+      pathname.startsWith(`${baseEmployeePath}/mock-interview`) ||
+      pathname.includes("/mock-interview")
+    ) {
       setActiveTab("interview");
       return;
     }
@@ -230,9 +236,10 @@ const Sidebar = ({
       localStorage.setItem("sidebarActiveTab", itemId);
 
       // Handle navigation based on item type
-      const path = item.id === "settings" 
-        ? `/dashboard/employee/${username}/settings` // Use full path for settings
-        : item.external || item.id === "interview"
+      const path =
+        item.id === "settings"
+          ? `/dashboard/employee/${username}/settings` // Use full path for settings
+          : item.external || item.id === "interview"
           ? item.path // Use provided path for external routes
           : `${item.path}`; // Use path as is for internal routes
 
@@ -246,14 +253,14 @@ const Sidebar = ({
 
   const handleLogout = async () => {
     try {
-      await logout();
-      router.push("/auth/login/employee");
+      await logout("/");
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
       // Force redirect even if logout fails
       localStorage.clear();
       sessionStorage.clear();
-      router.push("/auth/login/employee");
+      router.push("/");
     }
   };
 

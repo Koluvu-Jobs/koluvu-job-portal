@@ -141,20 +141,6 @@ def generate_sse_response(user_id):
     
     return event_stream()
 
-
-# Compatibility wrapper for older callers that expect `broadcast_to_user`
-def broadcast_to_user(user_id, notification_data):
-    """Backwards-compatible function name used by signal handlers.
-
-    Historically other modules imported `broadcast_to_user` from this
-    module. Internally we use NotificationManager; expose a thin wrapper
-    to avoid ImportError when older code imports the name.
-    """
-    try:
-        NotificationManager.send_notification_to_user(user_id, notification_data)
-    except Exception as e:
-        logger.error(f"Error in broadcast_to_user wrapper for user {user_id}: {e}")
-
 @method_decorator(csrf_exempt, name='dispatch')
 class NotificationStreamView(View):
     """Server-Sent Events endpoint for real-time notifications"""

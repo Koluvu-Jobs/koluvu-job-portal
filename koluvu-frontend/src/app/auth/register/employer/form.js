@@ -402,7 +402,12 @@ export default function EmployerRegistrationForm() {
       }
 
       localStorage.removeItem(FORM_CACHE_KEY);
-      router.push("/auth/login/employer?registered=true");
+
+      // Extract username from response or email
+      const username = data.username || formData.email.split("@")[0];
+
+      // Redirect to profile setup page instead of login
+      router.push(`/dashboard/employer/${username}/setup-profile`);
     } catch (error) {
       console.error("Registration failed:", error);
       setSubmitError(error.message || "Registration failed. Please try again.");
@@ -455,8 +460,18 @@ export default function EmployerRegistrationForm() {
         login(result);
         toast.success("Successfully signed in with Google!");
 
-        // Redirect to employer dashboard
-        const redirectPath = getRedirectPath(USER_TYPES.EMPLOYER, result);
+        // Check if profile exists - if new user, redirect to setup, else dashboard
+        const username = result.username;
+
+        // For new Google OAuth users, redirect to setup-profile
+        // You can detect this from backend response or profile_completion_percentage
+        const isNewUser =
+          result.is_new_user || result.profile_completion_percentage === 0;
+
+        const redirectPath = isNewUser
+          ? `/dashboard/employer/${username}/setup-profile`
+          : getRedirectPath(USER_TYPES.EMPLOYER, username);
+
         console.log("Redirecting to:", redirectPath);
         router.push(redirectPath);
       } catch (error) {

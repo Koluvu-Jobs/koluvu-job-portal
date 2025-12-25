@@ -13,7 +13,6 @@ import {
   Users,
   Wrench,
   ClipboardList,
-  IdCard,
   CreditCard as CreditCardIcon,
   HelpCircle,
   Search,
@@ -148,13 +147,6 @@ const Sidebar = ({
       tabName: "Candidate Status",
     },
     {
-      id: "verification",
-      label: "Verification",
-      icon: IdCard,
-      path: `/dashboard/employer/${username}?tab=verification`,
-      tabName: "Verification",
-    },
-    {
       id: "subscription-plans",
       label: "Subscription Plans",
       icon: CreditCardIcon,
@@ -187,24 +179,10 @@ const Sidebar = ({
     },
   };
 
-  useEffect(() => {
-    // Set active tab based on current path
-    const currentTab =
-      menuItems.find(
-        (item) =>
-          pathname === item.path ||
-          (item.id === "dashboard" &&
-            (pathname === "/dashboard/employer" ||
-              pathname === `/dashboard/employer/${username}`))
-      )?.id || "dashboard";
-    setActiveTab && setActiveTab(currentTab);
-  }, [pathname, setActiveTab]);
-
   const handleItemClick = (itemId) => {
     const item = menuItems.find((i) => i.id === itemId);
     if (item) {
       setActiveTab && setActiveTab(itemId);
-      localStorage.setItem("sidebarActiveTab", itemId);
 
       // For external routes (like active-jobs, expired-jobs), navigate normally
       if (item.external) {

@@ -164,24 +164,24 @@ const PostTrainingPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 bg-gradient-to-b from-blue-50 to-purple-50 min-h-screen">
-      <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">
+    <div className="w-full px-2 sm:px-4 py-4 sm:py-6 md:py-8 bg-gradient-to-b from-blue-50 to-purple-50 min-h-screen">
+      <div className="max-w-6xl mx-auto bg-white rounded-lg sm:rounded-xl shadow-lg sm:shadow-xl overflow-hidden border border-gray-100">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-6 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-4 sm:p-6 text-white relative overflow-hidden">
           <div className="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-purple-500 opacity-20"></div>
           <div className="absolute -right-5 -bottom-5 w-20 h-20 rounded-full bg-indigo-500 opacity-20"></div>
           <div className="relative z-10">
-            <h1 className="text-3xl font-bold">Training Course Registration</h1>
-            <p className="text-purple-100 mt-2 text-base">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Training Course Registration</h1>
+            <p className="text-purple-100 mt-1 sm:mt-2 text-sm sm:text-base">
               Submit your training course details for approval
             </p>
           </div>
         </div>
 
         {/* Step Navigation */}
-        <div className="px-6 pt-6 pb-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
+        <div className="px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
           <div className="flex justify-between items-center relative">
-            <div className="absolute top-5 left-0 right-0 h-2 bg-gray-200 z-0 mx-16 rounded-full">
+            <div className="absolute top-5 left-0 right-0 h-1 sm:h-2 bg-gray-200 z-0 mx-8 sm:mx-16 rounded-full">
               <div
                 className="h-full bg-gradient-to-r from-purple-400 to-indigo-500 transition-all duration-500 rounded-full"
                 style={{ width: `${(step - 1) * 25}%` }}
@@ -200,22 +200,22 @@ const PostTrainingPage = () => {
         </div>
 
         {/* Form Content */}
-        <div className="p-6 md:p-8">
+        <div className="p-3 sm:p-4 md:p-6 lg:p-8">
           {step === 1 && (
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               <div>
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 flex items-center">
+                  <span className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center mr-2 sm:mr-3 text-sm sm:text-base">
                     1
                   </span>
                   Institute & Course Information
                 </h2>
-                <p className="text-gray-500 text-base mt-2 ml-11">
+                <p className="text-gray-500 text-sm sm:text-base mt-2 ml-8 sm:ml-11">
                   Tell us about your institute and the course you're offering
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div className="bg-gradient-to-br from-white to-blue-50 p-4 rounded-lg border border-blue-100">
                   <Label className="text-gray-700 font-medium flex items-center">
                     <span className="text-purple-500 mr-1">*</span>Institute

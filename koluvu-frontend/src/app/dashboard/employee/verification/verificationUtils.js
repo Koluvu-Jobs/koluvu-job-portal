@@ -38,7 +38,7 @@ export const validateFile = (file, maxSizeMB = 5) => {
 export const verificationPrices = {
   uan: 49,
   form16: 49,
-  fresher: 19,
+  fresher: 9,
   badge: 9
 };
 

@@ -473,13 +473,13 @@ const CoursesOfferedPage = () => {
 
   return (
     <Card className="bg-white rounded-xl shadow-sm">
-      <CardContent className="p-6">
-        <div className="mb-10 text-center">
+      <CardContent className="p-2 sm:p-4 md:p-6">
+        <div className="mb-6 sm:mb-8 md:mb-10 text-center">
           <div className="relative">
-            <h2 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-3">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2 sm:mb-3">
               Explore Our Courses
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
               Discover professional courses designed to boost your career
             </p>
             <div className="absolute top-0 right-0 hidden md:block">
@@ -529,13 +529,13 @@ const CoursesOfferedPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
           {courses.map((course) => (
             <div
               key={course.id}
               className={`${course.cardColor} rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 border ${course.borderColor}`}
             >
-              <div className="p-5 border-b border-gray-100">
+              <div className="p-3 sm:p-4 md:p-5 border-b border-gray-100">
                 <div className="flex justify-between items-start">
                   <div>
                     <span
@@ -543,7 +543,7 @@ const CoursesOfferedPage = () => {
                     >
                       {course.category}
                     </span>
-                    <h3 className="text-xl font-bold text-gray-900">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900">
                       {course.title}
                     </h3>
                   </div>
@@ -561,7 +561,7 @@ const CoursesOfferedPage = () => {
                 </div>
               </div>
 
-              <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-3 sm:p-4 md:p-5 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
                 <div>
                   <div className="space-y-4">
                     <div className="flex items-start">
@@ -754,12 +754,12 @@ const CoursesOfferedPage = () => {
 
         {/* View Course Details Modal */}
         {viewCourse && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-start justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl my-8 mx-auto">
-              <div className="sticky top-0 bg-white z-10 border-b border-gray-200 p-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl my-4 sm:my-8 mx-auto">
+              <div className="sticky top-0 bg-white z-10 border-b border-gray-200 p-4 sm:p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                       {viewCourse.title}
                     </h2>
                     <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -807,11 +807,11 @@ const CoursesOfferedPage = () => {
                 </div>
               </div>
 
-              <div className="p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="space-y-8">
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+                  <div className="space-y-6 sm:space-y-8">
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
                         Course Description
                       </h3>
                       <p className="text-gray-700 leading-relaxed">
@@ -939,15 +939,15 @@ const CoursesOfferedPage = () => {
 
         {/* Enrollment Modal */}
         {enrollCourse && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-start justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md my-8 mx-auto">
-              <div className="sticky top-0 bg-white z-10 border-b border-gray-200 p-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md my-4 sm:my-8 mx-auto">
+              <div className="sticky top-0 bg-white z-10 border-b border-gray-200 p-4 sm:p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-lg sm:text-xl font-bold text-gray-900">
                       Enroll in {enrollCourse.title}
                     </h2>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-xs sm:text-sm text-gray-600 mt-1">
                       Complete the form to secure your spot
                     </p>
                   </div>
@@ -974,8 +974,8 @@ const CoursesOfferedPage = () => {
                 </div>
               </div>
 
-              <div className="p-6">
-                <form onSubmit={handleEnrollmentSubmit} className="space-y-5">
+              <div className="p-4 sm:p-6">
+                <form onSubmit={handleEnrollmentSubmit} className="space-y-4 sm:space-y-5">
                   <div>
                     <label
                       htmlFor="name"
@@ -1069,15 +1069,15 @@ const CoursesOfferedPage = () => {
 
         {/* Add Course Modal */}
         {addCourseModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-start justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl my-8 mx-auto">
-              <div className="sticky top-0 bg-white z-10 border-b border-gray-200 p-6">
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-[1000] flex items-start justify-center p-2 sm:p-4 overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl my-4 sm:my-8 mx-auto">
+              <div className="sticky top-0 bg-white z-10 border-b border-gray-200 p-4 sm:p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-pink-600 mb-1">
+                    <h2 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-pink-600 mb-1">
                       Add a New Course
                     </h2>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-xs sm:text-sm text-gray-600">
                       Fill out the details to add a new course to the list.
                     </p>
                   </div>
@@ -1104,9 +1104,9 @@ const CoursesOfferedPage = () => {
                 </div>
               </div>
 
-              <div className="p-6 bg-gradient-to-br from-blue-50 to-purple-50">
-                <form onSubmit={handleAddCourseSubmit} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="p-4 sm:p-6 bg-gradient-to-br from-blue-50 to-purple-50">
+                <form onSubmit={handleAddCourseSubmit} className="space-y-4 sm:space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                     <div>
                       <label
                         htmlFor="title"

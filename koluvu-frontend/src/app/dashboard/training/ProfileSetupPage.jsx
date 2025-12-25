@@ -386,7 +386,7 @@ const ProfileSetupPage = () => {
         <div className="text-center">
           <FontAwesomeIcon
             icon={faSpinner}
-            className="text-4xl text-blue-600 animate-spin mb-4"
+            className="text-4xl text-gray-600 animate-spin mb-4"
           />
           <p className="text-gray-600">Loading your profile...</p>
         </div>
@@ -395,23 +395,23 @@ const ProfileSetupPage = () => {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-6 space-y-6">
+    <div className="w-full max-w-5xl mx-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Setup</h1>
-        <p className="text-gray-600">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Profile Setup</h1>
+        <p className="text-sm sm:text-base text-gray-600">
           Create or update your training provider profile with your organization
           details, qualifications, and certificates.
         </p>
       </div>
 
       {/* Main Form */}
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
         {/* Organization Information Section */}
         <Card className="shadow-md border border-gray-200">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b border-gray-200">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <FontAwesomeIcon icon={faBuilding} className="text-blue-600" />
+          <CardHeader className="bg-white border-b border-gray-200 p-4 sm:p-6">
+            <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl text-gray-800">
+              <FontAwesomeIcon icon={faBuilding} className="text-gray-600" />
               Organization Information
             </CardTitle>
           </CardHeader>
@@ -425,7 +425,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faBuilding}
-                    className="w-4 h-4 text-blue-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Organization Name <span className="text-red-500">*</span>
                 </Label>
@@ -461,7 +461,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faUser}
-                    className="w-4 h-4 text-blue-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Contact Person <span className="text-red-500">*</span>
                 </Label>
@@ -495,7 +495,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faPhone}
-                    className="w-4 h-4 text-blue-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Phone Number <span className="text-red-500">*</span>
                 </Label>
@@ -529,7 +529,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faGlobe}
-                    className="w-4 h-4 text-blue-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Website <span className="text-red-500">*</span>
                 </Label>
@@ -564,7 +564,7 @@ const ProfileSetupPage = () => {
               >
                 <FontAwesomeIcon
                   icon={faMapMarkerAlt}
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 text-gray-600"
                 />
                 Address <span className="text-red-500">*</span>
               </Label>
@@ -594,11 +594,11 @@ const ProfileSetupPage = () => {
 
         {/* Qualifications Section */}
         <Card className="shadow-md border border-gray-200">
-          <CardHeader className="bg-gradient-to-r from-purple-50 to-purple-100 border-b border-gray-200">
-            <CardTitle className="flex items-center gap-3 text-xl">
+          <CardHeader className="bg-white border-b border-gray-200 p-4 sm:p-6">
+            <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl text-gray-800">
               <FontAwesomeIcon
                 icon={faCertificate}
-                className="text-purple-600"
+                className="text-gray-600"
               />
               Qualifications & Specializations
             </CardTitle>
@@ -613,7 +613,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faStar}
-                    className="w-4 h-4 text-purple-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Area of Specialization (Optional)
                 </Label>
@@ -636,7 +636,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faCheck}
-                    className="w-4 h-4 text-purple-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Certification Number (Optional)
                 </Label>
@@ -656,9 +656,9 @@ const ProfileSetupPage = () => {
 
         {/* Organization Details Section */}
         <Card className="shadow-md border border-gray-200">
-          <CardHeader className="bg-gradient-to-r from-indigo-50 to-indigo-100 border-b border-gray-200">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <FontAwesomeIcon icon={faBuilding} className="text-indigo-600" />
+          <CardHeader className="bg-white border-b border-gray-200 p-4 sm:p-6">
+            <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl text-gray-800">
+              <FontAwesomeIcon icon={faBuilding} className="text-gray-600" />
               Organization Details
             </CardTitle>
           </CardHeader>
@@ -671,7 +671,7 @@ const ProfileSetupPage = () => {
               >
                 <FontAwesomeIcon
                   icon={faUser}
-                  className="w-4 h-4 text-indigo-600"
+                  className="w-4 h-4 text-gray-600"
                 />
                 Organization Description (Optional)
               </Label>
@@ -695,7 +695,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faStar}
-                    className="w-4 h-4 text-indigo-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Years of Experience
                 </Label>
@@ -720,7 +720,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faBuilding}
-                    className="w-4 h-4 text-indigo-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Founded Year
                 </Label>
@@ -745,7 +745,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faUser}
-                    className="w-4 h-4 text-indigo-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Team Size
                 </Label>
@@ -770,7 +770,7 @@ const ProfileSetupPage = () => {
               >
                 <FontAwesomeIcon
                   icon={faCertificate}
-                  className="w-4 h-4 text-indigo-600"
+                  className="w-4 h-4 text-gray-600"
                 />
                 Key Qualifications & Certifications (Optional)
               </Label>
@@ -789,9 +789,9 @@ const ProfileSetupPage = () => {
 
         {/* Social Media Section */}
         <Card className="shadow-md border border-gray-200">
-          <CardHeader className="bg-gradient-to-r from-pink-50 to-pink-100 border-b border-gray-200">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <FontAwesomeIcon icon={faGlobe} className="text-pink-600" />
+          <CardHeader className="bg-white border-b border-gray-200 p-4 sm:p-6">
+            <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl text-gray-800">
+              <FontAwesomeIcon icon={faGlobe} className="text-gray-600" />
               Social Media & Online Presence
             </CardTitle>
           </CardHeader>
@@ -805,7 +805,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faGlobe}
-                    className="w-4 h-4 text-pink-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   LinkedIn Profile/Company Page
                 </Label>
@@ -828,7 +828,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faGlobe}
-                    className="w-4 h-4 text-pink-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Facebook Page
                 </Label>
@@ -851,7 +851,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faGlobe}
-                    className="w-4 h-4 text-pink-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   Twitter/X Profile
                 </Label>
@@ -874,7 +874,7 @@ const ProfileSetupPage = () => {
                 >
                   <FontAwesomeIcon
                     icon={faGlobe}
-                    className="w-4 h-4 text-pink-600"
+                    className="w-4 h-4 text-gray-600"
                   />
                   YouTube Channel
                 </Label>
@@ -894,14 +894,14 @@ const ProfileSetupPage = () => {
 
         {/* Logo Section */}
         <Card className="shadow-md border border-gray-200">
-          <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b border-gray-200">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <FontAwesomeIcon icon={faUpload} className="text-green-600" />
+          <CardHeader className="bg-white border-b border-gray-200 p-4 sm:p-6">
+            <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl text-gray-800">
+              <FontAwesomeIcon icon={faUpload} className="text-gray-600" />
               Organization Logo
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <div className="flex items-center gap-6">
+          <CardContent className="p-3 sm:p-4 md:p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
               {/* Logo Preview */}
               <div className="flex-shrink-0">
                 <div className="w-32 h-32 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
@@ -954,20 +954,20 @@ const ProfileSetupPage = () => {
         </Card>
 
         {/* Submit Button */}
-        <div className="flex justify-end gap-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4">
           <Button
             type="button"
             variant="outline"
             onClick={() => fetchProfile()}
             disabled={saving}
-            className="px-6 py-2"
+            className="px-4 sm:px-6 py-2 w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button
             type="submit"
             disabled={saving}
-            className="px-8 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg flex items-center gap-2"
+            className="px-6 sm:px-8 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             {saving ? (
               <>
@@ -991,7 +991,7 @@ const ProfileSetupPage = () => {
           <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
             <FontAwesomeIcon
               icon={faCheck}
-              className="text-green-600 text-lg mt-1 flex-shrink-0"
+              className="text-gray-600 text-lg mt-1 flex-shrink-0"
             />
             <div>
               <h3 className="font-semibold text-green-900">Profile Complete</h3>

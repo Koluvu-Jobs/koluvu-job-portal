@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'channels',
     # OTP System
     'django_otp',
     'django_otp.plugins.otp_totp',
@@ -87,8 +86,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 
-# Disable automatic slash appending to fix API routing issues
-APPEND_SLASH = False
+# Enable automatic slash appending for proper URL matching
+APPEND_SLASH = True
 
 ROOT_URLCONF = 'core.urls'
 
@@ -109,7 +108,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
-ASGI_APPLICATION = 'core.asgi.application'
 
 # Database
 if DEBUG:
@@ -238,13 +236,6 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
         'LOCATION': 'unique-snowflake',
-    }
-}
-
-# Channels (WebSocket) settings - in-memory for development. For production, use Redis.
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer'
     }
 }
 

@@ -18,15 +18,10 @@ class EmployeeProfileSerializer(serializers.ModelSerializer):
     google_profile_picture = serializers.SerializerMethodField()
     skills_list = serializers.SerializerMethodField()
     effective_profile_picture = serializers.SerializerMethodField()
-    background_image = serializers.SerializerMethodField()
-    public_id = serializers.UUIDField(read_only=True)
-    public_identifier = serializers.CharField(read_only=True)
     
     class Meta:
         model = EmployeeProfile
         fields = [
-            'public_id',
-            'public_identifier',
             'id', 'username', 'email', 'first_name', 'last_name', 'full_name',
             'phone_number', 'phone', 'date_of_birth', 'location', 
             'linkedin_url', 'linkedin_profile', 'github_url', 'github_profile', 
@@ -92,16 +87,6 @@ class EmployeeProfileSerializer(serializers.ModelSerializer):
             
         # Fall back to profile_picture field (URL)
         return obj.profile_picture if obj.profile_picture else None
-
-
-    def get_background_image(self, obj):
-        """Return absolute URL for background image when possible"""
-        if obj.background_image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.background_image.url)
-            return obj.background_image.url
-        return None
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -272,8 +257,6 @@ class ResumeSerializer(serializers.ModelSerializer):
 
 class ResumeBuilderSerializer(serializers.ModelSerializer):
     """Enhanced serializer for resume builder functionality"""
-    # Allow template to be omitted or explicitly null from clients
-    template = serializers.CharField(allow_null=True, required=False)
     file_url = serializers.SerializerMethodField()
     file_size = serializers.SerializerMethodField()
     completion_percentage = serializers.SerializerMethodField()
@@ -357,18 +340,6 @@ class ResumeBuilderSerializer(serializers.ModelSerializer):
         if value and not isinstance(value, list):
             raise serializers.ValidationError("Experience data must be a list")
         return value
-
-    def create(self, validated_data):
-        # Ensure template is not None when saving to DB (model enforces non-null)
-        if validated_data.get('template') is None:
-            validated_data['template'] = 'modern'
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        # Default template if client provided null
-        if 'template' in validated_data and validated_data.get('template') is None:
-            validated_data['template'] = instance.template or 'modern'
-        return super().update(instance, validated_data)
 
 
 class ResumeTemplateSerializer(serializers.ModelSerializer):
@@ -569,7 +540,7 @@ class CandidateSearchProfileSerializer(serializers.ModelSerializer):
             'id', 'name', 'designation', 'department', 'industry', 'key_skills',
             'experience', 'location', 'present_ctc', 'expected_ctc', 'notice_period',
             'preferred_location', 'actively_looking', 'profile_picture', 'contact',
-            'education', 'languages', 'achievements', 'strengths', 'projects', 'achievement_details',
+            'education', 'languages', 'achievements', 'projects', 'achievement_details',
             'availability_schedule', 'last_active', 'last_active_display', 
             'match_score', 'is_searchable'
         ]

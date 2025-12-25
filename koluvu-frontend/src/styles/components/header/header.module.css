@@ -40,13 +40,15 @@
   width: 100%;
   padding: var(--spacing-unit) clamp(1rem, 3vw, 2rem);
   min-height: var(--header-height);
+  gap: 1rem;
 }
 /* Logo Section */
 .logoContainer {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-right: auto;
+  flex-shrink: 0;
+  padding-left: clamp(0.5rem, 1vw, 1rem);
 }
 
 .logoLink {
@@ -133,13 +135,14 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
+  /* Enhanced glass morphism */
+  background: rgba(255, 255, 255, 0.12);
   padding: 0.25rem;
   border-radius: 40px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 20px rgba(0, 0, 0, 0.1);
   white-space: nowrap;
 }
 
@@ -235,6 +238,8 @@
   gap: 0.75rem;
   align-items: center;
   justify-content: flex-end;
+  flex-shrink: 0;
+  padding-right: clamp(0.5rem, 1vw, 1rem);
 }
 
 @media (min-width: 1201px) {
@@ -247,17 +252,22 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  padding: 0.5rem 1rem;
-  background: #28a745;
+  justify-content: center;
+  padding: 0.6rem 1.25rem;
+  /* Glass morphism effect */
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.85) 0%, rgba(32, 201, 151, 0.85) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   color: white;
   text-decoration: none;
   font-weight: 600;
-  border-radius: 20px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 25px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: clamp(13px, 1.4vw, 15px);
   overflow: hidden;
-  box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
-  border: 2px solid transparent;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  min-width: 100px;
 }
 
 .authButton::before {
@@ -270,7 +280,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.4),
     transparent
   );
   transition: left 0.6s ease;
@@ -281,14 +291,15 @@
 }
 
 .authButton:hover {
-  background: #218838;
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(33, 136, 56, 0.95) 0%, rgba(26, 161, 121, 0.95) 100%);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 30px rgba(40, 167, 69, 0.5), 0 0 25px rgba(40, 167, 69, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .authButton:active {
-  transform: translateY(-1px) scale(1.01);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
 }
 
 /* Mobile Menu Button */

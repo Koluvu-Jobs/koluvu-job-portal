@@ -204,11 +204,11 @@ const AnimatedEventCard = ({ event, index }) => {
   const getBadgeStyle = (badge) => {
     switch (badge) {
       case "New":
-        return "bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-lg shadow-green-400/25";
+        return "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg shadow-green-400/25";
       case "Coming Soon":
-        return "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg shadow-yellow-400/25";
+        return "bg-gradient-to-r from-orange-400 to-orange-500 text-white shadow-lg shadow-orange-400/25";
       case "Featured":
-        return "bg-gradient-to-r from-purple-400 to-pink-500 text-white shadow-lg shadow-purple-400/25";
+        return "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-400/25";
       default:
         return "bg-gradient-to-r from-blue-400 to-blue-500 text-white shadow-lg shadow-blue-400/25";
     }
@@ -217,7 +217,7 @@ const AnimatedEventCard = ({ event, index }) => {
   return (
     <div
       ref={cardRef}
-      className={`relative group p-3 md:p-4 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-purple-50/50 rounded-xl transition-all duration-500 border-b border-gray-100 last:border-0 cursor-pointer transform hover:scale-[1.02] ${
+      className={`relative group p-3 md:p-4 hover:bg-slate-50 rounded-xl transition-all duration-500 border-b border-gray-100 last:border-0 cursor-pointer transform hover:scale-[1.02] ${
         isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
       }`}
       style={{ animationDelay: `${index * 150}ms` }}
@@ -225,7 +225,7 @@ const AnimatedEventCard = ({ event, index }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Hover glow effect */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-blue-400/0 to-purple-400/0 group-hover:from-blue-400/10 group-hover:to-purple-400/10 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+      <div className="absolute -inset-1 bg-orange-50/50 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
 
       <div className="relative">
         {/* Header with date and badge */}
@@ -253,7 +253,7 @@ const AnimatedEventCard = ({ event, index }) => {
         {/* Event title with animation */}
         <h4 className="font-semibold text-sm text-gray-900 mb-2 group-hover:text-gray-800 transition-colors duration-300">
           {event.title}
-          <div className="w-0 group-hover:w-full h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 transition-all duration-500 mt-1"></div>
+          <div className="w-0 group-hover:w-full h-0.5 bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-500 mt-1"></div>
         </h4>
 
         {/* Location with icon */}
@@ -279,7 +279,7 @@ const AnimatedEventCard = ({ event, index }) => {
         </Link>
 
         {/* Progress indicator */}
-        <div className="absolute left-0 top-0 w-1 h-0 bg-gradient-to-b from-blue-400 to-purple-400 group-hover:h-full transition-all duration-500 rounded-r-full"></div>
+        <div className="absolute left-0 top-0 w-1 h-0 bg-gradient-to-b from-orange-400 to-orange-500 group-hover:h-full transition-all duration-500 rounded-r-full"></div>
       </div>
     </div>
   );
@@ -320,19 +320,19 @@ const AnimatedQuickLink = ({ link, index }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Background gradient on hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-50/0 via-purple-50/0 to-pink-50/0 group-hover:from-blue-50/80 group-hover:via-purple-50/40 group-hover:to-pink-50/80 transition-all duration-500"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-orange-50/0 via-orange-50/0 to-orange-50/0 group-hover:from-orange-50/80 group-hover:via-orange-50/40 group-hover:to-orange-50/80 transition-all duration-500"></div>
 
       {/* Animated border */}
       <div className="absolute inset-0 border border-transparent group-hover:border-blue-200/50 rounded-xl transition-all duration-500"></div>
 
       {/* Icon container with enhanced animations */}
       <div className="relative">
-        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600 flex items-center justify-center group-hover:from-blue-500 group-hover:to-blue-600 group-hover:text-white transition-all duration-500 transform group-hover:rotate-3 group-hover:scale-110">
+        <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-orange-100 to-orange-200 text-orange-600 flex items-center justify-center group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition-all duration-500 transform group-hover:rotate-3 group-hover:scale-110">
           {link.icon}
 
           {/* Pulse effect on hover */}
           {isHovered && (
-            <div className="absolute inset-0 rounded-xl bg-blue-400/30 animate-ping"></div>
+            <div className="absolute inset-0 rounded-xl bg-orange-400/30 animate-ping"></div>
           )}
         </div>
 
@@ -349,22 +349,22 @@ const AnimatedQuickLink = ({ link, index }) => {
         </span>
 
         {/* Animated underline */}
-        <div className="w-0 group-hover:w-full h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 transition-all duration-500 mt-1"></div>
+        <div className="w-0 group-hover:w-full h-0.5 bg-gradient-to-r from-orange-400 to-orange-500 transition-all duration-500 mt-1"></div>
       </div>
 
       {/* Arrow with animation */}
       <div className="relative">
-        <ArrowRight className="h-4 w-4 md:h-5 md:w-5 text-gray-400 group-hover:text-blue-600 transform group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300" />
+        <ArrowRight className="h-4 w-4 md:h-5 md:w-5 text-gray-400 group-hover:text-orange-600 transform group-hover:translate-x-1 group-hover:scale-110 transition-all duration-300" />
 
         {/* Trail effect */}
         {isHovered && (
-          <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-blue-400 rounded-full animate-pulse"></div>
+          <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-1 h-1 bg-orange-400 rounded-full animate-pulse"></div>
         )}
       </div>
 
       {/* Ripple effect on click */}
       <div className="absolute inset-0 rounded-xl overflow-hidden">
-        <div className="absolute inset-0 transform scale-0 group-active:scale-100 bg-blue-400/20 transition-transform duration-200 rounded-xl"></div>
+        <div className="absolute inset-0 transform scale-0 group-active:scale-100 bg-orange-400/20 transition-transform duration-200 rounded-xl"></div>
       </div>
     </Link>
   );
@@ -383,7 +383,7 @@ const imageCards = [
     title: "Resume Building",
     src: "/images/resume_building.jpg",
     desc: "Learn how to create a resume that stands out",
-    gradient: "bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700",
+    gradient: "bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700",
   },
   {
     id: 3,
@@ -404,14 +404,14 @@ const imageCards = [
     title: "HR Threads",
     src: "/images/hr_threads.jpg",
     desc: "Insights and discussions from HR professionals",
-    gradient: "bg-gradient-to-br from-red-500 via-red-600 to-red-700",
+    gradient: "bg-gradient-to-br from-green-500 via-green-600 to-green-700",
   },
   {
     id: 6,
     title: "Interview Tips",
     src: "/images/interview_tips.jpg",
     desc: "Master your interview skills with proven techniques",
-    gradient: "bg-gradient-to-br from-indigo-500 via-indigo-600 to-indigo-700",
+    gradient: "bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700",
   },
 ];
 

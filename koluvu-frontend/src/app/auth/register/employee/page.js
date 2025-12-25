@@ -24,18 +24,10 @@ import { getRedirectPath, USER_TYPES } from "@/utils/auth";
 import CaptchaVerification, {
   verifyCaptchaValue,
 } from "@koluvu/components/auth/CaptchaVerification";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 export default function EmployeeRegistration() {
   const router = useRouter();
-  const { login } = useAuth();
-
-  // Apply authentication guard
-  const { isAllowed } = useAuthGuard("employee-register", {
-    enableRedirect: true,
-    showError: true,
-  });
-
+  const { login, user, userType, loading: authLoading } = useAuth();
   const [captchaValue, setCaptchaValue] = useState("");
   const [captchaKey, setCaptchaKey] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -47,6 +39,17 @@ export default function EmployeeRegistration() {
 
   useEffect(() => {
     setIsClient(true);
+
+    // Redirect authenticated users to their dashboard
+    if (!authLoading && user && userType) {
+      const redirectPath = getRedirectPath(userType, user.username);
+      console.log(
+        `Authenticated ${userType} accessing employee registration. Redirecting to:`,
+        redirectPath
+      );
+      router.push(redirectPath);
+      return;
+    }
 
     // Handle video autoplay
     const video = videoRef.current;
@@ -62,7 +65,7 @@ export default function EmployeeRegistration() {
           });
       }
     }
-  }, []);
+  }, [authLoading, user, userType, router]);
 
   const handleCaptchaChange = (value, key) => {
     setCaptchaValue(value);
@@ -117,7 +120,10 @@ export default function EmployeeRegistration() {
         toast.success("Successfully signed in with Google!");
 
         // Redirect to employee dashboard
-        const redirectPath = getRedirectPath(USER_TYPES.EMPLOYEE, result);
+        const redirectPath = getRedirectPath(
+          USER_TYPES.EMPLOYEE,
+          result.username
+        );
         console.log("Redirecting to:", redirectPath);
         router.push(redirectPath);
       } catch (error) {
@@ -150,11 +156,6 @@ export default function EmployeeRegistration() {
       toast(`${provider} authentication not configured!`);
     }
   };
-
-  // Show loading or redirect if not allowed
-  if (!isAllowed) {
-    return null; // Auth guard handles redirect
-  }
 
   return (
     <div className="min-h-screen flex flex-col">

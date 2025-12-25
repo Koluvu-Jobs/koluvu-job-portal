@@ -58,11 +58,16 @@ export async function POST(request) {
 
     const body = await request.json();
 
+    console.log("=== ROUTE.JS DEBUG - RECEIVED FROM FRONTEND ===");
+    console.log("Body keys:", Object.keys(body));
+    console.log("Full body:", JSON.stringify(body, null, 2));
+
     // Transform frontend field names to backend field names
     const transformedBody = {
       // Basic job information
       title: body.title || body.jobTitle,
-      job_type: body.job_type || body.jobType,
+      // Map employment_type and jobType to job_type (the actual Django field)
+      job_type: body.job_type || body.jobType || body.employment_type,
       designation: body.designation,
       department: body.department,
       industry: body.industry || body.companyIndustry,
@@ -83,11 +88,24 @@ export async function POST(request) {
       description:
         body.description || body.jobDescription || body.jobBrief || "",
       job_brief: body.job_brief || body.jobBrief || "",
-      responsibilities: body.responsibilities || [],
-      requirements: body.requirements || [],
-      benefits: body.benefits || [],
-      perks: Array.isArray(body.perks) ? body.perks.join('\n') : (body.perks || ''),
-      skills: body.skills || [],
+
+      // Ensure arrays are properly formatted
+      responsibilities: Array.isArray(body.responsibilities)
+        ? body.responsibilities
+        : [],
+
+      // Map both requirements and skills fields
+      requirements: Array.isArray(body.requirements) ? body.requirements : [],
+      skills: Array.isArray(body.skills) ? body.skills : [],
+
+      // Map both benefits and company_benefits fields
+      benefits: Array.isArray(body.benefits) ? body.benefits : [],
+      company_benefits: body.company_benefits || body.companyBenefits || "",
+
+      // Convert perks array to JSON string if needed
+      perks: Array.isArray(body.perks)
+        ? body.perks.join("\n")
+        : body.perks || "",
 
       // Advanced fields
       faqs: body.faqs || [],
@@ -120,7 +138,8 @@ export async function POST(request) {
         return Array.isArray(prefs) ? prefs : [];
       })(),
       notification_preferences: (() => {
-        const prefs = body.notification_preferences || body.notificationPreference || [];
+        const prefs =
+          body.notification_preferences || body.notificationPreference || [];
         return Array.isArray(prefs) ? prefs : [];
       })(),
 
@@ -129,17 +148,16 @@ export async function POST(request) {
       employer_website_url: (() => {
         const url = body.employer_website_url || body.companyWebsite || "";
         // Don't send localhost URLs or invalid URLs
-        if (!url || url.includes('localhost') || url.includes('127.0.0.1')) {
+        if (!url || url.includes("localhost") || url.includes("127.0.0.1")) {
           return "";
         }
         // Ensure URL has proper protocol
-        if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+        if (url && !url.startsWith("http://") && !url.startsWith("https://")) {
           return `https://${url}`;
         }
         return url;
       })(),
       company_size: body.company_size || body.companySize || "",
-      company_benefits: body.company_benefits || body.companyBenefits || "",
 
       // Additional fields
       additional_notes: body.additional_notes || body.additionalNotes || "",
@@ -151,17 +169,27 @@ export async function POST(request) {
       status: body.status || "active",
     };
 
-    console.log("Job POST - Original body keys:", Object.keys(body));
+    console.log("=== ROUTE.JS DEBUG - TRANSFORMED FOR DJANGO ===");
+    console.log("Transformed body keys:", Object.keys(transformedBody));
+    console.log("Field mapping examples:");
     console.log(
-      "Job POST - Transformed body keys:",
-      Object.keys(transformedBody)
+      "  - job_type:",
+      transformedBody.job_type,
+      "(from",
+      body.job_type,
+      body.jobType,
+      body.employment_type,
+      ")"
     );
-    console.log("Job POST - Sample fields:", {
-      job_brief: transformedBody.job_brief,
-      responsibilities: transformedBody.responsibilities,
-      requirements: transformedBody.requirements,
-      faqs: transformedBody.faqs,
-    });
+    console.log("  - responsibilities:", transformedBody.responsibilities);
+    console.log("  - requirements:", transformedBody.requirements);
+    console.log("  - skills:", transformedBody.skills);
+    console.log("  - benefits:", transformedBody.benefits);
+    console.log("  - company_benefits:", transformedBody.company_benefits);
+    console.log(
+      "Full transformed body:",
+      JSON.stringify(transformedBody, null, 2)
+    );
 
     const response = await fetch(`${DJANGO_BASE_URL}/api/employer/jobs/`, {
       method: "POST",
@@ -174,17 +202,21 @@ export async function POST(request) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error("Django backend error:", errorData);
+      console.error("=== DJANGO BACKEND ERROR ===");
+      console.error("Status:", response.status);
+      console.error("Error data:", errorData);
       return NextResponse.json(
-        { 
+        {
           error: errorData.error || errorData.detail || "Failed to create job",
-          details: errorData.details || errorData
+          details: errorData.details || errorData,
         },
         { status: response.status }
       );
     }
 
     const data = await response.json();
+    console.log("=== JOB CREATED SUCCESSFULLY ===");
+    console.log("Created job data:", data);
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
     console.error("Job creation error:", error);

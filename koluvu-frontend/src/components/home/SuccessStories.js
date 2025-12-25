@@ -46,7 +46,7 @@ const ParticleField = () => {
         
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(139, 69, 255, ${particle.opacity})`;
+        ctx.fillStyle = `rgba(249, 115, 22, ${particle.opacity})`;
         ctx.fill();
       });
       
@@ -83,7 +83,7 @@ const FuturisticSuccessStories = () => {
       quote: "Koluvu helped me land my dream job at Google within 2 months of searching! The AI-powered resume screening gave me the edge I needed.",
       avatar: "/stories_images/Rahul_Sharma.jpg",
       stats: { applications: 45, interviews: 12, offers: 3 },
-      gradient: "from-blue-400 to-cyan-500"
+      gradient: "from-blue-400 to-blue-500"
     },
     {
       id: 2,
@@ -93,7 +93,7 @@ const FuturisticSuccessStories = () => {
       quote: "The job recommendations were spot on. Found the perfect role for my skills and the mock interviews prepared me perfectly.",
       avatar: "/stories_images/Priya_Patel.jpg",
       stats: { applications: 32, interviews: 8, offers: 2 },
-      gradient: "from-purple-400 to-pink-500"
+      gradient: "from-orange-400 to-orange-500"
     },
     {
       id: 3,
@@ -103,7 +103,7 @@ const FuturisticSuccessStories = () => {
       quote: "The interview prepration resources were invaluable for my career transition. The AI feedback helped me improve significantly.",
       avatar: "/stories_images/Amit_Singh.jpg",
       stats: { applications: 28, interviews: 10, offers: 4 },
-      gradient: "from-green-400 to-emerald-500"
+      gradient: "from-green-400 to-green-500"
     },
     {
       id: 4,
@@ -113,7 +113,7 @@ const FuturisticSuccessStories = () => {
       quote: "Koluvu's networking features connected me with the right people in my industry. The platform is truly revolutionary.",
       avatar: "/stories_images/Neha_Gupta.jpg",
       stats: { applications: 38, interviews: 15, offers: 5 },
-      gradient: "from-orange-400 to-red-500"
+      gradient: "from-orange-400 to-orange-500"
     },
     {
       id: 5,
@@ -123,7 +123,7 @@ const FuturisticSuccessStories = () => {
       quote: "From resume building to job offers, Koluvu was with me every step of the way. The support was incredible throughout.",
       avatar: "/stories_images/Sarah.jpg",
       stats: { applications: 42, interviews: 9, offers: 2 },
-      gradient: "from-indigo-400 to-purple-500"
+      gradient: "from-blue-400 to-blue-500"
     }
   ];
 
@@ -181,7 +181,7 @@ const FuturisticSuccessStories = () => {
   return (
     <div 
       ref={sectionRef}
-      className="relative min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 overflow-hidden"
+      className="relative min-h-screen bg-slate-50 overflow-hidden"
     >
       {/* Animated Background */}
       {/* Geometric Shapes - Adjusted for mobile */}
@@ -194,17 +194,15 @@ const FuturisticSuccessStories = () => {
               {/* Glow Effect */}
               <div className={`absolute -inset-1 bg-gradient-to-r ${currentStory.gradient} rounded-3xl blur opacity-75 animate-pulse`}></div>
               
-              <div className={`relative bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-6 md:p-8 transform transition-all duration-500 ${
-                isAnimating ? 'scale-95 opacity-70' : 'scale-100 opacity-100'
-              }`}>
+              <div className={`relative bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-lg transform transition-all duration-500 ${isAnimating ? 'scale-95 opacity-70' : 'scale-100 opacity-100'}`}>
                 
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4 md:mb-6">
                   <div className="flex items-center gap-2 md:gap-3">
-                    <Trophy className="w-5 h-5 md:w-6 md:h-6 text-yellow-400" />
-                    <span className="text-yellow-400 font-semibold text-sm md:text-base">Success Story</span>
+                    <Trophy className="w-5 h-5 md:w-6 md:h-6 text-orange-500" />
+                    <span className="text-orange-500 font-semibold text-sm md:text-base">Success Story</span>
                   </div>
-                  <div className="text-slate-400 text-xs md:text-sm">#{currentStory.id}</div>
+                  <div className="text-slate-500 text-xs md:text-sm">#{currentStory.id}</div>
                 </div>
 
                 {/* Profile Section */}
@@ -225,8 +223,8 @@ const FuturisticSuccessStories = () => {
                   </div>
                   
                   <div className="text-center sm:text-left">
-                    <h3 className="text-xl md:text-2xl font-bold text-white mb-1">{currentStory.name}</h3>
-                    <p className="text-slate-300 text-sm md:text-base mb-2">{currentStory.role}</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-1">{currentStory.name}</h3>
+                    <p className="text-slate-600 text-sm md:text-base mb-2">{currentStory.role}</p>
                     <div className={`inline-flex items-center gap-1 md:gap-2 px-2 md:px-3 py-1 bg-gradient-to-r ${currentStory.gradient} rounded-full text-white text-xs md:text-sm font-medium`}>
                       <Zap className="w-3 h-3 md:w-4 md:h-4" />
                       {currentStory.company}
@@ -236,8 +234,8 @@ const FuturisticSuccessStories = () => {
 
                 {/* Quote */}
                 <div className="relative mb-6 md:mb-8">
-                  <Quote className="absolute -top-2 -left-2 w-6 h-6 md:w-8 md:h-8 text-purple-400/50" />
-                  <blockquote className="text-base md:text-lg text-slate-200 leading-relaxed pl-4 md:pl-6 italic">
+                  <Quote className="absolute -top-2 -left-2 w-6 h-6 md:w-8 md:h-8 text-orange-300" />
+                  <blockquote className="text-base md:text-lg text-slate-600 leading-relaxed pl-4 md:pl-6 italic">
                     &quot;{currentStory.quote}&quot;
                   </blockquote>
                 </div>
@@ -249,12 +247,12 @@ const FuturisticSuccessStories = () => {
                     { label: 'Interviews', value: currentStory.stats.interviews, icon: <Users className="w-3 h-3 md:w-4 md:h-4" /> },
                     { label: 'Offers', value: currentStory.stats.offers, icon: <Trophy className="w-3 h-3 md:w-4 md:h-4" /> }
                   ].map((stat, idx) => (
-                    <div key={idx} className="text-center p-2 md:p-3 bg-slate-900/50 rounded-xl border border-slate-700/50">
-                      <div className="flex items-center justify-center gap-1 text-cyan-400 mb-1">
+                    <div key={idx} className="text-center p-2 md:p-3 bg-slate-50 rounded-xl border border-slate-200">
+                      <div className="flex items-center justify-center gap-1 text-orange-500 mb-1">
                         {stat.icon}
                         <span className="font-bold text-sm md:text-xl">{stat.value}</span>
                       </div>
-                      <div className="text-slate-400 text-xs">{stat.label}</div>
+                      <div className="text-slate-600 text-xs">{stat.label}</div>
                     </div>
                   ))}
                 </div>
@@ -262,7 +260,7 @@ const FuturisticSuccessStories = () => {
                 {/* Rating */}
                 <div className="flex items-center justify-center gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 fill-current animate-twinkle" style={{ animationDelay: `${i * 0.1}s` }} />
+                    <Star key={i} className="w-4 h-4 md:w-5 md:h-5 text-orange-400 fill-current animate-twinkle" style={{ animationDelay: `${i * 0.1}s` }} />
                   ))}
                 </div>
               </div>
@@ -274,19 +272,19 @@ const FuturisticSuccessStories = () => {
             
             {/* Header */}
             <div className="mb-6 md:mb-8">
-              <div className="inline-flex items-center gap-2 md:gap-3 mb-3 md:mb-4 px-3 md:px-4 py-1 md:py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full border border-purple-400/30 backdrop-blur-sm">
-                <Trophy className="w-6 h-6 md:w-8 md:h-12 text-purple-400" />
-                <span className="text-purple-300 text-lg md:text-2xl font-medium">Career Transformations</span>
+              <div className="inline-flex items-center gap-2 md:gap-3 mb-3 md:mb-4 px-3 md:px-4 py-1 md:py-2 bg-orange-50 rounded-full border border-orange-200">
+                <Trophy className="w-6 h-6 md:w-8 md:h-12 text-orange-500" />
+                <span className="text-orange-600 text-lg md:text-2xl font-medium">Career Transformations</span>
               </div>
               
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-white via-purple-200 to-cyan-300 bg-clip-text text-transparent mb-4 md:mb-6 leading-tight">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-4 md:mb-6 leading-tight">
                 Success
-                <span className="text-3xl md:text-5xl lg:text-6xl text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text">
+                <span className="text-3xl md:text-5xl lg:text-6xl text-orange-500">
                 &nbsp;Stories
                 </span>
               </h1>
               
-              <p className="text-slate-300 text-base md:text-lg lg:text-xl leading-relaxed max-w-lg">
+              <p className="text-slate-600 text-base md:text-lg lg:text-xl leading-relaxed max-w-lg">
                 Discover how professionals transformed their careers with our cutting-edge platform and AI-powered tools.
               </p>
             </div>
@@ -295,9 +293,9 @@ const FuturisticSuccessStories = () => {
             <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-8">
               <button
                 onClick={prevStory}
-                className="p-2 md:p-3 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 rounded-xl transition-all duration-200 hover:scale-105 group"
+                className="p-2 md:p-3 bg-white border border-slate-200 hover:border-orange-300 rounded-xl transition-all duration-200 hover:scale-105 group"
               >
-                <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-slate-300 group-hover:text-white" />
+                <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-slate-600 group-hover:text-orange-500" />
               </button>
               
               <div className="flex-1 flex items-center gap-1 md:gap-2">
@@ -307,7 +305,7 @@ const FuturisticSuccessStories = () => {
                     className={`h-1 rounded-full transition-all duration-300 ${
                       idx === currentIndex 
                         ? `bg-gradient-to-r ${currentStory.gradient} flex-1` 
-                        : 'bg-slate-600 w-4 md:w-8'
+                        : 'bg-slate-300 w-4 md:w-8'
                     }`}
                   />
                 ))}
@@ -315,9 +313,9 @@ const FuturisticSuccessStories = () => {
               
               <button
                 onClick={nextStory}
-                className="p-2 md:p-3 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 rounded-xl transition-all duration-200 hover:scale-105 group"
+                className="p-2 md:p-3 bg-white border border-slate-200 hover:border-orange-300 rounded-xl transition-all duration-200 hover:scale-105 group"
               >
-                <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-slate-300 group-hover:text-white" />
+                <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-slate-600 group-hover:text-orange-500" />
               </button>
             </div>
 
@@ -331,17 +329,17 @@ const FuturisticSuccessStories = () => {
               ].map((feature, idx) => (
                 <div 
                   key={idx}
-                  className="p-2 md:p-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl hover:bg-white/10 transition-all duration-300 transform hover:scale-105"
+                  className="p-2 md:p-4 bg-white border border-slate-200 rounded-xl hover:border-orange-300 hover:shadow-lg transition-all duration-300 transform hover:scale-105"
                 >
-                  <div className="text-cyan-400 mb-1 md:mb-2">{feature.icon}</div>
-                  <h4 className="text-white font-semibold text-xs md:text-sm mb-1">{feature.title}</h4>
-                  <p className="text-slate-400 text-xs">{feature.desc}</p>
+                  <div className="text-orange-500 mb-1 md:mb-2">{feature.icon}</div>
+                  <h4 className="text-slate-900 font-semibold text-xs md:text-sm mb-1">{feature.title}</h4>
+                  <p className="text-slate-600 text-xs">{feature.desc}</p>
                 </div>
               ))}
             </div>
 
             {/* CTA */}
-            <button className="group flex items-center justify-center md:justify-start gap-2 md:gap-3 px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-purple-500 to-cyan-500 text-white font-semibold rounded-xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-purple-500/25 text-sm md:text-base">
+            <button className="group flex items-center justify-center md:justify-start gap-2 md:gap-3 px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-orange-500/25 text-sm md:text-base">
               Start Your Success Story
               <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
             </button>

@@ -8,19 +8,28 @@ import Footer from "@koluvu/components/Footer/Footer";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Head from "next/head";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
+import { useAuth } from "@/contexts/AuthContext";
+import { getRedirectPath } from "@/utils/auth";
+import { useRouter } from "next/navigation";
 
 export default function EmployerRegistrationPage() {
-  // Apply authentication guard
-  const { isAllowed } = useAuthGuard("employer-register", {
-    enableRedirect: true,
-    showError: true,
-  });
-
   const [showPassword, setShowPassword] = useState(false);
   const [windowWidth, setWindowWidth] = useState(0);
+  const { user, userType, loading: authLoading } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
+    // Redirect authenticated users to their dashboard
+    if (!authLoading && user && userType) {
+      const redirectPath = getRedirectPath(userType, user.username);
+      console.log(
+        `Authenticated ${userType} accessing employer registration. Redirecting to:`,
+        redirectPath
+      );
+      router.push(redirectPath);
+      return;
+    }
+
     // Only run on client side
     if (typeof window !== "undefined") {
       setWindowWidth(window.innerWidth);
@@ -28,12 +37,7 @@ export default function EmployerRegistrationPage() {
       window.addEventListener("resize", handleResize);
       return () => window.removeEventListener("resize", handleResize);
     }
-  }, []);
-
-  // Show loading or redirect if not allowed
-  if (!isAllowed) {
-    return null; // Auth guard handles redirect
-  }
+  }, [authLoading, user, userType, router]);
 
   return (
     <>

@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@koluvu/components/Header/Header";
 import Footer from "@koluvu/components/Footer/Footer";
+import InstituteSetupModal from "@koluvu/components/training/InstituteSetupModal";
 
 // Animation variants
 const containerVariants = {
@@ -1109,6 +1110,84 @@ export default function TrainingDashboard() {
     const [activeCategory, setActiveCategory] = useState("");
     const [showAllCategories, setShowAllCategories] = useState(false);
     const [isClient, setIsClient] = useState(false);
+    const [showSetupModal, setShowSetupModal] = useState(false);
+    const [profileData, setProfileData] = useState(null);
+    const [isCheckingProfile, setIsCheckingProfile] = useState(true);
+
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+    // Check profile completeness on mount
+    useEffect(() => {
+        const checkProfileCompleteness = async () => {
+            try {
+                const token = localStorage.getItem("access_token");
+                if (!token) {
+                    console.warn("No access token found");
+                    setIsCheckingProfile(false);
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/api/training/profile/check-completeness/`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setProfileData(data.profile);
+                    
+                    // Show modal if profile is incomplete
+                    if (!data.is_complete) {
+                        setShowSetupModal(true);
+                    }
+                } else {
+                    console.error("Failed to check profile completeness");
+                }
+            } catch (error) {
+                console.error("Error checking profile:", error);
+            } finally {
+                setIsCheckingProfile(false);
+            }
+        };
+
+        checkProfileCompleteness();
+    }, []);
+
+    const handleProfileSubmit = async (formData) => {
+        try {
+            const token = localStorage.getItem("access_token");
+            if (!token) {
+                throw new Error("No access token found");
+            }
+
+            const response = await fetch(`${API_BASE_URL}/api/training/profile/`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || "Failed to save profile");
+            }
+
+            const updatedProfile = await response.json();
+            setProfileData(updatedProfile);
+            setShowSetupModal(false);
+            
+            // Show success message
+            alert("Profile setup completed successfully!");
+        } catch (error) {
+            console.error("Error submitting profile:", error);
+            throw error;
+        }
+    };
 
     useEffect(() => {
         setIsClient(true);
@@ -1172,8 +1251,28 @@ export default function TrainingDashboard() {
         return null;
     }
 
+    // Show loading state while checking profile
+    if (isCheckingProfile) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-orange-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading your dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col min-h-screen w-full bg-gray-50">
+            {/* Institute Setup Modal */}
+            <InstituteSetupModal
+                isOpen={showSetupModal}
+                onClose={() => {}} // Prevent closing until setup is complete
+                onSubmit={handleProfileSubmit}
+                existingData={profileData}
+            />
+            
             <Header />
             {/* Header Section */}
             <motion.div className="text-center mb-6 pt-8 px-4 bg-white shadow-sm"

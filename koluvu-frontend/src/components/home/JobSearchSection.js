@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import CompanySuggestions from "@/components/search/CompanySuggestions";
+import { Briefcase, Users, FileText, Building2 } from "lucide-react";
 
 export default function JobSearchSection() {
   const router = useRouter();
@@ -155,8 +156,7 @@ export default function JobSearchSection() {
   const containerStyle = {
     minHeight: "100vh",
     position: "relative",
-    background:
-      "linear-gradient(135deg, #1a2e1a 0%, #0d4f0d 25%, #1a3d5c 50%, #2d4a6b 75%, #1e3a52 100%)",
+    background: "#F8FAFC",
     overflow: "hidden",
   };
 
@@ -167,9 +167,8 @@ export default function JobSearchSection() {
     right: 0,
     bottom: 0,
     background: `
-      radial-gradient(circle at 20% 80%, rgba(255, 153, 51, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(19, 136, 8, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(0, 70, 135, 0.2) 0%, transparent 50%)
+      radial-gradient(circle at 20% 80%, rgba(248, 250, 252, 0.5) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(226, 232, 240, 0.3) 0%, transparent 50%)
     `,
     animation: "float 6s ease-in-out infinite",
   };
@@ -197,26 +196,18 @@ export default function JobSearchSection() {
   const quoteStyle = {
     fontSize: isExtraSmall ? "1.5rem" : isMobile ? "2rem" : "3.5rem",
     fontWeight: "700",
-    background: "linear-gradient(135deg, #ff9933, #ffffff, #138808)",
-    backgroundClip: "text",
-    WebkitBackgroundClip: "text",
-    color: "transparent",
+    color: "#0F172A",
     marginBottom: "1.5rem",
     lineHeight: "1.2",
-    textShadow: "0 0 30px rgba(255, 153, 51, 0.5)",
-    animation: isVisible
-      ? "textGlow 3s ease-in-out infinite alternate"
-      : "none",
   };
 
   const subtitleStyle = {
     fontSize: isExtraSmall ? "1rem" : isMobile ? "1.1rem" : "1.3rem",
-    color: "#e0e6ed",
+    color: "#334155",
     fontWeight: "400",
     maxWidth: "600px",
     margin: "0 auto",
     lineHeight: "1.6",
-    animation: isVisible ? "subtitlePulse 4s ease-in-out infinite" : "none",
   };
 
   const searchContainerStyle = {
@@ -229,17 +220,15 @@ export default function JobSearchSection() {
   };
 
   const searchFormStyle = {
-    background: "rgba(255, 255, 255, 0.08)",
-    backdropFilter: "blur(20px)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
+    background: "#FFFFFF",
+    border: "1px solid #E2E8F0",
     borderRadius: "20px",
     padding: isExtraSmall
       ? "1.5rem 1rem"
       : isMobile
       ? "2rem 1.5rem"
       : "3rem 2.5rem",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
-    animation: isVisible ? "formGlow 8s ease-in-out infinite" : "none",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
   };
 
   const inputGroupStyle = {
@@ -260,14 +249,14 @@ export default function JobSearchSection() {
   const inputStyle = {
     width: "100%",
     padding: isExtraSmall ? "0.4rem 0.8rem" : "0.5rem 1rem",
-    background: "rgba(255, 255, 255, 0.1)",
-    border: "1px solid rgba(255, 153, 51, 0.3)",
+    background: "#F8FAFC",
+    border: "1px solid #E2E8F0",
     borderRadius: "6px",
     fontSize: isExtraSmall ? "0.75rem" : "0.85rem",
     fontWeight: "500",
+    color: "#0F172A",
     outline: "none",
     transition: "all 0.3s ease",
-    backdropFilter: "blur(10px)",
   };
 
   const suggestionsStyle = {
@@ -275,30 +264,30 @@ export default function JobSearchSection() {
     top: "100%",
     left: 0,
     right: 0,
-    background: "rgba(0, 0, 0, 0.9)",
-    backdropFilter: "blur(20px)",
-    border: "1px solid rgba(255, 153, 51, 0.3)",
+    background: "#FFFFFF",
+    border: "1px solid #E2E8F0",
     borderRadius: "12px",
     marginTop: "0.5rem",
     zIndex: 10,
     maxHeight: "200px",
     overflowY: "auto",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
     animation: "slideDown 0.3s ease-out",
   };
 
   const suggestionItemStyle = {
     padding: isExtraSmall ? "0.625rem 0.875rem" : "0.75rem 1rem",
-    color: "#ffffff",
+    color: "#0F172A",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+    borderBottom: "1px solid #E2E8F0",
     fontSize: isExtraSmall ? "0.875rem" : "1rem",
   };
 
   const submitButtonStyle = {
     width: isMobile ? "100%" : "auto",
     padding: isExtraSmall ? "0.875rem 2rem" : "1rem 3rem",
-    background: "linear-gradient(135deg, #ff9933, #138808)",
+    background: "#F97316",
     border: "none",
     borderRadius: "50px",
     color: "#ffffff",
@@ -306,7 +295,7 @@ export default function JobSearchSection() {
     fontWeight: "600",
     cursor: "pointer",
     transition: "all 0.3s ease",
-    boxShadow: "0 4px 20px rgba(255, 153, 51, 0.4)",
+    boxShadow: "0 4px 12px rgba(249, 115, 22, 0.3)",
     textTransform: "uppercase",
     letterSpacing: "1px",
     display: "flex",
@@ -314,7 +303,6 @@ export default function JobSearchSection() {
     justifyContent: "center",
     gap: "0.5rem",
     margin: isMobile ? "0" : "0 auto",
-    animation: isVisible ? "buttonPulse 2s ease-in-out infinite" : "none",
   };
 
   const tagsContainerStyle = {
@@ -327,12 +315,9 @@ export default function JobSearchSection() {
 
   const tagsHeaderStyle = {
     fontSize: isExtraSmall ? "1.25rem" : "1.5rem",
-    color: "#ffffff",
+    color: "#0F172A",
     marginBottom: "1.5rem",
     fontWeight: "600",
-    animation: isVisible
-      ? "headerGlow 4s ease-in-out infinite alternate"
-      : "none",
   };
 
   const tagsFlexStyle = {
@@ -344,23 +329,19 @@ export default function JobSearchSection() {
 
   const tagStyle = (index) => ({
     padding: isExtraSmall ? "0.625rem 1.25rem" : "0.75rem 1.5rem",
-    background: "rgba(255, 255, 255, 0.1)",
-    border: "2px solid rgba(255, 153, 51, 0.3)",
+    background: "#FFFFFF",
+    border: "2px solid #F97316",
     borderRadius: "25px",
-    color: "#ffffff",
+    color: "#0F172A",
     cursor: "pointer",
     transition: "all 0.3s ease",
     fontSize: isExtraSmall ? "0.825rem" : "0.9rem",
     fontWeight: "500",
-    backdropFilter: "blur(10px)",
     transform: isVisible
       ? "translateY(0) rotateX(0)"
       : "translateY(20px) rotateX(45deg)",
     opacity: isVisible ? 1 : 0,
     transitionDelay: `${0.7 + index * 0.1}s`,
-    animation: isVisible
-      ? `tagFloat 3s ease-in-out infinite ${index * 0.5}s`
-      : "none",
   });
 
   const statsContainerStyle = {
@@ -381,45 +362,36 @@ export default function JobSearchSection() {
   };
 
   const statCardStyle = (index) => ({
-    background: "rgba(255, 255, 255, 0.08)",
-    backdropFilter: "blur(20px)",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
+    background: "#FFFFFF",
+    border: "1px solid #E2E8F0",
     borderRadius: "16px",
     padding: isExtraSmall ? "1.5rem 1rem" : "2rem 1.5rem",
     textAlign: "center",
     transition: "all 0.3s ease",
     cursor: "pointer",
+    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
     transform: isVisible
       ? "translateY(0) scale(1)"
       : "translateY(30px) scale(0.9)",
     opacity: isVisible ? 1 : 0,
     transitionDelay: `${1 + index * 0.1}s`,
-    animation: isVisible
-      ? `cardFloat 4s ease-in-out infinite ${index * 0.8}s`
-      : "none",
   });
 
   const statIconStyle = {
     fontSize: isExtraSmall ? "2rem" : "2.5rem",
     marginBottom: "1rem",
-    background: "linear-gradient(135deg, #ff9933, #138808)",
-    backgroundClip: "text",
-    WebkitBackgroundClip: "text",
-    color: "transparent",
-    animation: isVisible ? "iconSpin 6s ease-in-out infinite" : "none",
   };
 
   const statValueStyle = {
     fontSize: isExtraSmall ? "1.5rem" : "2rem",
     fontWeight: "700",
-    color: "#ffffff",
+    color: "#F97316",
     marginBottom: "0.5rem",
-    animation: isVisible ? "numberCount 3s ease-out" : "none",
   };
 
   const statLabelStyle = {
     fontSize: isExtraSmall ? "0.875rem" : "1rem",
-    color: "#b0b0b0",
+    color: "#64748B",
     fontWeight: "500",
   };
 
@@ -432,119 +404,49 @@ export default function JobSearchSection() {
             33% { transform: translateY(-20px) rotate(1deg); }
             66% { transform: translateY(-10px) rotate(-1deg); }
           }
-          
-          @keyframes textGlow {
-            0% { text-shadow: 0 0 30px rgba(255, 153, 51, 0.5); }
-            100% { text-shadow: 0 0 50px rgba(255, 153, 51, 0.8), 0 0 70px rgba(19, 136, 8, 0.3); }
-          }
-
-          @keyframes subtitlePulse {
-            0%, 100% { opacity: 0.9; transform: translateY(0); }
-            50% { opacity: 1; transform: translateY(-2px); }
-          }
-
-          @keyframes formGlow {
-            0%, 100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
-            50% { box-shadow: 0 12px 40px rgba(255, 153, 51, 0.2), 0 8px 32px rgba(0, 0, 0, 0.3); }
-          }
-
-          @keyframes buttonPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(255, 153, 51, 0.4); }
-            50% { transform: scale(1.02); box-shadow: 0 6px 25px rgba(255, 153, 51, 0.6); }
-          }
-
-          @keyframes headerGlow {
-            0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
-            100% { text-shadow: 0 0 20px rgba(255, 153, 51, 0.5), 0 0 30px rgba(19, 136, 8, 0.3); }
-          }
-
-          @keyframes tagFloat {
-            0%, 100% { transform: translateY(0) rotateY(0deg); }
-            50% { transform: translateY(-5px) rotateY(5deg); }
-          }
-
-          @keyframes cardFloat {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-8px) scale(1.02); }
-          }
-
-          @keyframes iconSpin {
-            0%, 100% { transform: rotateY(0deg) scale(1); }
-            25% { transform: rotateY(90deg) scale(1.1); }
-            50% { transform: rotateY(180deg) scale(1); }
-            75% { transform: rotateY(270deg) scale(1.1); }
-          }
-
-          @keyframes numberCount {
-            0% { opacity: 0; transform: scale(0.5); }
-            100% { opacity: 1; transform: scale(1); }
-          }
 
           @keyframes slideDown {
             0% { opacity: 0; transform: translateY(-10px); }
             100% { opacity: 1; transform: translateY(0); }
           }
 
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-          }
-
-          /* Enhanced hover effects */
-          .search-input {
-            color: #ffffff !important;
-          }
-
+          /* Input styles */
           .search-input::placeholder {
-            color: #000 !important;
+            color: #64748B !important;
             opacity: 1;
           }
 
           .search-input:focus {
-            border-color: #ff9933 !important;
-            box-shadow: 0 0 20px rgba(255, 153, 51, 0.4) !important;
-            transform: translateY(-2px) scale(1.01) !important;
-            animation: inputGlow 2s ease-in-out infinite !important;
+            border-color: #F97316 !important;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1) !important;
+            background: #FFFFFF !important;
           }
 
-          @keyframes inputGlow {
-            0%, 100% { box-shadow: 0 0 20px rgba(255, 153, 51, 0.4); }
-            50% { box-shadow: 0 0 30px rgba(255, 153, 51, 0.6), 0 0 40px rgba(19, 136, 8, 0.2); }
+          .search-input:hover {
+            border-color: #CBD5E1 !important;
           }
 
           .submit-button:hover {
-            transform: translateY(-3px) scale(1.05) !important;
-            box-shadow: 0 8px 30px rgba(255, 153, 51, 0.6) !important;
-            animation: none !important;
+            background: #EA580C !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4) !important;
           }
 
           .tag-item:hover {
-            background: rgba(255, 153, 51, 0.2) !important;
-            border-color: #ff9933 !important;
-            transform: translateY(-3px) scale(1.08) rotateZ(2deg) !important;
-            box-shadow: 0 8px 25px rgba(255, 153, 51, 0.3) !important;
-            animation: none !important;
+            background: #F97316 !important;
+            color: #FFFFFF !important;
+            transform: translateY(-2px) scale(1.05) !important;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3) !important;
           }
 
           .stat-card:hover {
-            transform: translateY(-8px) scale(1.05) !important;
-            box-shadow: 0 15px 50px rgba(19, 136, 8, 0.4) !important;
-            animation: none !important;
-          }
-
-          .stat-card:hover .stat-icon {
-            animation: hoverIconSpin 0.6s ease-in-out !important;
-          }
-
-          @keyframes hoverIconSpin {
-            0% { transform: rotateY(0deg) scale(1); }
-            50% { transform: rotateY(180deg) scale(1.2); }
-            100% { transform: rotateY(360deg) scale(1); }
+            transform: translateY(-4px) scale(1.02) !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+            border-color: #F97316 !important;
           }
 
           .suggestion-item:hover {
-            background: rgba(255, 153, 51, 0.2) !important;
-            transform: translateX(5px) !important;
+            background: #F8FAFC !important;
           }
 
           .suggestion-item:last-child {
@@ -560,21 +462,6 @@ export default function JobSearchSection() {
             .tag-item {
               font-size: 0.8rem !important;
               padding: 0.5rem 1rem !important;
-            }
-          }
-
-          /* Improved animations for larger screens */
-          @media (min-width: 769px) {
-            .stat-card {
-              transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-            }
-
-            .tag-item {
-              transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-            }
-
-            .search-input {
-              transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
             }
           }
         `}
@@ -766,10 +653,10 @@ export default function JobSearchSection() {
           <div ref={statsRef} style={statsContainerStyle}>
             <div style={statsGridStyle}>
               {[
-                { icon: "🚀", value: "10,000+", label: "Jobs" },
-                { icon: "👥", value: "1M+", label: "Professionals" },
-                { icon: "📄", value: "50,000+", label: "Resumes" },
-                { icon: "🌐", value: "1,000+", label: "Companies" },
+                { icon: <Briefcase className="w-8 h-8 md:w-10 md:h-10 text-orange-500" />, value: "10,000+", label: "Jobs" },
+                { icon: <Users className="w-8 h-8 md:w-10 md:h-10 text-blue-500" />, value: "1M+", label: "Professionals" },
+                { icon: <FileText className="w-8 h-8 md:w-10 md:h-10 text-green-500" />, value: "50,000+", label: "Resumes" },
+                { icon: <Building2 className="w-8 h-8 md:w-10 md:h-10 text-orange-500" />, value: "1,000+", label: "Companies" },
               ].map((stat, index) => (
                 <div
                   key={index}

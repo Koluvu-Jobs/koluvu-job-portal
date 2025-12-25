@@ -138,6 +138,81 @@
     letter-spacing: -0.02em;
   }
 
+  /* Professional Button Animations */
+  .btn-animate {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-animate::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .btn-animate:hover::before {
+    left: 100%;
+  }
+
+  .btn-animate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-animate:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Glow effect for buttons */
+  .btn-glow {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+
+  .btn-glow:hover {
+    box-shadow: 0 0 20px rgba(40, 167, 69, 0.5), 0 0 40px rgba(40, 167, 69, 0.3);
+  }
+
+  /* Ripple effect */
+  .btn-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-ripple::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.4s ease, height 0.4s ease;
+  }
+
+  .btn-ripple:active::after {
+    width: 200%;
+    height: 200%;
+  }
+
+  /* Float animation for cards */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 3s ease-in-out infinite 1.5s;
+  }
+
   .animate-fadeInUp {
     animation: fadeInUp 0.5s ease-out forwards;
   }
@@ -269,6 +344,15 @@
   }
 }
 
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);
@@ -276,6 +360,82 @@
   100% {
     transform: translateX(100%);
   }
+}
+
+/* Glass Effect Button Styles */
+.btn-glass {
+  @apply relative overflow-hidden;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.btn-glass-orange {
+  @apply relative overflow-hidden;
+  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(250, 127, 4, 0.2), rgba(230, 114, 10, 0.3));
+  border: 1px solid rgba(250, 127, 4, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-glass-orange:hover {
+  background: linear-gradient(135deg, rgba(250, 127, 4, 0.4), rgba(230, 114, 10, 0.5));
+  border-color: rgba(250, 127, 4, 0.6);
+  box-shadow: 0 8px 32px rgba(250, 127, 4, 0.3), 0 0 20px rgba(250, 127, 4, 0.2);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-glass-green {
+  @apply relative overflow-hidden;
+  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.2), rgba(4, 120, 87, 0.3));
+  border: 1px solid rgba(5, 150, 105, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-glass-green:hover {
+  background: linear-gradient(135deg, rgba(5, 150, 105, 0.4), rgba(4, 120, 87, 0.5));
+  border-color: rgba(5, 150, 105, 0.6);
+  box-shadow: 0 8px 32px rgba(5, 150, 105, 0.3), 0 0 20px rgba(5, 150, 105, 0.2);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn-glass-blue {
+  @apply relative overflow-hidden;
+  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.3));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-glass-blue:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.5));
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3), 0 0 20px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* Color gradient text effect */
+.text-gradient-orange {
+  background: linear-gradient(135deg, #fa7f04, #ff9500, #e6720a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-green {
+  background: linear-gradient(135deg, #10b981, #059669, #047857);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Hide scrollbar but allow scrolling */

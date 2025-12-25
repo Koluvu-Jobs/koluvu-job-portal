@@ -1,4 +1,6 @@
-﻿"use client";
+﻿//src/app/dashboard/employee/dashboard-component.js
+
+"use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -107,6 +109,7 @@ const Dashboard = ({
 
   // Profile editing states
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [editProfileData, setEditProfileData] = useState({
     name: "",
     role: "",
@@ -116,6 +119,24 @@ const Dashboard = ({
     skills: [],
     experience: [],
     education: [],
+    achievements: "",
+    professionalMission: "",
+    technicalQualifications: "",
+    projects: [],
+    research: "",
+    socialMediaLinks: {
+      twitter: "",
+      instagram: "",
+      facebook: "",
+      youtube: "",
+      website: "",
+    },
+    personalDetails: {
+      dateOfBirth: "",
+      nationality: "",
+      languages: "",
+      address: "",
+    },
   });
 
   useEffect(() => {
@@ -175,56 +196,7 @@ const Dashboard = ({
     const skillsData =
       Array.isArray(profile.skills) && profile.skills.length > 0
         ? profile.skills
-        : [
-            {
-              id: 1,
-              name: "React.js",
-              belt: "Advanced",
-              bgColor: "bg-blue-50",
-              textColor: "text-blue-500",
-              icon: "react",
-            },
-            {
-              id: 2,
-              name: "Node.js",
-              belt: "Advanced",
-              bgColor: "bg-cyan-50",
-              textColor: "text-cyan-500",
-              icon: "node",
-            },
-            {
-              id: 3,
-              name: "Python",
-              belt: "Expert",
-              bgColor: "bg-sky-50",
-              textColor: "text-sky-500",
-              icon: "python",
-            },
-            {
-              id: 4,
-              name: "AWS",
-              belt: "Expert",
-              bgColor: "bg-indigo-50",
-              textColor: "text-indigo-500",
-              icon: "aws",
-            },
-            {
-              id: 5,
-              name: "Docker",
-              belt: "Expert",
-              bgColor: "bg-blue-50",
-              textColor: "text-blue-500",
-              icon: "docker",
-            },
-            {
-              id: 6,
-              name: "MongoDB",
-              belt: "Intermediate",
-              bgColor: "bg-cyan-50",
-              textColor: "text-cyan-500",
-              icon: "database",
-            },
-          ];
+        : [];
 
     setEmployee({
       id: user.id || profile.id || 1,
@@ -702,7 +674,7 @@ const Dashboard = ({
     fetchNotifications();
   }, [dismissedNotifications]);
 
-  const handleAvailabilityChange = () => {
+  const handleAvailabilityChange = async () => {
     setAvailabilityStatus((current) => {
       const currentIndex = availabilityOptions.indexOf(current);
       const nextValue =
@@ -711,11 +683,47 @@ const Dashboard = ({
           : availabilityOptions[
               (currentIndex + 1) % availabilityOptions.length
             ];
+
+      // Update local state
       setEmployee((prev) =>
         prev ? { ...prev, availability: nextValue } : prev
       );
+
+      // Save to database
+      saveAvailabilityToDatabase(nextValue);
+
       return nextValue;
     });
+  };
+
+  const saveAvailabilityToDatabase = async (availability) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        console.error("No access token found for availability update");
+        return;
+      }
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/employee/profile/",
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            availability: availability,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Failed to update availability:", response.status);
+      }
+    } catch (error) {
+      console.error("Error updating availability:", error);
+    }
   };
 
   const handleAnnouncementNavigation = (announcement) => {
@@ -953,6 +961,10 @@ const Dashboard = ({
   };
 
   const handleBackgroundImageClick = () => {
+    // Only allow background image uploads in Edit Mode
+    if (!isEditMode) {
+      return;
+    }
     fileInputRef.current?.click();
   };
 
@@ -964,10 +976,30 @@ const Dashboard = ({
       location: employee?.location || "",
       experience: employee?.experience || "",
       expectedSalary: employee?.expectedSalary || "",
+      availability: employee?.availability || availabilityOptions[0],
       skills: employee?.skills || [],
       bio: employee?.bio || "",
+      achievements: employee?.achievements || "",
+      professionalMission: employee?.professionalMission || "",
+      technicalQualifications: employee?.technicalQualifications || "",
+      projects: employee?.projects || [],
+      research: employee?.research || "",
+      socialMediaLinks: {
+        twitter: employee?.socialMediaLinks?.twitter || "",
+        instagram: employee?.socialMediaLinks?.instagram || "",
+        facebook: employee?.socialMediaLinks?.facebook || "",
+        youtube: employee?.socialMediaLinks?.youtube || "",
+        website: employee?.socialMediaLinks?.website || "",
+      },
+      personalDetails: {
+        dateOfBirth: employee?.personalDetails?.dateOfBirth || "",
+        nationality: employee?.personalDetails?.nationality || "",
+        languages: employee?.personalDetails?.languages || "",
+        address: employee?.personalDetails?.address || "",
+      },
     });
     setIsEditingProfile(true);
+    setIsEditMode(true);
   };
 
   const updateEditProfileData = (field, value) => {
@@ -1016,11 +1048,24 @@ const Dashboard = ({
         expected_salary: editProfileData.expectedSalary
           ? Math.max(0, parseFloat(editProfileData.expectedSalary))
           : null,
+        availability: editProfileData.availability || availabilityOptions[0],
         bio: editProfileData.bio,
         skills:
           editProfileData.skills
             ?.map((skill) => skill.name || skill)
             .join(", ") || "",
+        // New comprehensive fields
+        achievements: editProfileData.achievements || "",
+        professional_mission: editProfileData.professionalMission || "",
+        technical_qualifications: editProfileData.technicalQualifications || "",
+        projects: JSON.stringify(editProfileData.projects || []),
+        research: editProfileData.research || "",
+        social_media_links: JSON.stringify(
+          editProfileData.socialMediaLinks || {}
+        ),
+        personal_details: JSON.stringify(editProfileData.personalDetails || {}),
+        // Date of birth from personal details
+        date_of_birth: editProfileData.personalDetails?.dateOfBirth || null,
       };
 
       console.log("Update data being sent:", updateData);
@@ -1052,11 +1097,25 @@ const Dashboard = ({
           location: editProfileData.location,
           experience: editProfileData.experience,
           expectedSalary: editProfileData.expectedSalary,
+          availability: editProfileData.availability,
           skills: editProfileData.skills,
           bio: editProfileData.bio,
+          achievements: editProfileData.achievements,
+          professionalMission: editProfileData.professionalMission,
+          technicalQualifications: editProfileData.technicalQualifications,
+          projects: editProfileData.projects,
+          research: editProfileData.research,
+          socialMediaLinks: editProfileData.socialMediaLinks,
+          personalDetails: editProfileData.personalDetails,
         }));
 
+        // Update availability status
+        setAvailabilityStatus(
+          editProfileData.availability || availabilityOptions[0]
+        );
+
         setIsEditingProfile(false);
+        setIsEditMode(false);
         setShowSuccessMessage(true);
 
         // Hide success message after 3 seconds
@@ -1092,6 +1151,7 @@ const Dashboard = ({
 
   const handleCancelEdit = () => {
     setIsEditingProfile(false);
+    setIsEditMode(false);
     setEditProfileData({});
   };
 
@@ -1247,7 +1307,7 @@ const Dashboard = ({
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 sticky top-24 hover:shadow-xl transition-shadow duration-300">
             <div
-              className="h-28 md:h-32 relative cursor-pointer group"
+              className={`h-28 md:h-32 relative ${isEditMode ? 'cursor-pointer group' : 'cursor-default'}`}
               onClick={handleBackgroundImageClick}
               style={{
                 background: backgroundImage
@@ -1265,8 +1325,9 @@ const Dashboard = ({
                 className="hidden"
                 onChange={handleBackgroundImageUpload}
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200">
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              {/* Background overlay - only show hover effect in Edit Mode */}
+              <div className={`absolute inset-0 ${isEditMode ? 'bg-black/0 group-hover:bg-black/20' : 'bg-black/0'} transition-colors duration-200`}>
+                <div className={`absolute inset-0 flex items-center justify-center ${isEditMode ? 'opacity-0 group-hover:opacity-100' : 'opacity-0'} transition-opacity duration-200`}>
                   <div className="bg-white/90 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
                     {backgroundImage
                       ? "Click to change background"
@@ -1274,6 +1335,16 @@ const Dashboard = ({
                   </div>
                 </div>
               </div>
+              
+              {/* View mode message - only show when NOT in Edit Mode and background exists */}
+              {!isEditMode && backgroundImage && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-white/80 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 pointer-events-none">
+                    Edit Profile to change
+                  </div>
+                </div>
+              )}
+              
               {/* Removed the floating remove button in favor of Delete Photo inside the editor UI */}
               <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
                 <div className="relative">
@@ -1348,33 +1419,49 @@ const Dashboard = ({
                   Top Skills
                 </h3>
                 <div className="grid grid-cols-2 gap-2 md:gap-3">
-                  {employee?.skills.map((skill) => (
-                    <div
-                      key={skill.id}
-                      className={`${skill.bgColor} ${skill.textColor} p-3 md:p-4 rounded-lg text-center hover:shadow-md transition-all duration-200 transform hover:scale-105 cursor-pointer border`}
-                    >
-                      <div className="flex items-center justify-center mb-1">
-                        {skill.icon === "react" && <Code className="w-5 h-5" />}
-                        {skill.icon === "node" && (
-                          <Layers className="w-5 h-5" />
-                        )}
-                        {skill.icon === "python" && (
-                          <Code className="w-5 h-5" />
-                        )}
-                        {skill.icon === "aws" && <Cloud className="w-5 h-5" />}
-                        {skill.icon === "docker" && <Box className="w-5 h-5" />}
-                        {skill.icon === "database" && (
-                          <Database className="w-5 h-5" />
-                        )}
+                  {employee?.skills && employee.skills.length > 0 ? (
+                    employee.skills.map((skill) => (
+                      <div
+                        key={skill.id}
+                        className={`${skill.bgColor} ${skill.textColor} p-3 md:p-4 rounded-lg text-center hover:shadow-md transition-all duration-200 transform hover:scale-105 cursor-pointer border`}
+                      >
+                        <div className="flex items-center justify-center mb-1">
+                          {skill.icon === "react" && (
+                            <Code className="w-5 h-5" />
+                          )}
+                          {skill.icon === "node" && (
+                            <Layers className="w-5 h-5" />
+                          )}
+                          {skill.icon === "python" && (
+                            <Code className="w-5 h-5" />
+                          )}
+                          {skill.icon === "aws" && (
+                            <Cloud className="w-5 h-5" />
+                          )}
+                          {skill.icon === "docker" && (
+                            <Box className="w-5 h-5" />
+                          )}
+                          {skill.icon === "database" && (
+                            <Database className="w-5 h-5" />
+                          )}
+                        </div>
+                        <div className="text-xs font-semibold mb-1 truncate">
+                          {skill.name}
+                        </div>
+                        <div className="text-[10px] uppercase tracking-wide opacity-80 truncate">
+                          {skill.belt}
+                        </div>
                       </div>
-                      <div className="text-xs font-semibold mb-1 truncate">
-                        {skill.name}
-                      </div>
-                      <div className="text-[10px] uppercase tracking-wide opacity-80 truncate">
-                        {skill.belt}
-                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-8 text-gray-500">
+                      <Target className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">No skills added yet</p>
+                      <p className="text-xs">
+                        Add skills to showcase your expertise
+                      </p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
 
@@ -1420,6 +1507,218 @@ const Dashboard = ({
                       />
                     </div>
 
+                    {/* Key Achievements */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Key Achievements
+                      </label>
+                      <textarea
+                        value={editProfileData.achievements || ""}
+                        onChange={(e) =>
+                          updateEditProfileData("achievements", e.target.value)
+                        }
+                        placeholder="List your key achievements, awards, and recognitions..."
+                        rows={3}
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      />
+                    </div>
+
+                    {/* Professional Mission */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Professional Mission
+                      </label>
+                      <textarea
+                        value={editProfileData.professionalMission || ""}
+                        onChange={(e) =>
+                          updateEditProfileData(
+                            "professionalMission",
+                            e.target.value
+                          )
+                        }
+                        placeholder="Describe your professional mission and career goals..."
+                        rows={3}
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      />
+                    </div>
+
+                    {/* Technical Qualifications */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Technical Qualifications
+                      </label>
+                      <textarea
+                        value={editProfileData.technicalQualifications || ""}
+                        onChange={(e) =>
+                          updateEditProfileData(
+                            "technicalQualifications",
+                            e.target.value
+                          )
+                        }
+                        placeholder="List your certifications, technical qualifications, and credentials..."
+                        rows={3}
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      />
+                    </div>
+
+                    {/* Research */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Research & Publications
+                      </label>
+                      <textarea
+                        value={editProfileData.research || ""}
+                        onChange={(e) =>
+                          updateEditProfileData("research", e.target.value)
+                        }
+                        placeholder="Describe your research work, publications, and academic contributions..."
+                        rows={3}
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      />
+                    </div>
+
+                    {/* Social Media Links */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Social Media Links
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          type="url"
+                          placeholder="Twitter Profile"
+                          value={
+                            editProfileData.socialMediaLinks?.twitter || ""
+                          }
+                          onChange={(e) =>
+                            updateEditProfileData("socialMediaLinks", {
+                              ...editProfileData.socialMediaLinks,
+                              twitter: e.target.value,
+                            })
+                          }
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <input
+                          type="url"
+                          placeholder="Instagram Profile"
+                          value={
+                            editProfileData.socialMediaLinks?.instagram || ""
+                          }
+                          onChange={(e) =>
+                            updateEditProfileData("socialMediaLinks", {
+                              ...editProfileData.socialMediaLinks,
+                              instagram: e.target.value,
+                            })
+                          }
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <input
+                          type="url"
+                          placeholder="Facebook Profile"
+                          value={
+                            editProfileData.socialMediaLinks?.facebook || ""
+                          }
+                          onChange={(e) =>
+                            updateEditProfileData("socialMediaLinks", {
+                              ...editProfileData.socialMediaLinks,
+                              facebook: e.target.value,
+                            })
+                          }
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <input
+                          type="url"
+                          placeholder="YouTube Channel"
+                          value={
+                            editProfileData.socialMediaLinks?.youtube || ""
+                          }
+                          onChange={(e) =>
+                            updateEditProfileData("socialMediaLinks", {
+                              ...editProfileData.socialMediaLinks,
+                              youtube: e.target.value,
+                            })
+                          }
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <input
+                          type="url"
+                          placeholder="Personal Website"
+                          value={
+                            editProfileData.socialMediaLinks?.website || ""
+                          }
+                          onChange={(e) =>
+                            updateEditProfileData("socialMediaLinks", {
+                              ...editProfileData.socialMediaLinks,
+                              website: e.target.value,
+                            })
+                          }
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 col-span-2"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Personal Details */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Personal Details
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <input
+                          type="date"
+                          placeholder="Date of Birth"
+                          value={
+                            editProfileData.personalDetails?.dateOfBirth || ""
+                          }
+                          onChange={(e) =>
+                            updateEditProfileData("personalDetails", {
+                              ...editProfileData.personalDetails,
+                              dateOfBirth: e.target.value,
+                            })
+                          }
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Nationality"
+                          value={
+                            editProfileData.personalDetails?.nationality || ""
+                          }
+                          onChange={(e) =>
+                            updateEditProfileData("personalDetails", {
+                              ...editProfileData.personalDetails,
+                              nationality: e.target.value,
+                            })
+                          }
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Languages (comma separated)"
+                          value={
+                            editProfileData.personalDetails?.languages || ""
+                          }
+                          onChange={(e) =>
+                            updateEditProfileData("personalDetails", {
+                              ...editProfileData.personalDetails,
+                              languages: e.target.value,
+                            })
+                          }
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 col-span-2"
+                        />
+                        <textarea
+                          placeholder="Address"
+                          value={editProfileData.personalDetails?.address || ""}
+                          onChange={(e) =>
+                            updateEditProfileData("personalDetails", {
+                              ...editProfileData.personalDetails,
+                              address: e.target.value,
+                            })
+                          }
+                          rows={2}
+                          className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none col-span-2"
+                        />
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Experience
@@ -1458,13 +1757,34 @@ const Dashboard = ({
                     </div>
 
                     <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Availability Status
+                      </label>
+                      <select
+                        value={
+                          editProfileData.availability || availabilityOptions[0]
+                        }
+                        onChange={(e) =>
+                          updateEditProfileData("availability", e.target.value)
+                        }
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        {availabilityOptions.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Skills
                       </label>
                       <div className="space-y-2 max-h-32 overflow-y-auto">
                         {(editProfileData.skills || []).map((skill, index) => (
                           <div
-                            key={index}
+                            key={`skill-${skill}-${index}`}
                             className="flex items-center space-x-2"
                           >
                             <input
@@ -2148,7 +2468,7 @@ const Dashboard = ({
                   <div className="flex flex-wrap gap-1 mb-3">
                     {job.skills.slice(0, 3).map((skill, index) => (
                       <span
-                        key={index}
+                        key={`${job.id}-skill-${skill}`}
                         className="px-2 py-1 bg-sky-50 text-sky-600 text-xs rounded-lg border border-sky-100 font-medium"
                       >
                         {skill}
@@ -2207,19 +2527,18 @@ const Dashboard = ({
 };
 
 // Lazy load components for different tabs
-// Temporarily commented out to debug syntax error
-// const ImageEditor = dynamic(
-//   () => import("@/components/imageEditor/ImageEditor"),
-//   {
-//     loading: () => (
-//       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-//         <div className="bg-white rounded-lg p-4">
-//           <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
-//         </div>
-//       </div>
-//     ),
-//   }
-// );
+const ImageEditor = dynamic(
+  () => import("@/components/imageEditor/ImageEditor.jsx"),
+  {
+    loading: () => (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+        <div className="bg-white rounded-lg p-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
+        </div>
+      </div>
+    ),
+  }
+);
 
 const ApplicationsComponent = dynamic(() => import("./application/page"), {
   loading: () => (
@@ -2700,6 +3019,11 @@ const AppContent = ({ username, forceTab }) => {
   };
 
   // Render content based on active tab
+  const handleCompleteProfile = () => {
+    // Navigate to My Profile tab to complete profile
+    setActiveTab("My Profile");
+  };
+
   const renderTabContent = () => {
     // Show loading state while checking authentication
     if (loading) {
@@ -2759,7 +3083,7 @@ const AppContent = ({ username, forceTab }) => {
   };
 
   // Profile Completion Guide Modal
-  const ProfileCompletionGuide = ({ show, onClose }) => {
+  const ProfileCompletionGuide = ({ show, onClose, onEditProfile }) => {
     // Calculate missing fields inline
     const getMissingFieldsInline = () => {
       if (!user || !user.employee_profile) return [];
@@ -2909,7 +3233,7 @@ const AppContent = ({ username, forceTab }) => {
               </h4>
               {missingFields.map((field, index) => (
                 <div
-                  key={index}
+                  key={field.name || `missing-field-${index}`}
                   className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
                 >
                   <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
@@ -2948,7 +3272,7 @@ const AppContent = ({ username, forceTab }) => {
               <button
                 onClick={() => {
                   onClose();
-                  handleEditProfile();
+                  onEditProfile();
                 }}
                 className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
               >
@@ -2967,6 +3291,7 @@ const AppContent = ({ username, forceTab }) => {
       <ProfileCompletionGuide
         show={showCompletionGuide}
         onClose={() => setShowCompletionGuide(false)}
+        onEditProfile={handleCompleteProfile}
       />
     </>
   );

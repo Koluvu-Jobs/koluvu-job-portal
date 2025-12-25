@@ -4,6 +4,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { EmployerHeader } from "./EmployerHeader";
 import { EmployeeHeader } from "./EmployeeHeader";
+import { TrainingHeader } from "./TrainingHeader";
 import { RoleBasedHeader } from "./RoleBasedHeader";
 
 export default function Header({
@@ -33,6 +34,16 @@ export default function Header({
       <EmployeeHeader
         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
+        toggleSidebar={toggleSidebar}
+        showSidebarToggle={showSidebarToggle}
+        isSidebarOpen={isSidebarOpen}
+      />
+    );
+  }
+
+  if (user && userType === "partner") {
+    return (
+      <TrainingHeader
         toggleSidebar={toggleSidebar}
         showSidebarToggle={showSidebarToggle}
         isSidebarOpen={isSidebarOpen}

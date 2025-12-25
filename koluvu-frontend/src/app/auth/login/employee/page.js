@@ -26,17 +26,10 @@ import CaptchaVerification, {
   verifyCaptchaValue,
 } from "@koluvu/components/auth/CaptchaVerification";
 import VerificationForm from "@koluvu/app/auth/register/employee/VerificationForm";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated, user, clearAuthData } = useAuth();
-
-  // Apply authentication guard
-  const { isAllowed, isLoading: authLoading } = useAuthGuard("employee-login", {
-    enableRedirect: true,
-    showError: true,
-  });
   const [deviceType, setDeviceType] = useState("desktop");
   const videoRef = useRef(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -44,7 +37,7 @@ export default function LoginPage() {
   const [loginError, setLoginError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [captchaValue, setCaptchaValue] = useState("");
   const [captchaKey, setCaptchaKey] = useState("");
   const [loginStep, setLoginStep] = useState("credentials"); // "credentials", "otp", "complete"
@@ -69,7 +62,7 @@ export default function LoginPage() {
       console.log(
         "User is already authenticated, redirecting to employee dashboard..."
       );
-      const redirectPath = getRedirectPath(USER_TYPES.EMPLOYEE, user);
+      const redirectPath = getRedirectPath(USER_TYPES.EMPLOYEE, user.username);
       router.replace(redirectPath);
     }
   }, [isAuthenticated, user, router]);
@@ -106,14 +99,14 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setIsLoading(true);
     setLoginError("");
 
     try {
       // Verify CAPTCHA first
       if (!captchaValue || !captchaKey) {
         setLoginError("Please complete the CAPTCHA verification.");
-        setIsSubmitting(false);
+        setIsLoading(false);
         return;
       }
 
@@ -123,7 +116,7 @@ export default function LoginPage() {
       );
       if (!captchaVerification.valid) {
         setLoginError("Invalid CAPTCHA. Please try again.");
-        setIsSubmitting(false);
+        setIsLoading(false);
         return;
       }
 
@@ -155,12 +148,12 @@ export default function LoginPage() {
       setLoginError("An unexpected error occurred.");
       toast.error("Login step failed. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   const handleOTPVerified = async () => {
-    setIsSubmitting(true);
+    setIsLoading(true);
     setLoginError("");
 
     try {
@@ -194,14 +187,15 @@ export default function LoginPage() {
       // Get the redirect URL from query params or default to dashboard
       const params = new URLSearchParams(window.location.search);
       const from =
-        params.get("from") || getRedirectPath(USER_TYPES.EMPLOYEE, data.user);
+        params.get("from") ||
+        getRedirectPath(USER_TYPES.EMPLOYEE, data.user.username);
       router.push(from);
     } catch (error) {
       console.error("Login failed:", error);
       setLoginError("An unexpected error occurred.");
       toast.error("Login failed. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
@@ -483,11 +477,6 @@ export default function LoginPage() {
     },
   };
 
-  // Show loading or redirect if not allowed
-  if (!isAllowed) {
-    return null; // Auth guard handles redirect
-  }
-
   return (
     <div style={styles.pageContainer}>
       <Header />
@@ -626,15 +615,13 @@ export default function LoginPage() {
                     type="submit"
                     style={{
                       ...styles.loginBtn,
-                      ...(isSubmitting
+                      ...(isLoading
                         ? { opacity: 0.7, cursor: "not-allowed" }
                         : {}),
                     }}
-                    disabled={isSubmitting}
+                    disabled={isLoading}
                   >
-                    {isSubmitting
-                      ? "Sending Login OTP..."
-                      : "Continue to Login"}
+                    {isLoading ? "Sending Login OTP..." : "Continue to Login"}
                   </button>
                 </form>
               )}

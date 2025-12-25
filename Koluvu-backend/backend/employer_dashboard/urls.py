@@ -8,15 +8,18 @@ from .views import (
     EmployerLoginView,
     # Username-based profile views
     UsernameBasedEmployerProfileView,
+    UsernameBasedEmployerProfileCreateView,
     UsernameBasedEmployerProfileUpdateView,
     UsernameBasedCompanyLogoUploadView, 
     UsernameBasedProfilePictureUploadView,
+    UsernameBasedDeleteAccountView,
     JobListCreateView,
     JobDetailView,
     JobApplicationListView,
     JobApplicationDetailView,
     PublicJobListView,
     PublicJobDetailView,
+    PublicJobDetailByIdView,
     JobStatsView,
     RecentJobsView,
     JobBulkActionView,
@@ -62,6 +65,14 @@ from .views import (
     SubmitFeedbackView,
 )
 
+# Import application views (NEW)
+from .application_views import (
+    JobApplyView,
+    JobApplicantsListView,
+    ApplicantDetailView,
+    MyApplicationsListView,
+)
+
 # Import settings views
 from .settings_views import (
     EmployerSettingsView,
@@ -89,6 +100,7 @@ urlpatterns = [
     path('companies/', CompaniesListView.as_view(), name='companies_list'),
     path('jobs/public/', PublicJobListView.as_view(), name='public_job_list'),
     path('jobs/public/<int:pk>/', PublicJobDetailView.as_view(), name='public_job_detail'),
+    path('jobs/single/', PublicJobDetailByIdView.as_view(), name='public_job_detail_by_id'),
     path('jobs/recent/', RecentJobsView.as_view(), name='recent_jobs'),
     
     # Authentication
@@ -100,9 +112,11 @@ urlpatterns = [
     
     # Username-based profile URLs (LinkedIn-style)
     path('<str:username>/profile/', UsernameBasedEmployerProfileView.as_view(), name='username_employer_profile'),
+    path('<str:username>/profile/create/', UsernameBasedEmployerProfileCreateView.as_view(), name='username_employer_profile_create'),
     path('<str:username>/profile/update/', UsernameBasedEmployerProfileUpdateView.as_view(), name='username_employer_profile_update'),
     path('<str:username>/profile/upload-logo/', UsernameBasedCompanyLogoUploadView.as_view(), name='username_company_logo_upload'),
     path('<str:username>/profile/upload-picture/', UsernameBasedProfilePictureUploadView.as_view(), name='username_profile_picture_upload'),
+    path('<str:username>/delete-account/', UsernameBasedDeleteAccountView.as_view(), name='username_delete_account'),
     
     # Jobs (Protected - Employer only)
     path('jobs/', JobListCreateView.as_view(), name='job_list_create'),
@@ -119,9 +133,14 @@ urlpatterns = [
     path('jobs/<int:pk>/update-views/', JobViewCountUpdateView.as_view(), name='job_update_views'),
     path('jobs/<int:pk>/reactivate/', JobReactivateView.as_view(), name='job_reactivate'),
     
+    # Job Application Endpoints (NEW)
+    path('jobs/<int:job_id>/apply/', JobApplyView.as_view(), name='job_apply'),  # Public/Employee - Submit application
+    path('jobs/<int:job_id>/applicants/', JobApplicantsListView.as_view(), name='job_applicants_list'),  # Employer - View applicants
+    
     # Applications (Protected - Employer only)
     path('applications/', JobApplicationListView.as_view(), name='application_list'),
     path('applications/<int:pk>/', JobApplicationDetailView.as_view(), name='application_detail'),
+    path('applicants/<int:pk>/', ApplicantDetailView.as_view(), name='applicant_detail'),  # NEW - Full applicant details
     
     # Boolean Search (Protected - Employer only)
     path('candidates/boolean-search/', BooleanCandidateSearchView.as_view(), name='boolean_candidate_search'),

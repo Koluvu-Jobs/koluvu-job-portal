@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Sidebar from "./components/Sidebar";
 import Chatbot from "./components/Chatbot";
 import Header from "@koluvu/components/Header/Header";
@@ -17,17 +17,45 @@ export default function EmployerLayout({ children }) {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user, loading } = useAuth();
   const { profile: employerProfile } = useEmployerProfile();
 
   useEffect(() => {
     setMounted(true);
-    // Update active tab based on current route
+    // Update active tab based on current route and search params
     const path = pathname.split("/").pop();
-    if (path) {
-      setActiveTab(path === "employer" ? "dashboard" : path);
+    const tab = searchParams.get("tab");
+
+    // Priority: search param tab > direct routes > default dashboard
+    if (tab) {
+      // Handle all possible tab values from search params
+      setActiveTab(tab);
+    } else {
+      // Handle direct routes (not using ?tab=)
+      const directRoutes = {
+        "post-jobs": "post-jobs",
+        "active-jobs": "active-jobs", 
+        "expired-jobs": "expired-jobs",
+        "closed-jobs": "closed-jobs",
+        "boolean-search": "boolean-search",
+        "ats": "ats",
+        "interview-scheduler": "interview-scheduler",
+        "proxying-detector": "proxying-detector",
+        "feedback-form": "feedback-form",
+        "candidate-status": "candidate-status",
+        "subscription-plans": "subscription-plans",
+        "help-center": "help-center",
+        "settings": "settings",
+        "applications": "applications",
+        "profile": "profile",
+        "company": "company",
+        "subscription": "subscription"
+      };
+      
+      setActiveTab(directRoutes[path] || "dashboard");
     }
-  }, [pathname]);
+  }, [pathname, searchParams]);
 
   if (!mounted) {
     return null;

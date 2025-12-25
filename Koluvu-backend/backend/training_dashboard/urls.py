@@ -1,7 +1,9 @@
 from django.urls import path
 from .views import (
     RegisterTrainingProviderView, 
-    TrainingProviderProfileView, 
+    TrainingProviderProfileView,
+    ProfileCompletenessCheckView,
+    DashboardStatisticsView,
     TrainingProviderLoginView,
     TrainingProgramListCreateView,
     TrainingProgramDetailView,
@@ -26,6 +28,8 @@ urlpatterns = [
     path('register/', RegisterTrainingProviderView.as_view(), name='training_provider_register'),
     path('login/', TrainingProviderLoginView.as_view(), name='training_provider_login'),
     path('profile/', TrainingProviderProfileView.as_view(), name='training_provider_profile'),
+    path('profile/check-completeness/', ProfileCompletenessCheckView.as_view(), name='profile_completeness_check'),
+    path('dashboard/statistics/', DashboardStatisticsView.as_view(), name='dashboard_statistics'),
     
     # Training Programs
     path('programs/', TrainingProgramListCreateView.as_view(), name='training_program_list_create'),

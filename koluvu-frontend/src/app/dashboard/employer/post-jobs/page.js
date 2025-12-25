@@ -246,6 +246,8 @@ export default function PostJobPage() {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [debugInfo, setDebugInfo] = useState(null);
+  const [showDebug, setShowDebug] = useState(false);
   const router = useRouter();
 
   const steps = [
@@ -286,15 +288,88 @@ export default function PostJobPage() {
 
   const validateStep = (stepNum) => {
     if (stepNum === 1) {
-      if (!formData.jobTitle || !formData.location || !formData.contactEmail) {
-        alert(
-          "Please fill in all required fields: Job Title, Location, and Contact Email"
-        );
+      if (
+        !formData.jobTitle ||
+        !formData.jobType ||
+        !formData.department ||
+        !formData.location ||
+        !formData.employmentType ||
+        !formData.experienceMin ||
+        !formData.experienceMax ||
+        !formData.salaryMin ||
+        !formData.salaryMax ||
+        !formData.salaryCurrency ||
+        !formData.applicationDeadline ||
+        !formData.contactEmail
+      ) {
+        alert("Please fill in all required fields in Basic Information.");
+        return false;
+      }
+      // Type constraints
+      if (
+        isNaN(formData.experienceMin) ||
+        isNaN(formData.experienceMax) ||
+        formData.experienceMin < 0 ||
+        formData.experienceMax < 0 ||
+        isNaN(formData.salaryMin) ||
+        isNaN(formData.salaryMax) ||
+        formData.salaryMin < 0 ||
+        formData.salaryMax < 0
+      ) {
+        alert("Experience and Salary must be positive numbers.");
+        return false;
+      }
+      // Email format
+      const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+      if (!emailRegex.test(formData.contactEmail)) {
+        alert("Please enter a valid email address.");
         return false;
       }
     } else if (stepNum === 2) {
-      if (!formData.jobBrief) {
-        alert("Please provide a Job Brief");
+      if (
+        !formData.jobBrief ||
+        !formData.responsibilities ||
+        !formData.requirements
+      ) {
+        alert("Please provide Job Brief, Responsibilities, and Requirements.");
+        return false;
+      }
+    } else if (stepNum === 3) {
+      if (
+        !formData.companyDescription ||
+        !formData.companyWebsite ||
+        !formData.companyIndustry ||
+        !formData.companySize ||
+        !formData.companyBenefits
+      ) {
+        alert("Please fill in all required fields about the company.");
+        return false;
+      }
+      // URL format
+      try {
+        new URL(formData.companyWebsite);
+      } catch {
+        alert("Please enter a valid company website URL.");
+        return false;
+      }
+    } else if (stepNum === 4) {
+      if (
+        !formData.screeningQuestions.length ||
+        formData.screeningQuestions.some((q) => !q.question)
+      ) {
+        alert(
+          "Please add at least one screening question and fill all questions."
+        );
+        return false;
+      }
+    } else if (stepNum === 5) {
+      if (
+        !formData.hiringProcessStages.length ||
+        formData.hiringProcessStages.some((s) => !s.stage || !s.duration)
+      ) {
+        alert(
+          "Please add all hiring process stages and fill all required fields."
+        );
         return false;
       }
     }
@@ -392,8 +467,68 @@ export default function PostJobPage() {
         description: formData.jobBrief || "Job description",
       };
 
+      // Create debug information to display on frontend
+      const debugData = {
+        step: "PREPARING_DATA",
+        formDataKeys: Object.keys(formData),
+        jobDataKeys: Object.keys(jobData),
+        fieldMappings: {
+          "jobTitle → title": {
+            frontend: formData.jobTitle,
+            backend: jobData.title,
+          },
+          "jobType → job_type": {
+            frontend: formData.jobType,
+            backend: jobData.job_type,
+          },
+          "employmentType → employment_type": {
+            frontend: formData.employmentType,
+            backend: jobData.employment_type,
+          },
+          "jobBrief → job_brief": {
+            frontend: formData.jobBrief,
+            backend: jobData.job_brief,
+          },
+          "responsibilities (text)": {
+            frontend: formData.responsibilities,
+            backend: jobData.responsibilities,
+          },
+          "requirements (text)": {
+            frontend: formData.requirements,
+            backend: jobData.requirements,
+          },
+          "skills (text)": {
+            frontend: formData.skills,
+            backend: jobData.skills,
+          },
+          "benefits (text)": {
+            frontend: formData.benefits,
+            backend: jobData.benefits,
+          },
+          "companyBenefits → company_benefits": {
+            frontend: formData.companyBenefits,
+            backend: jobData.company_benefits,
+          },
+          faqs: { frontend: formData.faqs, backend: jobData.faqs },
+          "screeningQuestions → screening_questions": {
+            frontend: formData.screeningQuestions,
+            backend: jobData.screening_questions,
+          },
+          "hiringProcessStages → hiring_process_stages": {
+            frontend: formData.hiringProcessStages,
+            backend: jobData.hiring_process_stages,
+          },
+        },
+        timestamp: new Date().toISOString(),
+      };
+
+      setDebugInfo(debugData);
+
       // Print what is being sent to the backend
-      console.log("Posting job data:", jobData);
+      console.log("=== JOB SUBMISSION DEBUG ===");
+      console.log("Frontend formData:", formData);
+      console.log("Transformed jobData:", jobData);
+      console.log("Debug info:", debugData);
 
       const res = await fetch("/api/employer/jobs/", {
         method: "POST",
@@ -403,6 +538,17 @@ export default function PostJobPage() {
       });
 
       const data = await res.json();
+
+      // Update debug info with API response
+      setDebugInfo((prev) => ({
+        ...prev,
+        step: res.ok ? "API_SUCCESS" : "API_ERROR",
+        apiResponse: {
+          status: res.status,
+          statusText: res.statusText,
+          data: data,
+        },
+      }));
 
       if (!res.ok) {
         // Format detailed error message
@@ -421,35 +567,161 @@ export default function PostJobPage() {
         }
 
         setApiError(errorMessage);
+        setShowDebug(true); // Show debug panel on error
         setSubmitting(false);
         return;
       }
 
-      alert("Job posted successfully!");
-      // Build unique job URL
-      const slugify = (str) =>
-        String(str || "")
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/(^-|-$)+/g, "");
+      // Update debug with created job data
+      setDebugInfo((prev) => ({
+        ...prev,
+        createdJob: data,
+        step: "JOB_CREATED",
+      }));
 
-      const companySlug = slugify(
-        formData.companyIndustry || formData.companyName || "company"
-      );
-      const jobTitleSlug = slugify(formData.jobTitle);
-      const jobTypeSlug = slugify(formData.jobType);
-      const employmentTypeSlug = slugify(formData.employmentType);
-      const jobUrl = `/dashboard/employer/jobs/${companySlug}/${jobTitleSlug}/${jobTypeSlug}/${employmentTypeSlug}`;
-      router.push(jobUrl);
+      alert("Job posted successfully!");
+
+      // Redirect to the job detail page using the job ID
+      const jobId = data.id || data.job_id || data.job?.id;
+      if (jobId) {
+        router.push(`/jobs/${jobId}`);
+      } else {
+        // Fallback to active jobs page if no ID returned
+        console.warn("No job ID returned from API, redirecting to active jobs");
+        router.push("/dashboard/employer?tab=active-jobs");
+      }
     } catch (err) {
       console.error("Error posting job:", err);
+      setDebugInfo((prev) => ({
+        ...prev,
+        step: "NETWORK_ERROR",
+        error: err.message,
+      }));
       setApiError("Network error. Please try again.");
+      setShowDebug(true); // Show debug panel on error
       setSubmitting(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Debug Panel - Toggle Button */}
+      <button
+        onClick={() => setShowDebug(!showDebug)}
+        className="fixed top-4 right-4 z-50 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 transition-all"
+      >
+        <span className="text-sm font-medium">🐛 Debug Info</span>
+        {showDebug ? <FiChevronUp /> : <FiChevronDown />}
+      </button>
+
+      {/* Debug Panel */}
+      {showDebug && debugInfo && (
+        <div className="fixed top-16 right-4 z-40 bg-white border-2 border-purple-500 rounded-lg shadow-2xl max-w-2xl max-h-[80vh] overflow-auto">
+          <div className="sticky top-0 bg-purple-600 text-white px-4 py-3 flex justify-between items-center">
+            <h3 className="font-bold text-lg">🐛 Field Mapping Debug</h3>
+            <button
+              onClick={() => setShowDebug(false)}
+              className="text-white hover:text-gray-200"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="p-4 space-y-4">
+            {/* Current Step */}
+            <div className="bg-blue-50 border border-blue-200 rounded p-3">
+              <div className="font-bold text-blue-900 mb-1">Current Step:</div>
+              <div className="text-blue-700">{debugInfo.step}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {debugInfo.timestamp}
+              </div>
+            </div>
+
+            {/* Field Mappings */}
+            <div className="bg-gray-50 border border-gray-200 rounded p-3">
+              <div className="font-bold text-gray-900 mb-2">
+                Field Mappings (Frontend → Backend):
+              </div>
+              <div className="space-y-2 text-sm">
+                {Object.entries(debugInfo.fieldMappings || {}).map(
+                  ([mapping, values]) => (
+                    <div
+                      key={mapping}
+                      className="bg-white border border-gray-200 rounded p-2"
+                    >
+                      <div className="font-semibold text-purple-700">
+                        {mapping}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mt-1">
+                        <div>
+                          <div className="text-xs text-gray-500">Frontend:</div>
+                          <div className="text-xs bg-yellow-50 p-1 rounded border border-yellow-200 overflow-auto max-h-20">
+                            {JSON.stringify(values.frontend, null, 2)}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500">Backend:</div>
+                          <div className="text-xs bg-green-50 p-1 rounded border border-green-200 overflow-auto max-h-20">
+                            {JSON.stringify(values.backend, null, 2)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+
+            {/* API Response */}
+            {debugInfo.apiResponse && (
+              <div
+                className={`border rounded p-3 ${
+                  debugInfo.apiResponse.status === 201
+                    ? "bg-green-50 border-green-200"
+                    : "bg-red-50 border-red-200"
+                }`}
+              >
+                <div className="font-bold mb-2">API Response:</div>
+                <div className="text-sm space-y-1">
+                  <div>
+                    <span className="font-semibold">Status:</span>{" "}
+                    {debugInfo.apiResponse.status}{" "}
+                    {debugInfo.apiResponse.statusText}
+                  </div>
+                  <div className="bg-white p-2 rounded border mt-2 overflow-auto max-h-40">
+                    <pre className="text-xs">
+                      {JSON.stringify(debugInfo.apiResponse.data, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Created Job Data */}
+            {debugInfo.createdJob && (
+              <div className="bg-green-50 border border-green-200 rounded p-3">
+                <div className="font-bold text-green-900 mb-2">
+                  ✅ Created Job Data:
+                </div>
+                <div className="bg-white p-2 rounded border overflow-auto max-h-60">
+                  <pre className="text-xs">
+                    {JSON.stringify(debugInfo.createdJob, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {/* Error Info */}
+            {debugInfo.error && (
+              <div className="bg-red-50 border border-red-200 rounded p-3">
+                <div className="font-bold text-red-900 mb-2">❌ Error:</div>
+                <div className="text-red-700 text-sm">{debugInfo.error}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Mobile Header */}
         <div className="lg:hidden py-6">

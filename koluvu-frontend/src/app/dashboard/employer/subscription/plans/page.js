@@ -40,8 +40,9 @@ const SubscriptionPage = () => {
         "Basic ATS",
         "AI Candidate Matching",
         "Interview Scheduler",
+        "+49 for verification",
       ],
-      included: [true, true, true, false, false],
+      included: [true, true, true, false, false, true],
       buttonText: "Get Started",
     },
     professional: {
@@ -53,8 +54,9 @@ const SubscriptionPage = () => {
         "100 ATS",
         "200 AI Suggested Candidates",
         "Basic Interview Scheduler",
+        "+49 for verification",
       ],
-      included: [true, true, true, true, false],
+      included: [true, true, true, true, false, true],
       buttonText: "Upgrade",
       popular: true,
     },
@@ -67,8 +69,9 @@ const SubscriptionPage = () => {
         "Unlimited ATS",
         "Unlimited AI Suggested Candidates",
         "Full Interview Scheduler",
+        "+49 for verification",
       ],
-      included: [true, true, true, true, true],
+      included: [true, true, true, true, true, true],
       buttonText: "Contact Sales",
     },
   };
@@ -82,8 +85,8 @@ const SubscriptionPage = () => {
       title: plan.title,
       price:
         cycle === "monthly"
-          ? plan.monthlyPrice
-          : calculateYearlyPrice(plan.monthlyPrice),
+          ? plan.monthlyPrice + 49
+          : calculateYearlyPrice(plan.monthlyPrice + 49),
       billingCycle: cycle,
       features: plan.features,
     };
@@ -155,7 +158,7 @@ const SubscriptionPage = () => {
               <div className="text-3xl font-bold text-blue-600">
                 {billingCycle === "monthly" ? (
                   <>
-                    ₹{plans.basic.monthlyPrice}
+                    ₹{plans.basic.monthlyPrice}+49
                     <small className="text-gray-500 text-base">/month</small>
                   </>
                 ) : (
@@ -212,7 +215,7 @@ const SubscriptionPage = () => {
               <div className="text-3xl font-bold text-blue-600">
                 {billingCycle === "monthly" ? (
                   <>
-                    ₹{plans.professional.monthlyPrice}
+                    ₹{plans.professional.monthlyPrice}+49
                     <small className="text-gray-500 text-base">/month</small>
                   </>
                 ) : (
@@ -264,7 +267,7 @@ const SubscriptionPage = () => {
               <div className="text-3xl font-bold text-blue-600">
                 {billingCycle === "monthly" ? (
                   <>
-                    ₹{plans.enterprise.monthlyPrice}
+                    ₹{plans.enterprise.monthlyPrice}+49
                     <small className="text-gray-500 text-base">/month</small>
                   </>
                 ) : (

@@ -558,7 +558,7 @@ export default function Applications() {
                 <button
                   onClick={() => {
                     console.log("Navigating to mock interview...");
-                    router.push("/dashboard/employee/mock-interview");
+                    router.push("/mock-interview");
                   }}
                   className={`px-4 py-2 rounded-lg transition-all duration-300 text-base md:px-5 md:py-2.5 font-medium border transform hover:scale-105 hover:shadow-lg ${
                     isDarkMode

@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 export async function POST(request, { params }) {
   try {
     const { username } = await params;
-    
+
     const cookieStore = await cookies();
     const accessToken = cookieStore.get("access_token")?.value;
 
@@ -15,10 +15,39 @@ export async function POST(request, { params }) {
 
     // Verify that the requested username matches the authenticated user
     try {
-      const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
-      const userFromToken = tokenPayload.username || tokenPayload.email?.split('@')[0];
-      
-      if (userFromToken !== username) {
+      const tokenPayload = JSON.parse(atob(accessToken.split(".")[1]));
+      const userIdFromToken = tokenPayload.user_id;
+
+      if (!userIdFromToken) {
+        return NextResponse.json(
+          { error: "Invalid token format" },
+          { status: 401 }
+        );
+      }
+
+      // Fetch user details from backend
+      const userCheckUrl = `${
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"
+      }/api/auth/user/`;
+      const userCheckResponse = await fetch(userCheckUrl, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (!userCheckResponse.ok) {
+        return NextResponse.json(
+          { error: "Failed to verify user identity" },
+          { status: 401 }
+        );
+      }
+
+      const userData = await userCheckResponse.json();
+      const emailPrefix = userData.email?.split("@")[0];
+      const isAuthorized =
+        userData.username === username ||
+        emailPrefix === username ||
+        String(userData.id) === username;
+
+      if (!isAuthorized) {
         return NextResponse.json(
           { error: "Unauthorized access to this profile" },
           { status: 403 }
@@ -26,25 +55,22 @@ export async function POST(request, { params }) {
       }
     } catch (tokenError) {
       console.error("Token verification error:", tokenError);
-      return NextResponse.json(
-        { error: "Invalid token" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     // Get the form data from the request
     const formData = await request.formData();
-    const logoFile = formData.get('company_logo');
-    
+    const logoFile = formData.get("company_logo");
+
     console.log(`Form data received for logo upload for user: ${username}`);
-    
+
     if (!logoFile) {
       return NextResponse.json(
         { error: "No file uploaded. Please select a company logo." },
         { status: 400 }
       );
     }
-    
+
     // Validate file size (max 5MB)
     if (logoFile.size > 5 * 1024 * 1024) {
       return NextResponse.json(
@@ -52,26 +78,37 @@ export async function POST(request, { params }) {
         { status: 400 }
       );
     }
-    
+
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+    ];
     if (!allowedTypes.includes(logoFile.type)) {
       return NextResponse.json(
-        { error: "Invalid file type. Please upload an image file (JPEG, PNG, GIF, or WebP)." },
+        {
+          error:
+            "Invalid file type. Please upload an image file (JPEG, PNG, GIF, or WebP).",
+        },
         { status: 400 }
       );
     }
-    
+
     // Forward request to Django backend
-    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000'}/api/employer/${username}/profile/upload-logo/`;
-    
+    const backendUrl = `${
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"
+    }/api/employer/${username}/profile/upload-logo/`;
+
     const backendFormData = new FormData();
-    backendFormData.append('company_logo', logoFile);
-    
+    backendFormData.append("company_logo", logoFile);
+
     const backendResponse = await fetch(backendUrl, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         // Don't set Content-Type for FormData, let browser set it with boundary
       },
       body: backendFormData,
@@ -80,8 +117,8 @@ export async function POST(request, { params }) {
     if (!backendResponse.ok) {
       console.error(`Backend logo upload failed: ${backendResponse.status}`);
       const errorText = await backendResponse.text();
-      console.error('Backend error:', errorText);
-      
+      console.error("Backend error:", errorText);
+
       return NextResponse.json(
         { error: "Failed to upload logo to backend" },
         { status: backendResponse.status }
@@ -90,9 +127,8 @@ export async function POST(request, { params }) {
 
     const uploadResult = await backendResponse.json();
     console.log(`Logo uploaded successfully for user: ${username}`);
-    
-    return NextResponse.json(uploadResult);
 
+    return NextResponse.json(uploadResult);
   } catch (error) {
     console.error("Logo upload error:", error);
     return NextResponse.json(

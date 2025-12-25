@@ -1,4 +1,4 @@
-// Authentication utility functions and constants
+// src/utils/auth/index.js
 
 export const AUTH_ROUTES = {
   LOGIN_EMPLOYEE: "/auth/login/employee",
@@ -86,19 +86,29 @@ export const clearStoredAuth = () => {
   if (typeof window === "undefined") return;
 
   try {
+    // Clear all localStorage keys
     Object.values(STORAGE_KEYS).forEach((key) => {
       localStorage.removeItem(key);
+      sessionStorage.removeItem(key); // Also clear from sessionStorage
     });
 
-    // Clear any additional auth-related items
+    // Clear any additional auth-related items from both storages
     const authRelatedKeys = [
       "sb-auth-token",
       "google-auth-user",
       "auth-session",
+      "employee-profile",
+      "employer-profile",
+      "partner-profile",
     ];
     authRelatedKeys.forEach((key) => {
       localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
     });
+
+    console.log(
+      "✅ Cleared all auth data from localStorage and sessionStorage"
+    );
   } catch (error) {
     console.error("Error clearing stored auth:", error);
   }
@@ -116,29 +126,23 @@ export const isTokenExpired = (token) => {
   }
 };
 
-export const getRedirectPath = (userType, user = null) => {
+export const getRedirectPath = (userType, username = null) => {
   switch (userType) {
     case USER_TYPES.EMPLOYEE:
-      if (user) {
-        // Use public_identifier for employees (KJS- prefixed) if available, fallback to username
-        const identifier = user.public_identifier || user.username;
-        return `/dashboard/employee/${identifier}`;
-      }
-      return DASHBOARD_ROUTES.EMPLOYEE;
+      return username
+        ? `/dashboard/employee/${username}`
+        : DASHBOARD_ROUTES.EMPLOYEE;
     case USER_TYPES.EMPLOYER:
-      return user
-        ? `/dashboard/employer/${user.username || user}`
+      return username
+        ? `/dashboard/employer/${username}`
         : DASHBOARD_ROUTES.EMPLOYER;
     case USER_TYPES.PARTNER:
-      return user
-        ? `/dashboard/partner/${user.username || user}`
+      return username
+        ? `/dashboard/partner/${username}`
         : DASHBOARD_ROUTES.PARTNER;
     default:
-      if (user) {
-        // Default to employee behavior for backward compatibility
-        const identifier = user.public_identifier || user.username || user;
-        return `/dashboard/employee/${identifier}`;
-      }
-      return DASHBOARD_ROUTES.EMPLOYEE;
+      return username
+        ? `/dashboard/employee/${username}`
+        : DASHBOARD_ROUTES.EMPLOYEE;
   }
 };

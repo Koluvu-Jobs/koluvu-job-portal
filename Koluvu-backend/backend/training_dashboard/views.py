@@ -28,6 +28,117 @@ class TrainingProviderProfileView(generics.RetrieveUpdateAPIView):
         return profile
 
 
+class ProfileCompletenessCheckView(generics.GenericAPIView):
+    """Check if training provider has completed their profile setup"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            profile = TrainingProviderProfile.objects.get(user=request.user)
+            
+            # Define required fields for initial setup
+            required_fields = [
+                'organization_name',
+                'contact_person',
+                'phone',
+                'address'
+            ]
+            
+            # Check if all required fields are filled
+            is_complete = all([
+                getattr(profile, field, None) and str(getattr(profile, field, '')).strip()
+                for field in required_fields
+            ])
+            
+            # Get missing fields
+            missing_fields = [
+                field for field in required_fields
+                if not getattr(profile, field, None) or not str(getattr(profile, field, '')).strip()
+            ]
+            
+            return Response({
+                'is_complete': is_complete,
+                'missing_fields': missing_fields,
+                'profile': TrainingProviderProfileSerializer(profile).data
+            })
+            
+        except TrainingProviderProfile.DoesNotExist:
+            return Response({
+                'is_complete': False,
+                'missing_fields': ['organization_name', 'contact_person', 'phone', 'address'],
+                'profile': None
+            })
+
+
+class DashboardStatisticsView(generics.GenericAPIView):
+    """Get dashboard statistics for the training provider"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            from django.db.models import Count, Q
+            from datetime import datetime, timedelta
+            
+            profile = TrainingProviderProfile.objects.get(user=request.user)
+            
+            # Program statistics
+            total_programs = TrainingProgram.objects.filter(provider=profile).count()
+            active_programs = TrainingProgram.objects.filter(provider=profile, status='active').count()
+            expired_programs = TrainingProgram.objects.filter(provider=profile, status='expired').count()
+            draft_programs = TrainingProgram.objects.filter(provider=profile, status='draft').count()
+            
+            # Enrollment statistics
+            total_enrollments = TrainingEnrollment.objects.filter(program__provider=profile).count()
+            active_enrollments = TrainingEnrollment.objects.filter(
+                program__provider=profile, 
+                status__in=['enrolled', 'in_progress']
+            ).count()
+            completed_enrollments = TrainingEnrollment.objects.filter(
+                program__provider=profile, 
+                status='completed'
+            ).count()
+            
+            # Monthly views (placeholder - implement actual view tracking)
+            monthly_views = 0  # TODO: Implement view tracking
+            
+            # Enrollment trend for last 6 weeks
+            enrollment_trend = []
+            today = datetime.now()
+            for i in range(6, 0, -1):
+                week_start = today - timedelta(weeks=i)
+                week_end = today - timedelta(weeks=i-1)
+                week_enrollments = TrainingEnrollment.objects.filter(
+                    program__provider=profile,
+                    enrollment_date__gte=week_start,
+                    enrollment_date__lt=week_end
+                ).count()
+                enrollment_trend.append({
+                    'name': f'Week {7-i}',
+                    'enrollments': week_enrollments
+                })
+            
+            return Response({
+                'programs': {
+                    'total': total_programs,
+                    'active': active_programs,
+                    'expired': expired_programs,
+                    'draft': draft_programs
+                },
+                'enrollments': {
+                    'total': total_enrollments,
+                    'active': active_enrollments,
+                    'completed': completed_enrollments
+                },
+                'monthly_views': monthly_views,
+                'enrollment_trend': enrollment_trend
+            })
+            
+        except TrainingProviderProfile.DoesNotExist:
+            return Response({
+                'error': 'Profile not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
 class TrainingProviderLoginView(generics.GenericAPIView):
     """Training provider login view with JWT authentication"""
     permission_classes = []

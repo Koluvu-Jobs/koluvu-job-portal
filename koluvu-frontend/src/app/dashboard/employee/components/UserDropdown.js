@@ -18,14 +18,14 @@ export default function UserDropdown({ user }) {
 
   const handleLogout = async () => {
     try {
-      await logout();
-      router.push("/auth/login/employee");
+      await logout("/");
+      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
       // Force redirect even if logout fails
       localStorage.clear();
       sessionStorage.clear();
-      router.push("/auth/login/employee");
+      router.push("/");
     }
     setIsOpen(false);
   };

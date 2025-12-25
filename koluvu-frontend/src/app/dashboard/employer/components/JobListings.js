@@ -25,6 +25,37 @@ import {
 
 export default function JobListings() {
   const [showAll, setShowAll] = useState(false);
+  const [jobs, setJobs] = useState([]);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+
+  useEffect(() => {
+    setJobs(allJobs);
+  }, []);
+
+  // Action handlers
+  const handleViewJob = (job) => {
+    // Navigate to applicants page for this job
+    window.location.href = `/dashboard/employer/applicants?title=${encodeURIComponent(job.title)}&applicants=${job.applicants}&jobId=${job.id}`;
+  };
+
+  const handleEditJob = (job) => {
+    // Navigate to post-jobs page (could be enhanced to support editing)
+    window.location.href = `/dashboard/employer/post-jobs?edit=${job.id}&title=${encodeURIComponent(job.title)}`;
+  };
+
+  const handleDeleteJob = (jobId) => {
+    setShowDeleteConfirm(jobId);
+  };
+
+  const confirmDeleteJob = () => {
+    setJobs(jobs.filter(job => job.id !== showDeleteConfirm));
+    setShowDeleteConfirm(null);
+    // In a real app, this would make an API call to delete the job
+  };
+
+  const cancelDeleteJob = () => {
+    setShowDeleteConfirm(null);
+  };
 
   const allJobs = [
     {
@@ -150,7 +181,7 @@ export default function JobListings() {
     },
   ];
 
-  const jobsToDisplay = showAll ? allJobs : allJobs.slice(0, 5);
+  const jobsToDisplay = showAll ? jobs : jobs.slice(0, 5);
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -227,7 +258,7 @@ export default function JobListings() {
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                   <Link
-                    href="/dashboard/employer/applicants"
+                    href={`/dashboard/employer/applicants?title=${encodeURIComponent(job.title)}&applicants=${job.applicants}&jobId=${job.id}`}
                     className="flex items-center hover:text-blue-600 cursor-pointer"
                   >
                     <i className="fas fa-user-friends mr-2 text-blue-500"></i>
@@ -247,13 +278,25 @@ export default function JobListings() {
                   </span>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                  <button className="text-blue-600 hover:text-blue-900 mr-3">
+                  <button
+                    onClick={() => handleViewJob(job)}
+                    className="text-blue-600 hover:text-blue-900 mr-3"
+                    title="View Job Details"
+                  >
                     <i className="fas fa-eye"></i>
                   </button>
-                  <button className="text-green-600 hover:text-green-900 mr-3">
+                  <button
+                    onClick={() => handleEditJob(job)}
+                    className="text-green-600 hover:text-green-900 mr-3"
+                    title="Edit Job"
+                  >
                     <i className="fas fa-edit"></i>
                   </button>
-                  <button className="text-red-600 hover:text-red-900">
+                  <button
+                    onClick={() => handleDeleteJob(job.id)}
+                    className="text-red-600 hover:text-red-900"
+                    title="Delete Job"
+                  >
                     <i className="fas fa-trash-alt"></i>
                   </button>
                 </td>
@@ -266,8 +309,8 @@ export default function JobListings() {
         <div className="mt-4 flex items-center justify-between">
           <div className="text-sm text-gray-500">
             Showing <span className="font-medium">1</span> to{" "}
-            <span className="font-medium">{allJobs.length}</span> of{" "}
-            <span className="font-medium">{allJobs.length}</span> jobs
+            <span className="font-medium">{jobs.length}</span> of{" "}
+            <span className="font-medium">{jobs.length}</span> jobs
           </div>
           <div className="flex space-x-2">
             <button className="px-3 py-1 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
@@ -276,6 +319,34 @@ export default function JobListings() {
             <button className="px-3 py-1 rounded-md border border-gray-300 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
               Next
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Confirm Delete
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to delete this job? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={cancelDeleteJob}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteJob}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

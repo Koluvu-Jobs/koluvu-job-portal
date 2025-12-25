@@ -157,6 +157,90 @@ class UsernameBasedEmployerProfileView(APIView):
             })
 
 
+class UsernameBasedEmployerProfileCreateView(APIView):
+    """
+    Create employer profile via username (first-time setup)
+    POST /api/employer/{username}/profile/create
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get_user_by_username(self, username):
+        """Get user by username or email prefix"""
+        try:
+            # First try exact username match
+            user = User.objects.get(username=username)
+            return user
+        except User.DoesNotExist:
+            # Try to find by email prefix
+            try:
+                user = User.objects.get(email__startswith=f"{username}@")
+                return user
+            except User.DoesNotExist:
+                return None
+    
+    def post(self, request, username):
+        """Create profile - only allowed for own profile"""
+        target_user = self.get_user_by_username(username)
+        if not target_user:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Security check: Users can only create their own profile
+        if target_user != request.user:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        # Check if profile already exists
+        if EmployerProfile.objects.filter(user=target_user).exists():
+            return Response({'error': 'Profile already exists. Use update endpoint instead.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Extract email update if provided
+        new_email = request.data.get('email')
+        if new_email and new_email != target_user.email:
+            # Validate email format
+            from django.core.validators import validate_email
+            from django.core.exceptions import ValidationError
+            try:
+                validate_email(new_email)
+            except ValidationError:
+                return Response({'error': 'Invalid email format'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Check if email is already taken
+            if User.objects.filter(email=new_email).exclude(id=target_user.id).exists():
+                return Response({'error': 'Email already in use'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Update user email
+            target_user.email = new_email
+            target_user.save()
+        
+        # Remove email from profile data as it's handled at user level
+        profile_data = request.data.copy()
+        if 'email' in profile_data:
+            del profile_data['email']
+        
+        # Validate required fields
+        if not profile_data.get('company_name'):
+            return Response({'error': 'Company name is required'}, status=status.HTTP_400_BAD_REQUEST)
+        if not profile_data.get('employer_name'):
+            return Response({'error': 'Employer name is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Set default is_active
+        profile_data['is_active'] = True
+        
+        serializer = EmployerProfileSerializer(data=profile_data)
+        if serializer.is_valid():
+            employer_profile = serializer.save(user=target_user)
+            response_data = serializer.data
+            # Include user email in response
+            response_data['user'] = {
+                'id': target_user.id,
+                'username': target_user.username,
+                'email': target_user.email,
+                'first_name': target_user.first_name,
+                'last_name': target_user.last_name,
+            }
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UsernameBasedEmployerProfileUpdateView(APIView):
     """
     Update employer profile via username
@@ -338,6 +422,55 @@ class UsernameBasedProfilePictureUploadView(APIView):
             'profile_picture_url': serializer.data.get('profile_picture'),
             'profile': serializer.data
         })
+
+
+class UsernameBasedDeleteAccountView(APIView):
+    """
+    Delete employer account via username
+    DELETE /api/employer/{username}/delete-account
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get_user_by_username(self, username):
+        """Get user by username or email prefix"""
+        try:
+            user = User.objects.get(username=username)
+            return user
+        except User.DoesNotExist:
+            try:
+                user = User.objects.get(email__startswith=f"{username}@")
+                return user
+            except User.DoesNotExist:
+                return None
+    
+    def delete(self, request, username):
+        """Delete account - only allowed for own account"""
+        target_user = self.get_user_by_username(username)
+        if not target_user:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Security check: Users can only delete their own account
+        if target_user != request.user:
+            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+        
+        try:
+            # Store username for response
+            deleted_username = target_user.username
+            deleted_email = target_user.email
+            
+            # Delete user (will cascade delete profile and related data)
+            target_user.delete()
+            
+            return Response({
+                'message': 'Account deleted successfully',
+                'username': deleted_username,
+                'email': deleted_email
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to delete account: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 # Legacy views for backward compatibility

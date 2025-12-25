@@ -26,10 +26,11 @@ import {
   Facebook,
   Instagram,
   User,
+  Trash2,
 } from "lucide-react";
 
 const EmployerProfile = () => {
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, logout } = useAuth();
   const { refetch: refreshGlobalProfile } = useEmployerProfile();
   const params = useParams();
   const router = useRouter();
@@ -40,6 +41,9 @@ const EmployerProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingProfilePicture, setUploadingProfilePicture] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   // Get username from URL params
   const urlUsername = params?.username;
@@ -115,12 +119,6 @@ const EmployerProfile = () => {
         },
       });
 
-      console.log("Profile fetch response status:", response.status);
-      console.log(
-        "Profile fetch response headers:",
-        Object.fromEntries(response.headers.entries())
-      );
-
       if (!response.ok) {
         let errorData = {};
         try {
@@ -129,14 +127,17 @@ const EmployerProfile = () => {
           console.warn("Failed to parse error response as JSON");
         }
 
-        console.error("Profile fetch error:", {
-          url: `/api/employer/${urlUsername}/profile`,
-          status: response.status,
-          statusText: response.statusText,
-          errorData,
-          username: urlUsername,
-          hasToken: !!accessToken,
-        });
+        // Only log detailed error in development
+        if (process.env.NODE_ENV === "development") {
+          console.error("Profile fetch error:", {
+            url: `/api/employer/${urlUsername}/profile`,
+            status: response.status,
+            statusText: response.statusText,
+            errorData,
+            username: urlUsername,
+            hasToken: !!accessToken,
+          });
+        }
 
         if (response.status === 403) {
           throw new Error("You don't have permission to view this profile");
@@ -485,6 +486,59 @@ const EmployerProfile = () => {
 
     // Reset file input
     e.target.value = "";
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!canEdit()) {
+      setMessage({
+        type: "error",
+        text: "You don't have permission to delete this account",
+      });
+      return;
+    }
+
+    // Validate confirmation text
+    if (deleteConfirmText !== "DELETE") {
+      setMessage({
+        type: "error",
+        text: "Please type DELETE to confirm account deletion",
+      });
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setMessage(null);
+
+      const response = await fetch(
+        `/api/employer/${urlUsername}/delete-account`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete account");
+      }
+
+      setMessage({
+        type: "success",
+        text: "Account deleted successfully. Redirecting...",
+      });
+
+      // Use proper logout function to clear all auth state
+      setTimeout(async () => {
+        await logout("/");
+      }, 2000);
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      setMessage({ type: "error", text: error.message });
+      setDeleting(false);
+    }
   };
 
   if (loading) {
@@ -1291,6 +1345,94 @@ const EmployerProfile = () => {
             </div>
           </div>
         </div>
+
+        {/* Delete Account Section - Only show for own profile */}
+        {canEdit() && (
+          <div className="bg-white rounded-lg shadow-sm border border-red-200 p-6 mt-6">
+            <h2 className="text-xl font-semibold text-red-900 mb-2">
+              Danger Zone
+            </h2>
+            <p className="text-gray-600 mb-4">
+              Once you delete your account, there is no going back. This action
+              is permanent.
+            </p>
+            <button
+              onClick={() => setShowDeleteDialog(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Account
+            </button>
+          </div>
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        {showDeleteDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-md w-full p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Delete Account
+                  </h3>
+                  <p className="text-gray-600 mt-1">
+                    This action cannot be undone. This will permanently delete
+                    your account, company profile, all job postings, and
+                    associated data.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type <span className="font-bold text-red-600">DELETE</span> to
+                  confirm
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  placeholder="DELETE"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteDialog(false);
+                    setDeleteConfirmText("");
+                  }}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleting || deleteConfirmText !== "DELETE"}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {deleting ? (
+                    <>
+                      <Loader className="w-4 h-4 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Delete Forever
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

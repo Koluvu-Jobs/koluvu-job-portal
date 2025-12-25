@@ -25,17 +25,10 @@ import CaptchaVerification, {
   verifyCaptchaValue,
 } from "@koluvu/components/auth/CaptchaVerification";
 import VerificationForm from "@koluvu/app/auth/register/employee/VerificationForm";
-import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, isAuthenticated, user, clearAuthData } = useAuth();
-
-  // Apply authentication guard
-  const { isAllowed } = useAuthGuard("employer-login", {
-    enableRedirect: true,
-    showError: true,
-  });
   const videoRef = useRef(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -67,7 +60,7 @@ export default function LoginPage() {
       console.log(
         "User is already authenticated, redirecting to employer dashboard..."
       );
-      const redirectPath = getRedirectPath(USER_TYPES.EMPLOYER, user);
+      const redirectPath = getRedirectPath(USER_TYPES.EMPLOYER, user.username);
       router.replace(redirectPath);
     }
   }, [isAuthenticated, user, router]);
@@ -195,7 +188,8 @@ export default function LoginPage() {
       // Get the redirect URL from query params or default to dashboard
       const params = new URLSearchParams(window.location.search);
       const from =
-        params.get("from") || getRedirectPath(USER_TYPES.EMPLOYER, data.user);
+        params.get("from") ||
+        getRedirectPath(USER_TYPES.EMPLOYER, data.user.username);
       router.push(from);
     } catch (error) {
       console.error("Login failed:", error);
@@ -232,11 +226,6 @@ export default function LoginPage() {
     setCaptchaValue(value);
     setCaptchaKey(key);
   };
-
-  // Show loading or redirect if not allowed
-  if (!isAllowed) {
-    return null; // Auth guard handles redirect
-  }
 
   return (
     <>

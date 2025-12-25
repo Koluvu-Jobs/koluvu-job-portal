@@ -99,8 +99,9 @@ export const HeaderClient = ({
           }}
           className="text-white hover:bg-white/20 w-full text-left px-2.5 py-2 sm:px-3 sm:py-2.5 md:px-4 md:py-3 rounded-lg font-medium flex justify-between items-center transition-all duration-300 hover:scale-105 group relative overflow-hidden"
           suppressHydrationWarning
+          style={{ fontSize: "clamp(14px, 3.5vw, 15px)" }}
         >
-          <span className="relative z-10 text-xs sm:text-sm md:text-base">
+          <span className="relative z-10">
             Koluvu Labs
           </span>
           <svg

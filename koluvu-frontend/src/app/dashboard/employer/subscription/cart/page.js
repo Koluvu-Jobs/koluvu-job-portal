@@ -67,8 +67,11 @@ const Cart = () => {
                   )}
                 </p>
                 <div className="text-sm text-gray-500">
-                  <p>• {plan.features?.length || 0} features included</p>
-                  <p>
+                  <p className="font-medium mb-1">Features included:</p>
+                  {plan.features?.map((feature, index) => (
+                    <p key={index} className="ml-2">• {feature}</p>
+                  ))}
+                  <p className="mt-2">
                     • Next billing:{" "}
                     {new Date(
                       Date.now() +
@@ -83,7 +86,7 @@ const Cart = () => {
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold text-blue-600">
-                  ₹{plan.price}
+                  ₹{plan.price - 49}+49
                 </p>
                 <p className="text-gray-500">
                   /{plan.billingCycle === "monthly" ? "month" : "year"}
@@ -117,7 +120,7 @@ const Cart = () => {
               <div className="flex justify-between">
                 <span className="text-gray-600">Total</span>
                 <span className="text-lg font-bold text-blue-600">
-                  ₹{calculateTotal()}
+                  ₹{calculateTotal() - 49}+49
                 </span>
               </div>
             </div>

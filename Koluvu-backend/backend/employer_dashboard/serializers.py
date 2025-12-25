@@ -95,44 +95,10 @@ class JobSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Job
-        fields = [
-            # Basic Job Information (1-11)
-            'id', 'title', 'company_name', 'location', 'industry',
-            'salary_min', 'salary_max', 'salary_currency',
-            'description', 'job_brief', 'responsibilities', 'requirements', 
-            'benefits', 'perks', 'faqs', 'screening_questions', 'hiring_process_stages',
-            'application_deadline', 'contact_email', 'job_type',
-            
-            # Qualification Requirements (12-16)
-            'education_level', 'education', 
-            'experience_level', 'experience_min', 'experience_max',
-            'skills', 'skills_required', 'language_proficiency',
-            'additional_notes', 'ats_keywords',
-            
-            # Employer Details (17-26)
-            'employer_name', 'employer_email', 'employer_phone',
-            'employer_linkedin_url', 'employer_website_url',
-            'employer_logo', 'employer_logo_url', 'employer_logo_display',
-            'employer_bio', 'employer_social_media',
-            'company_size', 'company_benefits',
-            
-            # Additional Fields
-            'designation', 'department', 'employment_type', 'gender_preference',
-            'candidate_profile', 'urgency', 'interview_method', 
-            'virtual_platform', 'walkin_address', 
-            'contact_preferences', 'notification_preferences',
-            
-            # Status & Metrics
-            'status', 'created_at', 'updated_at',
-            'views_count', 'applications_count',
-            
-            # Relationships
-            'employer', 'employer_name', 'employer_profile_picture'
-        ]
+        fields = '__all__'
         read_only_fields = [
             'id', 'created_at', 'updated_at', 'views_count', 
-            'applications_count', 'employer', 'employer_name', 
-            'employer_profile_picture', 'employer_logo_display'
+            'applications_count', 'employer'
         ]
     
     def validate_faqs(self, value):
@@ -305,20 +271,146 @@ class JobListSerializer(serializers.ModelSerializer):
             'experience_min', 'experience_max', 'experience_level',
             'education_level', 'status', 'application_deadline', 
             'created_at', 'views_count', 'applications_count',
-            'employer_name', 'employer_logo_display', 'urgency'
+            'employer_name', 'employer_logo_display', 'urgency',
+            'description', 'job_brief', 'requirements', 'responsibilities',
+            'skills', 'benefits', 'faqs', 'screening_questions',
+            'hiring_process_stages', 'contact_email', 'virtual_platform',
+            'candidate_profile', 'company_benefits', 'employer_email', 'employer_phone',
+            'employer_linkedin_url', 'employer_website_url', 'employer_bio', 'employer_social_media',
+            'company_size', 'notification_preferences', 'contact_preferences', 'walkin_address',
+            'interview_method', 'virtual_platform', 'gender_preference', 'salary_currency', 'additional_notes',
+            # Add any other employer-entered fields except ATS keywords
         ]
 
 
 class JobApplicationSerializer(serializers.ModelSerializer):
     job_title = serializers.CharField(source='job.title', read_only=True)
     company_name = serializers.CharField(source='job.employer.company_name', read_only=True)
+    employee_name = serializers.SerializerMethodField()
+    employee_email = serializers.SerializerMethodField()
+    employee_phone = serializers.SerializerMethodField()
+    
+    def get_employee_name(self, obj):
+        if obj.employee and obj.employee.user:
+            full_name = f"{obj.employee.user.first_name} {obj.employee.user.last_name}".strip()
+            return full_name if full_name else obj.employee.user.username
+        return obj.candidate_name or "N/A"
+    
+    def get_employee_email(self, obj):
+        if obj.employee and obj.employee.user:
+            return obj.employee.user.email
+        return obj.candidate_email or "N/A"
+    
+    def get_employee_phone(self, obj):
+        if obj.employee:
+            return obj.employee.phone_number or obj.employee.phone or "N/A"
+        return obj.candidate_phone or "N/A"
     
     class Meta:
         model = JobApplication
         fields = [
-            'id', 'job', 'job_title', 'company_name', 'candidate_name',
-            'candidate_email', 'candidate_phone', 'resume', 'cover_letter',
-            'status', 'applied_at', 'updated_at'
+            'id', 'job', 'job_title', 'company_name', 
+            'employee', 'employee_name', 'employee_email', 'employee_phone',
+            'candidate_name', 'candidate_email', 'candidate_phone', 
+            'resume', 'resume_file_name', 'resume_file_size', 'cover_letter',
+            'screening_answers', 'ats_score', 'matching_keywords', 'missing_keywords',
+            'status', 'viewed_by_employer', 'viewed_at',
+            'applied_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'id', 'employee', 'ats_score', 'matching_keywords', 'missing_keywords',
+            'resume_file_name', 'resume_file_size', 'viewed_by_employer', 'viewed_at',
+            'applied_at', 'updated_at'
+        ]
+
+
+class EducationSerializer(serializers.ModelSerializer):
+    """Serializer for employee education"""
+    class Meta:
+        from employee_dashboard.models import Education
+        model = Education
+        fields = ['id', 'institution', 'degree', 'field_of_study', 'start_date', 'end_date', 'grade', 'is_current']
+
+
+class ExperienceSerializer(serializers.ModelSerializer):
+    """Serializer for employee work experience"""
+    class Meta:
+        from employee_dashboard.models import Experience
+        model = Experience
+        fields = ['id', 'company_name', 'position', 'location', 'start_date', 'end_date', 'is_current', 'description', 'skills_used']
+
+
+class SkillSerializer(serializers.ModelSerializer):
+    """Serializer for employee skills"""
+    class Meta:
+        from employee_dashboard.models import Skill
+        model = Skill
+        fields = ['id', 'name', 'proficiency', 'years_of_experience']
+
+
+class EmployeeProfileSerializer(serializers.ModelSerializer):
+    """Nested employee profile with full details for applicant view"""
+    user_name = serializers.SerializerMethodField()
+    user_email = serializers.SerializerMethodField()
+    education = EducationSerializer(many=True, read_only=True)
+    experience = ExperienceSerializer(many=True, read_only=True)
+    skills = SkillSerializer(many=True, read_only=True)
+    profile_picture_url = serializers.SerializerMethodField()
+    
+    def get_user_name(self, obj):
+        if obj.user:
+            full_name = f"{obj.user.first_name} {obj.user.last_name}".strip()
+            return full_name if full_name else obj.user.username
+        return "N/A"
+    
+    def get_user_email(self, obj):
+        return obj.user.email if obj.user else "N/A"
+    
+    def get_profile_picture_url(self, obj):
+        if obj.image_field_picture:
+            return obj.image_field_picture.url
+        return obj.profile_picture or ""
+    
+    class Meta:
+        from employee_dashboard.models import EmployeeProfile
+        model = EmployeeProfile
+        fields = [
+            'id', 'user_name', 'user_email', 'phone_number', 'phone', 
+            'date_of_birth', 'location', 'linkedin_url', 'github_url', 'portfolio_url',
+            'bio', 'profile_picture_url', 'current_designation', 'current_position',
+            'experience_years', 'expected_salary', 'resume_url',
+            'education', 'experience', 'skills'
+        ]
+
+
+class ApplicantDetailSerializer(serializers.ModelSerializer):
+    """Full applicant details including employee profile, ATS scoring, and screening answers"""
+    job_title = serializers.CharField(source='job.title', read_only=True)
+    company_name = serializers.CharField(source='job.employer.company_name', read_only=True)
+    employee_profile = EmployeeProfileSerializer(source='employee', read_only=True)
+    resume_url = serializers.SerializerMethodField()
+    
+    def get_resume_url(self, obj):
+        if obj.resume:
+            return obj.resume.url
+        return None
+    
+    class Meta:
+        model = JobApplication
+        fields = [
+            'id', 'job', 'job_title', 'company_name',
+            'employee', 'employee_profile',
+            'candidate_name', 'candidate_email', 'candidate_phone',
+            'resume', 'resume_url', 'resume_file_name', 'resume_file_size',
+            'cover_letter', 'screening_answers',
+            'ats_score', 'matching_keywords', 'missing_keywords',
+            'status', 'viewed_by_employer', 'viewed_at',
+            'applied_at', 'updated_at'
+        ]
+        read_only_fields = [
+            'id', 'employee', 'employee_profile', 'ats_score', 'matching_keywords', 
+            'missing_keywords', 'resume_file_name', 'resume_file_size', 
+            'viewed_by_employer', 'viewed_at', 'applied_at', 'updated_at'
         ]
 
 

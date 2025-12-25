@@ -133,7 +133,7 @@ const SuccessPage = () => {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-right font-medium">
-                    ₹{selectedPlan.price}
+                    ₹{selectedPlan.price - 49}+49
                   </td>
                 </tr>
                 <tr className="border-t bg-gray-50">
@@ -141,7 +141,7 @@ const SuccessPage = () => {
                     Total
                   </td>
                   <td className="px-4 py-3 text-right font-bold text-lg text-blue-600">
-                    ₹{selectedPlan.price}
+                    ₹{selectedPlan.price - 49}+49
                   </td>
                 </tr>
               </tbody>

@@ -48,7 +48,7 @@ export default function HeroSection() {
               </h1>
 
               {/* Subtitle */}
-              <p className="text-xl sm:text-2xl md:text-2xl lg:text-2xl text-blue-100 drop-shadow-md max-w-md">
+              <p className="text-xl sm:text-2xl md:text-2xl lg:text-2xl text-slate-100 drop-shadow-md max-w-md">
                 Your gateway to finding the right job and building a brighter
                 future.
               </p>
@@ -57,13 +57,13 @@ export default function HeroSection() {
             {/* CTA Buttons - Adjusted width for medium and small screens */}
             <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 w-full max-w-xs sm:max-w-sm mx-auto sm:mx-0">
               <Link href="/auth/register/employee" className="w-full">
-                <button className="w-full bg-white hover:bg-blue-50 text-blue-600 px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg font-medium transition-all transform hover:scale-105 shadow-lg text-sm sm:text-base">
+                <button className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg text-sm sm:text-base">
                   Find Dream Job
                 </button>
               </Link>
 
               <Link href="/auth/register/employer" className="w-full">
-                <button className="w-full bg-transparent hover:bg-blue-700 text-white px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg font-medium border border-white transition-all transform hover:scale-105 shadow text-sm sm:text-base">
+                <button className="w-full bg-transparent hover:bg-white/10 text-white px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg font-semibold border-2 border-white transition-all transform hover:scale-105 shadow text-sm sm:text-base">
                   Post Job Opening
                 </button>
               </Link>
@@ -72,16 +72,16 @@ export default function HeroSection() {
             {/* Stats - Responsive for mobile and small screens */}
             <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-4 md:gap-6 pt-4 md:pt-6">
               <div className="text-center min-w-[80px] sm:min-w-[90px]">
-                <div className="text-2xl sm:text-2xl md:text-3xl font-bold text-white">10K+</div>
-                <div className="text-blue-200 text-xs sm:text-sm">Active Jobs</div>
+                <div className="text-2xl sm:text-2xl md:text-3xl font-bold text-orange-500">10K+</div>
+                <div className="text-slate-200 text-xs sm:text-sm">Active Jobs</div>
               </div>
               <div className="text-center min-w-[80px] sm:min-w-[90px]">
-                <div className="text-2xl sm:text-2xl md:text-3xl font-bold text-white">5K+</div>
-                <div className="text-blue-200 text-xs sm:text-sm">Companies</div>
+                <div className="text-2xl sm:text-2xl md:text-3xl font-bold text-orange-500">5K+</div>
+                <div className="text-slate-200 text-xs sm:text-sm">Companies</div>
               </div>
               <div className="text-center min-w-[80px] sm:min-w-[90px]">
-                <div className="text-2xl sm:text-2xl md:text-3xl font-bold text-white">50K+</div>
-                <div className="text-blue-200 text-xs sm:text-sm">Job Seekers</div>
+                <div className="text-2xl sm:text-2xl md:text-3xl font-bold text-orange-500">50K+</div>
+                <div className="text-slate-200 text-xs sm:text-sm">Job Seekers</div>
               </div>
             </div>
           </div>
@@ -96,11 +96,11 @@ export default function HeroSection() {
           >
             <div className="relative">
               {/* Decorative Elements - Smaller for mobile */}
-              <div className="absolute -top-3 -left-3 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full opacity-20 animate-pulse"></div>
-              <div className="absolute -bottom-3 -right-3 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full opacity-15 animate-pulse delay-1000"></div>
+              <div className="absolute -top-3 -left-3 w-16 h-16 sm:w-20 sm:h-20 bg-orange-500/20 rounded-full opacity-40 animate-pulse"></div>
+              <div className="absolute -bottom-3 -right-3 w-20 h-20 sm:w-24 sm:h-24 bg-green-500/20 rounded-full opacity-30 animate-pulse delay-1000"></div>
 
               {/* Main Image Container - Adjusted padding */}
-              <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl sm:shadow-2xl border border-white/20">
+              <div className="relative bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-xl sm:shadow-2xl border border-white/20">
                 <Image
                   src="/images/career_success.jpg"
                   alt="Career Success"
@@ -112,7 +112,7 @@ export default function HeroSection() {
                 />
 
                 {/* Floating Cards - Smaller for mobile */}
-                <div className="absolute -top-4 -left-4 bg-white/90 backdrop-blur-sm rounded-md sm:rounded-lg p-2 sm:p-3 shadow-lg animate-float">
+                <div className="absolute -top-4 -left-4 bg-white/95 backdrop-blur-sm rounded-md sm:rounded-lg p-2 sm:p-3 shadow-lg animate-float">
                   <div className="flex items-center space-x-1 sm:space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     <span className="text-gray-800 font-medium text-xs sm:text-sm">
@@ -121,7 +121,7 @@ export default function HeroSection() {
                   </div>
                 </div>
 
-                <div className="absolute -bottom-4 -right-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-md sm:rounded-lg p-2 sm:p-3 shadow-lg animate-float-delayed">
+                <div className="absolute -bottom-4 -right-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-md sm:rounded-lg p-2 sm:p-3 shadow-lg animate-float-delayed">
                   <div className="text-center">
                     <div className="text-lg sm:text-xl md:text-2xl font-bold">98%</div>
                     <div className="text-2xs sm:text-xs md:text-sm opacity-90">Success Rate</div>

@@ -22,8 +22,10 @@ from .models import (
 # Import username-based profile views
 from .username_profile_views import (
     EmployerProfileView, UsernameBasedEmployerProfileView, 
+    UsernameBasedEmployerProfileCreateView,
     UsernameBasedEmployerProfileUpdateView, UsernameBasedCompanyLogoUploadView,
-    UsernameBasedProfilePictureUploadView, EmployerRegisterView, 
+    UsernameBasedProfilePictureUploadView, UsernameBasedDeleteAccountView,
+    EmployerRegisterView, 
     EmployerLoginView, SocialMediaSyncView, ProfileCompletionView
 )
 from .serializers import (
@@ -571,7 +573,7 @@ class EmployerRegisterView(generics.CreateAPIView):
             
             # Verify CAPTCHA (prefer reCAPTCHA if provided)
             if recaptcha_token:
-                from backend.authentication.captcha_views import verify_recaptcha_required
+                from authentication.captcha_views import verify_recaptcha_required
                 is_valid, error_msg, score = verify_recaptcha_required(recaptcha_token, 'register')
                 if not is_valid:
                     return Response({
@@ -579,7 +581,7 @@ class EmployerRegisterView(generics.CreateAPIView):
                         'error': f'CAPTCHA verification failed: {error_msg}'
                     }, status=status.HTTP_400_BAD_REQUEST)
             else:
-                from backend.authentication.captcha_views import verify_captcha_required
+                from authentication.captcha_views import verify_captcha_required
                 is_valid, error_msg = verify_captcha_required(captcha_key, captcha_value)
                 if not is_valid:
                     return Response({
@@ -671,6 +673,8 @@ class EmployerRegisterView(generics.CreateAPIView):
             return Response({
                 'success': True,
                 'message': 'Employer registered successfully',
+                'username': user.username,
+                'is_new_user': True,
                 'profile': serializer.data
             }, status=status.HTTP_201_CREATED)
             
@@ -724,7 +728,7 @@ class EmployerProfileView(generics.RetrieveUpdateAPIView):
         data['social_accounts'] = []
         
         # Get associated social accounts
-        from backend.authentication.models import SocialAccount
+        from authentication.models import SocialAccount
         social_accounts = SocialAccount.objects.filter(user=request.user)
         for account in social_accounts:
             data['social_accounts'].append({
@@ -874,7 +878,7 @@ class EmployerLoginView(generics.GenericAPIView):
         
         # Verify CAPTCHA (prefer reCAPTCHA if provided)
         if recaptcha_token:
-            from backend.authentication.captcha_views import verify_recaptcha_required
+            from authentication.captcha_views import verify_recaptcha_required
             is_valid, error_msg, score = verify_recaptcha_required(recaptcha_token, 'login')
             if not is_valid:
                 return Response({
@@ -882,7 +886,7 @@ class EmployerLoginView(generics.GenericAPIView):
                     'error': f'CAPTCHA verification failed: {error_msg}'
                 }, status=status.HTTP_400_BAD_REQUEST)
         else:
-            from backend.authentication.captcha_views import verify_captcha_required
+            from authentication.captcha_views import verify_captcha_required
             is_valid, error_msg = verify_captcha_required(captcha_key, captcha_value)
             if not is_valid:
                 return Response({
@@ -1348,6 +1352,55 @@ class PublicJobDetailView(APIView):
             return Response({
                 'error': 'Job not found or no longer active'
             }, status=status.HTTP_404_NOT_FOUND)
+
+
+class PublicJobDetailByIdView(APIView):
+    """Public endpoint to view job details by job ID"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request):
+        try:
+            # Get job ID from query parameters
+            job_id = request.GET.get('id', '').strip()
+            
+            if not job_id:
+                return Response({
+                    'error': 'Job ID is required',
+                    'details': 'Please provide a valid job ID'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Validate job_id is numeric
+            try:
+                job_id = int(job_id)
+            except (ValueError, TypeError):
+                return Response({
+                    'error': 'Invalid job ID',
+                    'details': 'Job ID must be a valid number'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Get the job by ID
+            try:
+                job = Job.objects.select_related('employer').get(
+                    pk=job_id,
+                    status='active'
+                )
+            except Job.DoesNotExist:
+                return Response({
+                    'error': 'Job not found',
+                    'details': f'No active job found with ID: {job_id}'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            # Increment view count
+            job.increment_views()
+            
+            serializer = JobSerializer(job)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            return Response({
+                'error': 'Failed to retrieve job',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class JobStatsView(APIView):

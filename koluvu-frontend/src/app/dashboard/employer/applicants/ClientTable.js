@@ -1,4 +1,5 @@
 // src/app/dashboard/employer/applicants/ClientTable.js
+
 'use client';
 
 import { useState } from "react";

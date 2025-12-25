@@ -1,7 +1,7 @@
 // src/app/dashboard/training/Sidebar.jsx
 
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faTimes, faCamera } from "@fortawesome/free-solid-svg-icons";
 
 const Sidebar = ({
   activeTab,
@@ -39,6 +39,7 @@ const Sidebar = ({
     role: "Professional Training Solutions",
     avatar: "https://randomuser.me/api/portraits/men/32.jpg",
   },
+  onProfileUpdate,
 }) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -50,12 +51,6 @@ const Sidebar = ({
       label: "Dashboard",
       icon: LayoutDashboard,
       path: "/dashboard/training",
-    },
-    {
-      id: "Profile Setup",
-      label: "Profile Setup",
-      icon: User,
-      path: "/dashboard/training/profile",
     },
     {
       id: "Post Training",
@@ -98,6 +93,12 @@ const Sidebar = ({
       label: "Courses offered",
       icon: GraduationCap,
       path: "/dashboard/training/courses",
+    },
+    {
+      id: "Profile Setup",
+      label: "Profile Setup",
+      icon: User,
+      path: "/dashboard/training/profile",
     },
     {
       id: "account settings",
@@ -183,6 +184,7 @@ const Sidebar = ({
         activeTab={activeTab}
         setActiveTab={handleItemClick}
         userProfile={userProfile}
+        onProfileUpdate={onProfileUpdate}
         backgroundGradient={DEFAULT_SIDEBAR_BACKGROUND}
         expandedServices={expandedServices}
         toggleServices={toggleServices}
@@ -214,6 +216,7 @@ const Sidebar = ({
               isMobile={true}
               toggleSidebar={() => setSidebarOpen(false)}
               userProfile={userProfile}
+              onProfileUpdate={onProfileUpdate}
               expandedServices={expandedServices}
               toggleServices={toggleServices}
               isExpanded={true}
@@ -232,6 +235,7 @@ const HoverExpandableSidebar = ({
   activeTab,
   setActiveTab,
   userProfile,
+  onProfileUpdate,
   backgroundGradient = DEFAULT_SIDEBAR_BACKGROUND,
   expandedServices,
   toggleServices,
@@ -265,6 +269,7 @@ const HoverExpandableSidebar = ({
           setActiveTab={setActiveTab}
           isMobile={false}
           userProfile={userProfile}
+          onProfileUpdate={onProfileUpdate}
           expandedServices={expandedServices}
           toggleServices={toggleServices}
           isExpanded={isExpanded}
@@ -282,10 +287,72 @@ const SidebarContent = ({
   isMobile,
   toggleSidebar,
   userProfile,
+  onProfileUpdate,
   expandedServices,
   toggleServices,
   isExpanded = true,
 }) => {
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file (JPG, PNG, etc.)");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5MB");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const backendBase =
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
+      const token = localStorage.getItem("access_token");
+
+      const formData = new FormData();
+      formData.append("logo", file);
+
+      const response = await fetch(`${backendBase}/api/training/profile/`, {
+        method: "PATCH",
+        headers: {
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+        body: formData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Update the userProfile with new logo
+        const updatedProfile = {
+          ...userProfile,
+          avatar: data.logo ? `${backendBase}${data.logo}` : null,
+        };
+        if (onProfileUpdate) {
+          onProfileUpdate(updatedProfile);
+        }
+      } else {
+        alert("Failed to upload image. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      alert("Error uploading image. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div
       className={`flex flex-col h-full $${
@@ -321,9 +388,10 @@ const SidebarContent = ({
       >
         <div className={`flex flex-col items-center ${isExpanded ? "" : ""}`}>
           <div
-            className={`rounded-full flex items-center justify-center bg-[#1a2036] relative shadow-lg transition-all duration-300 group ${
+            className={`rounded-full flex items-center justify-center bg-[#1a2036] relative shadow-lg transition-all duration-300 group cursor-pointer ${
               isExpanded ? "w-16 h-16 m-2" : "w-10 h-10 m-1"
             }`}
+            onClick={handleImageClick}
           >
             {userProfile.avatar ? (
               <Image
@@ -340,12 +408,32 @@ const SidebarContent = ({
                 }
               />
             )}
+            {/* Upload overlay */}
+            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <FontAwesomeIcon
+                icon={faCamera}
+                className={`${isExpanded ? "w-4 h-4" : "w-3 h-3"} text-white`}
+              />
+            </div>
+            {uploading && (
+              <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              </div>
+            )}
             <span
               className={`absolute ${
                 isExpanded ? "bottom-2 right-2" : "bottom-1 right-1"
               } w-2.5 h-2.5 bg-green-500 border-2 border-[#232946] rounded-full`}
             ></span>
           </div>
+          {/* Hidden file input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
           {isExpanded && (
             <>
               <p className="font-semibold text-base leading-snug">

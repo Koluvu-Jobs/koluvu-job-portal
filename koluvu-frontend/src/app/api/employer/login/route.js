@@ -1,5 +1,6 @@
 // src/app/api/employer/login/route.js
 
+import supabase from "../../../../lib/supabaseClient";
 import { NextResponse } from "next/server";
 
 const BACKEND_URL =
@@ -70,17 +71,59 @@ export async function POST(request) {
 
     const djangoData = await djangoResponse.json();
 
-    // Return Django authentication result (Supabase removed)
-    return NextResponse.json(
+    // Then authenticate with Supabase
+    const { data: supabaseData, error: supabaseError } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+    if (supabaseError) {
+      console.error("Supabase auth error during login:", supabaseError);
+      if (supabaseError.code === "email_not_confirmed") {
+        return NextResponse.json(
+          {
+            error:
+              "Email not verified. Please verify your email before logging in.",
+          },
+          { status: 400 }
+        );
+      }
+      return NextResponse.json(
+        { error: "Invalid login credentials." },
+        { status: supabaseError.status || 401 }
+      );
+    }
+
+    if (!supabaseData.user) {
+      console.error("No user data returned after sign in");
+      return NextResponse.json(
+        { error: "Failed to login: No user data returned." },
+        { status: 500 }
+      );
+    }
+
+    // Set the cookie server-side
+    const response = NextResponse.json(
       {
         message: "Employer logged in successfully!",
-        user: djangoData.user,
+        user: supabaseData.user,
+        session: supabaseData.session,
         employerProfile: djangoData.employer,
-        accessToken: djangoData.access_token,
-        refreshToken: djangoData.refresh_token,
       },
       { status: 200 }
     );
+
+    if (supabaseData.session?.access_token) {
+      response.cookies.set("sb-auth-token", supabaseData.session.access_token, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+        sameSite: "lax",
+        // httpOnly: true, // Uncomment if you want HTTP-only
+      });
+    }
+
+    return response;
   } catch (error) {
     console.error("Internal server error during login:", error);
     return NextResponse.json(

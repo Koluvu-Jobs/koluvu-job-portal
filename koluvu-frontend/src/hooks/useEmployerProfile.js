@@ -32,10 +32,11 @@ export const useEmployerProfile = () => {
         const data = await response.json();
         console.log("Employer profile data:", data);
         setProfile(data);
-      } else if (response.status === 404) {
-        // Profile doesn't exist yet, create it
-        console.log("No profile found, creating new profile");
+      } else if (response.status === 404 || response.status === 403) {
+        // Profile doesn't exist (404) or user doesn't have access (403)
+        console.log("No profile found or access denied");
         setProfile(null);
+        setError(null); // Clear any previous errors
       } else {
         throw new Error(`Failed to fetch profile: ${response.status}`);
       }

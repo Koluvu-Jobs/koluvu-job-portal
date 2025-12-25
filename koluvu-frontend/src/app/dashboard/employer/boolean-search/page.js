@@ -33,6 +33,8 @@ export default function BooleanJobSearch() {
   const [isMobile, setIsMobile] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [queryErrors, setQueryErrors] = useState({});
+  const [filterErrors, setFilterErrors] = useState({});
   const [formData, setFormData] = useState({
     query: "",
     location: "",
@@ -163,13 +165,9 @@ export default function BooleanJobSearch() {
       [name]: type === "checkbox" ? checked : value,
     });
 
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
-    }
-    if (errors.general) {
-      setErrors((prev) => ({ ...prev, general: null }));
-    }
+    setErrors({});
+    setQueryErrors({});
+    setFilterErrors({});
   };
 
   // Handle autocomplete field focus
@@ -223,41 +221,21 @@ export default function BooleanJobSearch() {
     return isValid;
   };
 
-  // Form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+  // Shared search performer (used for both boolean query and filter search)
+  const performSearch = async (searchPayload) => {
     setIsLoading(true);
     setShowResults(true);
     setResults([]);
     setErrors({});
 
     try {
-      // Check authentication
       if (!isAuthenticated || !isEmployer || !accessToken) {
         setErrors({
           general: "Authentication required. Please log in as an employer.",
         });
+        setIsLoading(false);
         return;
       }
-
-      // Prepare search data for backend API
-      const searchPayload = {
-        query: formData.query || "",
-        location: formData.location,
-        department: formData.department,
-        designation: formData.designation,
-        experience: formData.experience,
-        notice_period: formData.noticePeriod,
-        salary_range: formData.salaryRange,
-        actively_looking: formData.activelyLooking,
-      };
-
-      console.log("Submitting boolean search:", searchPayload);
 
       let currentToken = accessToken;
 
@@ -274,137 +252,172 @@ export default function BooleanJobSearch() {
 
       let response = await makeRequest(currentToken);
 
-      // If token is invalid, try to refresh it
       if (response.status === 403) {
         try {
-          console.log("Token expired, attempting refresh...");
           currentToken = await refreshAccessToken();
           response = await makeRequest(currentToken);
         } catch (refreshError) {
-          console.error("Token refresh failed:", refreshError);
-          setErrors({
-            general: "Session expired. Please log in again.",
-          });
+          setErrors({ general: "Session expired. Please log in again." });
+          setIsLoading(false);
           return;
         }
       }
 
       const data = await response.json();
-      console.log("Boolean search response:", data);
 
       if (!response.ok) {
         if (response.status === 403) {
-          setErrors({
-            general: "Authentication failed. Please log in again.",
-          });
+          setErrors({ general: "Authentication failed. Please log in again." });
         } else {
-          setErrors({
-            general:
-              data.error || "Failed to search candidates. Please try again.",
-          });
+          setErrors({ general: data.error || "Failed to search candidates." });
         }
 
-        // If there are validation errors from backend
         if (data.details && typeof data.details === "object") {
           setErrors((prev) => ({ ...prev, ...data.details }));
         }
 
         setResults([]);
       } else {
-        // Transform backend data to match frontend structure
-        const transformedCandidates = (data.candidates || []).map(
-          (candidate) => ({
-            id: candidate.id,
-            name:
-              candidate.employee?.user?.first_name &&
-              candidate.employee?.user?.last_name
-                ? `${candidate.employee.user.first_name} ${candidate.employee.user.last_name}`
-                : candidate.employee?.user?.username || "Anonymous",
-            designation:
-              candidate.employee?.current_designation ||
-              candidate.employee?.current_position ||
-              "Not specified",
-            department: candidate.department || "Not specified",
-            industry: candidate.industry || "Not specified",
-            keySkills: candidate.key_skills || "Not specified",
-            experience: `${candidate.employee?.experience_years || 0} years`,
-            location: candidate.employee?.location || "Not specified",
-            presentCTC: candidate.current_ctc
-              ? `${candidate.current_ctc} LPA`
-              : "Not disclosed",
-            expectedCTC: candidate.expected_ctc
-              ? `${candidate.expected_ctc} LPA`
-              : "Not specified",
-            noticePeriod: candidate.notice_period || "Not specified",
-            preferredLocation:
-              candidate.preferred_location ||
-              candidate.employee?.location ||
-              "Not specified",
-            activelyLooking: candidate.actively_looking || false,
-            profilePicture:
-              candidate.employee?.profile_picture ||
-              "https://randomuser.me/api/portraits/lego/1.jpg",
-            contact: {
-              call:
-                candidate.employee?.user?.phone ||
-                candidate.employee?.phone ||
-                "Not available",
-              email: candidate.employee?.user?.email || "Not available",
-              whatsapp:
-                candidate.employee?.user?.phone ||
-                candidate.employee?.phone ||
-                "Not available",
-              sms:
-                candidate.employee?.user?.phone ||
-                candidate.employee?.phone ||
-                "Not available",
-            },
-            education: candidate.employee?.education?.[0]?.degree
-              ? `${candidate.employee.education[0].degree} - ${
-                  candidate.employee.education[0].institution ||
-                  "Institution not specified"
-                }`
-              : "Education details not available",
-            languages: "English, Hindi", // Default languages
-            achievements: candidate.achievement_details?.map(
-              (ach) => ach.title
-            ) || ["Professional achievements not listed"],
-            projects:
-              candidate.projects?.map((project) => ({
-                name: project.title || "Project",
-                description:
-                  project.description || "Project description not available",
-              })) || [],
-            availability: candidate.availability || "Contact for availability",
-            lastActive: candidate.last_active
-              ? `Active ${new Date(candidate.last_active).toLocaleDateString()}`
-              : "Recently active",
-            matchScore: candidate.match_score || 70,
-          })
-        );
+        const transformedCandidates = (data.candidates || []).map((candidate) => ({
+          id: candidate.id,
+          name:
+            candidate.employee?.user?.first_name &&
+            candidate.employee?.user?.last_name
+              ? `${candidate.employee.user.first_name} ${candidate.employee.user.last_name}`
+              : candidate.employee?.user?.username || "Anonymous",
+          designation:
+            candidate.employee?.current_designation ||
+            candidate.employee?.current_position ||
+            "Not specified",
+          department: candidate.department || "Not specified",
+          industry: candidate.industry || "Not specified",
+          keySkills: candidate.key_skills || "Not specified",
+          experience: `${candidate.employee?.experience_years || 0} years`,
+          location: candidate.employee?.location || "Not specified",
+          presentCTC: candidate.current_ctc ? `${candidate.current_ctc} LPA` : "Not disclosed",
+          expectedCTC: candidate.expected_ctc ? `${candidate.expected_ctc} LPA` : "Not specified",
+          noticePeriod: candidate.notice_period || "Not specified",
+          preferredLocation: candidate.preferred_location || candidate.employee?.location || "Not specified",
+          activelyLooking: candidate.actively_looking || false,
+          profilePicture: candidate.employee?.profile_picture || "https://randomuser.me/api/portraits/lego/1.jpg",
+          contact: {
+            call: candidate.employee?.user?.phone || candidate.employee?.phone || "Not available",
+            email: candidate.employee?.user?.email || "Not available",
+            whatsapp: candidate.employee?.user?.phone || candidate.employee?.phone || "Not available",
+            sms: candidate.employee?.user?.phone || candidate.employee?.phone || "Not available",
+          },
+          education: candidate.employee?.education?.[0]?.degree
+            ? `${candidate.employee.education[0].degree} - ${candidate.employee.education[0].institution || "Institution not specified"}`
+            : "Education details not available",
+          languages: "English, Hindi",
+          achievements: candidate.achievement_details?.map((ach) => ach.title) || ["Professional achievements not listed"],
+          projects: candidate.projects?.map((project) => ({
+            name: project.title || "Project",
+            description: project.description || "Project description not available",
+          })) || [],
+          availability: candidate.availability || "Contact for availability",
+          lastActive: candidate.last_active ? `Active ${new Date(candidate.last_active).toLocaleDateString()}` : "Recently active",
+          matchScore: candidate.match_score || 70,
+        }));
 
         setResults(transformedCandidates);
-        console.log("Transformed candidates:", transformedCandidates.length);
       }
     } catch (error) {
-      console.error("Boolean search error:", error);
-      setErrors({
-        general:
-          "Network error occurred. Please check your connection and try again.",
-      });
+      console.error("Search error:", error);
+      setErrors({ general: "Network error occurred. Please try again." });
       setResults([]);
     } finally {
       setIsLoading(false);
 
-      // Scroll to results on mobile
       if (isMobile) {
         setTimeout(() => {
-          document
-            .getElementById("results-section")
-            ?.scrollIntoView({ behavior: "smooth" });
+          document.getElementById("results-section")?.scrollIntoView({ behavior: "smooth" });
         }, 100);
       }
     }
+  };
+
+  // Query validation (boolean search)
+  const validateQueryForm = () => {
+    const newErrors = {};
+    if (!formData.query || formData.query.trim().length < 3) {
+      newErrors.query = "Search query must be at least 3 characters";
+      setQueryErrors(newErrors);
+      return false;
+    }
+
+    setQueryErrors({});
+    return true;
+  };
+
+  // Filter validation (detailed search)
+  const validateFilterForm = () => {
+    const newErrors = {};
+    let isValid = true;
+
+    const requiredFields = [
+      "location",
+      "department",
+      "designation",
+      "experience",
+      "noticePeriod",
+      "salaryRange",
+    ];
+
+    requiredFields.forEach((field) => {
+      if (!formData[field]) {
+        newErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      setFilterErrors(newErrors);
+      return false;
+    }
+
+    setFilterErrors({});
+    return true;
+  };
+
+  // Handlers for the two search modes
+  const handleQuerySubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    
+    setQueryErrors({});
+    setFilterErrors({});
+    setErrors({});
+    
+    if (!validateQueryForm()) return;
+
+    const payload = {
+      query: formData.query.trim(),
+    };
+
+    await performSearch(payload);
+  };
+
+  const handleFilterSubmit = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    
+    setQueryErrors({});
+    setFilterErrors({});
+    setErrors({});
+    
+    if (!validateFilterForm()) return;
+
+    const payload = {
+      query: "",
+      location: formData.location,
+      department: formData.department,
+      designation: formData.designation,
+      experience: formData.experience,
+      notice_period: formData.noticePeriod,
+      salary_range: formData.salaryRange,
+      actively_looking: formData.activelyLooking,
+    };
+
+    await performSearch(payload);
   };
 
   // Reset form
@@ -469,10 +482,9 @@ export default function BooleanJobSearch() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Left Column - Normal Boolean Search */}
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Left Column - Normal Boolean Search */}
+            <form onSubmit={handleQuerySubmit} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
                 <div className="bg-blue-600 px-6 py-4 border-b border-blue-700">
                   <div className="flex items-center">
                     <svg className="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -499,13 +511,13 @@ export default function BooleanJobSearch() {
                         value={formData.query}
                         onChange={handleInputChange}
                         className={`w-full px-4 py-3 rounded-lg border-2 ${
-                          errors.query ? "border-red-500" : "border-gray-300"
+                          queryErrors.query ? "border-red-500" : "border-gray-300"
                         } focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all`}
                         placeholder="e.g., Developer AND React NOT Junior"
                       />
-                      {errors.query && (
+                      {queryErrors.query && (
                         <p className="mt-2 text-sm text-red-600">
-                          {errors.query}
+                          {queryErrors.query}
                         </p>
                       )}
                     </div>
@@ -544,10 +556,10 @@ export default function BooleanJobSearch() {
                     </button>
                   </div>
                 </div>
-              </div>
+            </form>
 
-              {/* Right Column - Detailed Search Form */}
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            {/* Right Column - Detailed Search Form */}
+            <form onSubmit={handleFilterSubmit} className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
                 <div className="bg-indigo-600 px-6 py-4 border-b border-indigo-700">
                   <div className="flex items-center">
                     <svg className="w-6 h-6 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -580,7 +592,7 @@ export default function BooleanJobSearch() {
                         onChange={handleInputChange}
                         onFocus={() => handleFieldFocus("location")}
                         className={`w-full px-4 py-3 rounded-lg border-2 ${
-                          errors.location
+                          filterErrors.location
                             ? "border-red-500"
                             : "border-gray-300"
                         } focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all`}
@@ -602,9 +614,9 @@ export default function BooleanJobSearch() {
                             ))}
                           </div>
                         )}
-                      {errors.location && (
+                      {filterErrors.location && (
                         <p className="mt-2 text-sm text-red-600">
-                          {errors.location}
+                          {filterErrors.location}
                         </p>
                       )}
                     </div>
@@ -625,7 +637,7 @@ export default function BooleanJobSearch() {
                         onChange={handleInputChange}
                         onFocus={() => handleFieldFocus("department")}
                         className={`w-full px-4 py-3 rounded-lg border-2 ${
-                          errors.department
+                          filterErrors.department
                             ? "border-red-500"
                             : "border-gray-300"
                         } focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all`}
@@ -647,9 +659,9 @@ export default function BooleanJobSearch() {
                             ))}
                           </div>
                         )}
-                      {errors.department && (
+                      {filterErrors.department && (
                         <p className="mt-2 text-sm text-red-600">
-                          {errors.department}
+                          {filterErrors.department}
                         </p>
                       )}
                     </div>
@@ -670,7 +682,7 @@ export default function BooleanJobSearch() {
                         onChange={handleInputChange}
                         onFocus={() => handleFieldFocus("designation")}
                         className={`w-full px-4 py-3 rounded-lg border-2 ${
-                          errors.designation
+                          filterErrors.designation
                             ? "border-red-500"
                             : "border-gray-300"
                         } focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all`}
@@ -697,9 +709,9 @@ export default function BooleanJobSearch() {
                             )}
                           </div>
                         )}
-                      {errors.designation && (
+                      {filterErrors.designation && (
                         <p className="mt-2 text-sm text-red-600">
-                          {errors.designation}
+                          {filterErrors.designation}
                         </p>
                       )}
                     </div>
@@ -718,7 +730,7 @@ export default function BooleanJobSearch() {
                         value={formData.experience}
                         onChange={handleInputChange}
                         className={`w-full px-4 py-3 rounded-lg border-2 ${
-                          errors.experience
+                          filterErrors.experience
                             ? "border-red-500"
                             : "border-gray-300"
                         } focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all`}
@@ -729,9 +741,9 @@ export default function BooleanJobSearch() {
                         <option>3-5 years</option>
                         <option>5+ years</option>
                       </select>
-                      {errors.experience && (
+                      {filterErrors.experience && (
                         <p className="mt-2 text-sm text-red-600">
-                          {errors.experience}
+                          {filterErrors.experience}
                         </p>
                       )}
                     </div>
@@ -750,7 +762,7 @@ export default function BooleanJobSearch() {
                         value={formData.noticePeriod}
                         onChange={handleInputChange}
                         className={`w-full px-4 py-3 rounded-lg border-2 ${
-                          errors.noticePeriod
+                          filterErrors.noticePeriod
                             ? "border-red-500"
                             : "border-gray-300"
                         } focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all`}
@@ -762,9 +774,9 @@ export default function BooleanJobSearch() {
                         <option>2 Months</option>
                         <option>3 Months</option>
                       </select>
-                      {errors.noticePeriod && (
+                      {filterErrors.noticePeriod && (
                         <p className="mt-2 text-sm text-red-600">
-                          {errors.noticePeriod}
+                          {filterErrors.noticePeriod}
                         </p>
                       )}
                     </div>
@@ -783,7 +795,7 @@ export default function BooleanJobSearch() {
                         value={formData.salaryRange}
                         onChange={handleInputChange}
                         className={`w-full px-4 py-3 rounded-lg border-2 ${
-                          errors.salaryRange
+                          filterErrors.salaryRange
                             ? "border-red-500"
                             : "border-gray-300"
                         } focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all`}
@@ -795,9 +807,9 @@ export default function BooleanJobSearch() {
                         <option>10-15 LPA</option>
                         <option>15+ LPA</option>
                       </select>
-                      {errors.salaryRange && (
+                      {filterErrors.salaryRange && (
                         <p className="mt-2 text-sm text-red-600">
-                          {errors.salaryRange}
+                          {filterErrors.salaryRange}
                         </p>
                       )}
                     </div>
@@ -843,9 +855,8 @@ export default function BooleanJobSearch() {
                     </button>
                   </div>
                 </div>
-              </div>
-            </div>
-          </form>
+            </form>
+          </div>
 
           {/* Results Section */}
           {showResults && (

@@ -35,14 +35,8 @@ const JobCard = ({ job }) => {
     return null;
   };
 
-  // Build the job detail URL
-  const companySlug = slugify(job.company_name || job.company || "company");
-  const jobTitleSlug = slugify(job.title);
-  const jobTypeSlug = slugify(job.job_type || job.type || "type");
-  const employmentTypeSlug = slugify(
-    job.employment_type || job.employment || "employment"
-  );
-  const jobUrl = `/jobs/${companySlug}/${jobTitleSlug}/${jobTypeSlug}/${employmentTypeSlug}`;
+  // Build the job detail URL using job ID
+  const jobUrl = `/jobs/${job.id}`;
 
   return (
     <motion.div

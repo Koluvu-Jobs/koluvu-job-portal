@@ -51,7 +51,7 @@ const SocialAuth = ({ userType = USER_TYPES.EMPLOYEE }) => {
 
       // Use the user_type from the backend response for redirect
       const actualUserType = result.user_type || userType;
-      const redirectPath = getRedirectPath(actualUserType, result);
+      const redirectPath = getRedirectPath(actualUserType, result.username);
 
       console.log(
         "Redirecting to:",

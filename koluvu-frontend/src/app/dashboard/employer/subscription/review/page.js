@@ -80,13 +80,13 @@ const ReviewPage = () => {
                       {plan.billingCycle === 'monthly' ? 'Monthly' : 'Yearly'} billing
                     </p>
                   </div>
-                  <span className="font-semibold">₹{plan.price}</span>
+                  <span className="font-semibold">₹{plan.price - 49}+49</span>
                 </div>
               </div>
               <div className="border-t pt-4">
                 <div className="flex justify-between text-lg font-semibold">
                   <span>Total</span>
-                  <span className="text-blue-600">₹{calculateTotal()}</span>
+                  <span className="text-blue-600">₹{calculateTotal() - 49}+49</span>
                 </div>
               </div>
             </div>

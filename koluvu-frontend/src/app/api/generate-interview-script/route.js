@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 
+import { query } from "../../../lib/db";
+
 // Helper function to get setup details from the database
 async function getSetupDetails(setupId) {
   const result = await query(

@@ -2,6 +2,7 @@
 
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   CheckCircle,
   XCircle,
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 
 const ATSScoreSystem = () => {
+  const { user } = useAuth();
   const [currentView, setCurrentView] = useState("home");
 
   // Handle browser back/forward buttons
@@ -66,7 +68,7 @@ const ATSScoreSystem = () => {
   const candidates = [
     {
       id: 1,
-      name: "Priya Sharma",
+      name: user?.first_name && user?.last_name ? `${user.first_name} ${user.last_name}` : user?.username || "User",
       skills: ["React", "JavaScript", "Node.js", "MongoDB", "Git"],
       experience: "5 years",
       location: "Bangalore, India",
@@ -499,39 +501,39 @@ const ATSScoreSystem = () => {
   );
 
   const ATSScoreView = () => (
-    <div className="w-full flex flex-col lg:flex-row gap-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Main ATS Content */}
-      <div className="flex-1 max-w-6xl space-y-8">
-        <div className="rounded-2xl border border-lime-200/70 bg-white/80 backdrop-blur-sm p-6 md:p-8 shadow-sm">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4 tracking-tight">
+      <div className="space-y-6">
+        <div className="rounded-2xl border border-lime-200/70 bg-white/80 backdrop-blur-sm p-4 sm:p-6 md:p-8 shadow-lg">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 tracking-tight">
             ATS Score Analysis
           </h1>
-          <div className="rounded-xl border border-lime-200/60 bg-gradient-to-r from-lime-50 via-white to-orange-50 p-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div>
-                <h2 className="text-xl font-semibold text-[#104210]">
+          <div className="rounded-xl border border-lime-200/60 bg-gradient-to-r from-lime-50 via-white to-orange-50 p-4 sm:p-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+              <div className="w-full md:w-auto">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#104210]">
                   {selectedCandidate.name}
                 </h2>
-                <p className="text-sm text-[#104210]/80">
+                <p className="text-xs sm:text-sm text-[#104210]/80 mt-1">
                   {jobRequirements.title}
                 </p>
               </div>
-              <div className="text-center px-6 py-4 rounded-xl bg-white border border-lime-100 shadow-sm">
-                <div className="text-4xl font-bold bg-gradient-to-r from-[#104210] via-[#7a871e] to-[#f6a21e] bg-clip-text text-transparent">
+              <div className="text-center px-4 sm:px-6 py-3 sm:py-4 rounded-xl bg-white border border-lime-100 shadow-md w-full md:w-auto">
+                <div className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#104210] via-[#7a871e] to-[#f6a21e] bg-clip-text text-transparent">
                   {selectedCandidate.overallScore}%
                 </div>
-                <div className="text-sm font-medium text-[#104210]/80 mt-1">
+                <div className="text-xs sm:text-sm font-medium text-[#104210]/80 mt-1">
                   Overall Score
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-2xl border border-orange-100/70 bg-white p-6 shadow-sm">
-              <h3 className="text-lg font-semibold mb-5 flex items-center text-gray-800 tracking-tight">
-                <TrendingUp className="w-5 h-5 text-[#e55b13] mr-2" />
+        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="lg:col-span-1 xl:col-span-2 space-y-4 sm:space-y-6">
+            <div className="rounded-2xl border border-orange-100/70 bg-white p-4 sm:p-6 shadow-lg">
+              <h3 className="text-base sm:text-lg font-semibold mb-4 sm:mb-5 flex items-center text-gray-800 tracking-tight">
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-[#e55b13] mr-2" />
                 Criteria Breakdown
               </h3>
               <div className="space-y-4">
@@ -693,180 +695,22 @@ const ATSScoreSystem = () => {
             </div>
           </div>
         </div>
-        <div className="pt-2 flex flex-wrap justify-center gap-4">
+        <div className="pt-4 flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4">
           <button
             onClick={() => updateView("applied")}
-            className="px-5 py-2.5 rounded-xl bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium shadow-sm"
+            className="w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium shadow-sm"
           >
             Back
           </button>
           <button
             onClick={() => (window.location.href = "/training")}
-            className="px-5 py-2.5 rounded-xl bg-[#104210] text-white hover:bg-[#0d360d] transition-colors text-sm font-medium shadow-sm"
+            className="w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl bg-[#104210] text-white hover:bg-[#0d360d] transition-colors text-sm font-medium shadow-sm"
           >
             Start Training
           </button>
-          <button className="px-5 py-2.5 rounded-xl bg-[#f6a21e] text-[#141414] hover:bg-[#e59205] transition-colors text-sm font-semibold shadow-sm">
+          <button className="w-full sm:w-auto px-4 sm:px-5 py-2.5 rounded-xl bg-[#f6a21e] text-[#141414] hover:bg-[#e59205] transition-colors text-sm font-semibold shadow-sm">
             Download
           </button>
-        </div>
-      </div>
-
-  {/* Training Institutions Sidebar */}
-  <div className="w-full lg:w-80 space-y-4">
-        <div className="bg-white rounded-2xl shadow-md border p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg">
-              <GraduationCap className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">
-                Training Institutions
-              </h3>
-              <p className="text-sm text-gray-600">
-                Recommended for skill enhancement
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="border rounded-xl p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-start gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">CT</span>
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">
-                    CodeTech Academy
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Full Stack Development
-                  </p>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600">
-                      4.8 (2.1k reviews)
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-indigo-600">
-                      ₹15,999
-                    </span>
-                    <button
-                      onClick={() => (window.location.href = "/training")}
-                      className="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition-colors"
-                    >
-                      Enroll
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="border rounded-xl p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-start gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">DH</span>
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">
-                    DataHub Institute
-                  </h4>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Data Science & Analytics
-                  </p>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600">
-                      4.9 (1.8k reviews)
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-green-600">
-                      ₹18,999
-                    </span>
-                    <button
-                      onClick={() => (window.location.href = "/training")}
-                      className="px-3 py-1.5 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition-colors"
-                    >
-                      Enroll
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="border rounded-xl p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-start gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">AI</span>
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">AI Masters</h4>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Machine Learning & AI
-                  </p>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600">
-                      4.7 (1.5k reviews)
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-purple-600">
-                      ₹22,999
-                    </span>
-                    <button
-                      onClick={() => (window.location.href = "/training")}
-                      className="px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition-colors"
-                    >
-                      Enroll
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="border rounded-xl p-4 hover:shadow-md transition-shadow">
-              <div className="flex items-start gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">CD</span>
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">CloudDev Pro</h4>
-                  <p className="text-sm text-gray-600 mb-2">
-                    Cloud Computing & DevOps
-                  </p>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="text-sm text-gray-600">
-                      4.6 (1.2k reviews)
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-orange-600">
-                      ₹20,999
-                    </span>
-                    <button
-                      onClick={() => (window.location.href = "/training")}
-                      className="px-3 py-1.5 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700 transition-colors"
-                    >
-                      Enroll
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 pt-4 border-t">
-            <button
-              onClick={() => (window.location.href = "/training")}
-              className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all"
-            >
-              View All Training Programs
-            </button>
-          </div>
         </div>
       </div>
     </div>
