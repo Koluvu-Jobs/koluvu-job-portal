@@ -73,7 +73,7 @@ export async function POST(req) {
             "UPDATE mock_interview_setups SET resume_filename = NULL WHERE id = $1",
             [setupId]
           );
-          resume_filename = null; // Clear the variable so we don't try to read it again
+          // Note: resume_filename is const, so we skip reading it below
         }
 
         if (resume_filename) {

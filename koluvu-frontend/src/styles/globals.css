@@ -1,10 +1,10 @@
 /* src/styles/globals.css */
+/* Import responsive utilities - must be before @tailwind */
+@import "./responsive-utilities.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import responsive utilities */
-@import "./responsive-utilities.css";
 
 @layer base {
   @font-face {
