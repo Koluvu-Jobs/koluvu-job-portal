@@ -1,4 +1,4 @@
-// src/middleware.js
+// src/proxy.js
 
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
@@ -26,7 +26,7 @@ const loginRoutes = [
   "/auth/login/admin",
 ];
 
-export async function middleware(request) {
+export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
   // Always allow force-logout routes - no protection
