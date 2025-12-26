@@ -179,23 +179,23 @@ export default function EmployeeVerification() {
 
   return (
     <div className="min-h-screen transition-colors duration-300 bg-gray-50">
-      <div className="p-4 lg:p-8">
+      <div className="p-2 xs:p-3 sm:p-4 md:p-6 lg:p-8">
         <div className="w-full max-w-5xl mx-auto">
-                <div className="text-center mb-12">
-                  <h1 className="text-3xl font-bold mb-4 inline-block px-4 py-2 rounded-lg" style={{ backgroundColor: '#F3E8FF', color: '#6C2BD9' }}>Verify Your Profile</h1>
-                  <div className="max-w-2xl mx-auto px-6 py-3 rounded-lg bg-[#FFFDE7] my-4 border border-amber-100">
-                    <p className="text-[#4A4A00] text-center text-sm sm:text-base font-medium leading-relaxed">
+                <div className="text-center mb-8 xs:mb-10 sm:mb-12">
+                  <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold mb-3 xs:mb-4 inline-block px-3 xs:px-4 py-1.5 xs:py-2 rounded-lg" style={{ backgroundColor: '#F3E8FF', color: '#6C2BD9' }}>Verify Your Profile</h1>
+                  <div className="max-w-2xl mx-auto px-3 xs:px-4 sm:px-6 py-2 xs:py-2.5 sm:py-3 rounded-lg bg-[#FFFDE7] my-3 xs:my-4 border border-amber-100">
+                    <p className="text-[#4A4A00] text-center text-xs xs:text-sm md:text-base font-medium leading-relaxed">
                       Complete your profile verification to unlock all features and increase your credibility.
                     </p>
                   </div>
                 </div>
 
-                <Card className="mb-8">
-                  <CardContent className="p-4 sm:p-8">
-                    <form onSubmit={handleSubmit} className="space-y-8">
+                <Card className="mb-6 xs:mb-7 sm:mb-8">
+                  <CardContent className="p-3 xs:p-4 sm:p-6 md:p-8">
+                    <form onSubmit={handleSubmit} className="space-y-4 xs:space-y-5 sm:space-y-6 md:space-y-8">
                       <div className="space-y-4">
                         <div className="mb-2">
-                          <label className="text-base sm:text-lg font-bold text-[#00796B] block pb-1 relative px-4 py-2 rounded-lg bg-white inline-block w-auto border border-gray-100 shadow-sm">
+                          <label className="text-sm xs:text-base md:text-lg font-bold text-[#00796B] block pb-1 relative px-2 xs:px-3 sm:px-4 py-1.5 xs:py-2 rounded-lg bg-white inline-block w-auto border border-gray-100 shadow-sm">
                             Choose Verification Method
                             <span className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-[#FF6D00] to-[#6C2BD9] rounded-full"></span>
                           </label>

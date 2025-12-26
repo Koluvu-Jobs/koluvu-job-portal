@@ -87,7 +87,7 @@ export default function EmployeeSubscriptionPlans() {
           align-items: center;
           min-height: 100vh;
           background: #F5F5F4;
-          padding: 40px 20px;
+          padding: 20px 8px;
         }
         
         .pricing-content {
@@ -96,17 +96,18 @@ export default function EmployeeSubscriptionPlans() {
           max-width: 1200px;
           margin: 0 auto;
           flex-wrap: wrap;
-          gap: 20px;
+          gap: 12px;
         }
         
         .box {
           display: flex;
           flex-direction: column;
           height: auto;
-          min-height: 400px;
-          width:300px;
-          border-radius: 20px;
-          margin: 0 15px;
+          min-height: 360px;
+          width: 100%;
+          max-width: 300px;
+          border-radius: 12px;
+          margin: 0 auto;
           background: white;
           box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.2);
           position: relative;
@@ -120,44 +121,44 @@ export default function EmployeeSubscriptionPlans() {
         .view {
           display: block;
           width: 100%;
-          padding: 30px 0 20px;
+          padding: 20px 0 15px;
           background: #F5F5F4;
         }
         
         .icon {
           display: flex;
           justify-content: center;
-          font-size: 4rem;
-          margin-bottom: 10px;
+          font-size: 3rem;
+          margin-bottom: 8px;
         }
         
         .cost {
           display: flex;
           justify-content: center;
           flex-direction: row;
-          margin-top: 10px;
+          margin-top: 8px;
         }
         
         .amount {
-          font-size: 2.8em;
+          font-size: 2.2em;
           font-weight: bold;
           color: #333;
         }
         
         .detail {
-          margin: auto 0 auto 5px;
-          width: 70px;
-          font-size: 0.7em;
+          margin: auto 0 auto 4px;
+          width: 60px;
+          font-size: 0.65em;
           font-weight: bold;
-          line-height: 15px;
+          line-height: 14px;
           color: #7D7C7C;
         }
         
         .description {
-          margin: 30px auto;
-          font-size: 0.8em;
+          margin: 20px auto;
+          font-size: 0.75em;
           color: #7D7C7C;
-          padding: 0 20px;
+          padding: 0 15px;
           flex-grow: 1;
         }
         
@@ -167,10 +168,10 @@ export default function EmployeeSubscriptionPlans() {
         }
         
         .description li {
-          margin-top: 10px;
+          margin-top: 8px;
           position: relative;
-          padding-left: 20px;
-          font-size: 1.2em;
+          padding-left: 18px;
+          font-size: 1.1em;
         }
         
         .description li::before {
@@ -179,19 +180,19 @@ export default function EmployeeSubscriptionPlans() {
           left: 0;
           color: #10B981;
           font-weight: bold;
-          font-size: 1.3em;
+          font-size: 1.2em;
         }
         
         .button {
-          margin: 0 auto 30px;
+          margin: 0 auto 20px;
         }
         
         .cta-button {
-          height: 40px;
-          width: 250px;
-          font-size: 0.7em;
+          height: 36px;
+          width: 220px;
+          font-size: 0.65em;
           font-weight: bold;
-          letter-spacing: 0.5px;
+          letter-spacing: 0.4px;
           color: #7D7C7C;
           border: 2px solid #7D7C7C;
           border-radius: 50px;
@@ -213,50 +214,50 @@ export default function EmployeeSubscriptionPlans() {
           right: 0;
           background: #FF7445;
           color: white;
-          font-size: 0.7em;
+          font-size: 0.65em;
           font-weight: bold;
-          padding: 5px 10px;
-          border-top-right-radius: 20px;
-          border-bottom-left-radius: 10px;
+          padding: 4px 8px;
+          border-top-right-radius: 12px;
+          border-bottom-left-radius: 8px;
         }
         
         .savings-text {
           color: #10B981;
-          font-size: 0.75em;
+          font-size: 0.7em;
           font-weight: 600;
-          margin-top: 5px;
+          margin-top: 4px;
         }
         
         .free-benefits {
           max-width: 1200px;
-          margin: 40px auto 0;
+          margin: 30px auto 0;
           background: white;
-          padding: 30px;
-          border-radius: 20px;
+          padding: 20px 15px;
+          border-radius: 15px;
           box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
         }
         
         .free-benefits h3 {
           color: #2d3af3ff;
-          font-size: 1.5em;
+          font-size: 1.3em;
           font-weight: bold;
           text-align: center;
-          margin-bottom: 20px;
+          margin-bottom: 15px;
         }
         
         .free-benefits ul {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 15px;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 12px;
           list-style: none;
-          font-size: 1.1em;
+          font-size: 1em;
           padding: 0;
         }
         
         .free-benefits li {
           color: #7D7C7C;
-          font-size: 0.9em;
-          padding-left: 25px;
+          font-size: 0.85em;
+          padding-left: 22px;
           position: relative;
         }
         
@@ -264,13 +265,13 @@ export default function EmployeeSubscriptionPlans() {
           content: "✅";
           position: absolute;
           left: 0;
-          font-size: 1.1em;
+          font-size: 1em;
         }
         
         .cta-text {
           text-align: center;
-          margin-top: 40px;
-          font-size: 1.2em;
+          margin-top: 30px;
+          font-size: 1.1em;
           font-weight: 600;
           color: #4F46E5;
         }
@@ -282,11 +283,70 @@ export default function EmployeeSubscriptionPlans() {
           }
           
           .box {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
           }
           
           .pricing-section {
-            padding: 20px 10px;
+            padding: 15px 8px;
+          }
+        }
+        
+        @media screen and (max-width: 360px) {
+          .pricing-section {
+            padding: 10px 5px;
+          }
+          
+          .box {
+            min-height: 320px;
+            border-radius: 10px;
+          }
+          
+          .amount {
+            font-size: 1.8em;
+          }
+          
+          .detail {
+            font-size: 0.6em;
+          }
+          
+          .description {
+            font-size: 0.7em;
+            padding: 0 12px;
+            margin: 15px auto;
+          }
+          
+          .description li {
+            margin-top: 6px;
+            font-size: 1em;
+          }
+          
+          .cta-button {
+            height: 32px;
+            width: 180px;
+            font-size: 0.6em;
+          }
+          
+          .free-benefits {
+            padding: 15px 10px;
+            margin: 20px auto 0;
+          }
+          
+          .free-benefits h3 {
+            font-size: 1.1em;
+          }
+          
+          .free-benefits ul {
+            grid-template-columns: 1fr;
+            gap: 10px;
+          }
+          
+          .free-benefits li {
+            font-size: 0.8em;
+          }
+          
+          .cta-text {
+            font-size: 1em;
+            margin-top: 20px;
           }
         }
       `}</style>
@@ -294,11 +354,11 @@ export default function EmployeeSubscriptionPlans() {
       <div className="pricing-section">
         <div className="w-full">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-600 mb-4">
+          <div className="text-center mb-8 xs:mb-10 sm:mb-12 px-2">
+            <h1 className="text-2xl xs:text-3xl sm:text-4xl font-bold text-gray-600 mb-3 xs:mb-4">
               Koluvu Employee Subscription Plans
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-sm xs:text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-2">
               Boost your career with AI-powered tools and expert feedback.
             </p>
           </div>

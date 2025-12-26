@@ -60,15 +60,55 @@ const SetupEmployerProfile = () => {
       setLoading(true);
       setMessage(null);
 
-      // Validate required fields
-      if (
-        !formData.username ||
-        !formData.company_name ||
-        !formData.employer_name
-      ) {
+      // Validate required fields client-side
+      const errors = [];
+
+      if (!formData.username || formData.username.trim() === "") {
+        errors.push("Username is required");
+      }
+
+      if (!formData.company_name || formData.company_name.trim() === "") {
+        errors.push("Company name is required");
+      }
+
+      if (!formData.employer_name || formData.employer_name.trim() === "") {
+        errors.push("Employer name is required");
+      }
+
+      // Validate email format if provided
+      if (formData.email && formData.email.trim() !== "") {
+        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          errors.push("Please enter a valid email address");
+        }
+      }
+
+      // Validate website URL if provided
+      if (formData.website && formData.website.trim() !== "") {
+        try {
+          new URL(formData.website);
+        } catch {
+          errors.push(
+            "Please enter a valid website URL (e.g., https://example.com)"
+          );
+        }
+      }
+
+      // Validate phone number if provided
+      if (formData.phone && formData.phone.trim() !== "") {
+        const phoneRegex = /^[\\d\\s\\-\\+\\(\\)]+$/;
+        if (
+          !phoneRegex.test(formData.phone) ||
+          formData.phone.replace(/\\D/g, "").length < 10
+        ) {
+          errors.push("Please enter a valid phone number (at least 10 digits)");
+        }
+      }
+
+      if (errors.length > 0) {
         setMessage({
           type: "error",
-          text: "Username, company name, and employer name are required",
+          text: errors.join(". "),
         });
         setLoading(false);
         return;
@@ -82,12 +122,29 @@ const SetupEmployerProfile = () => {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create profile");
+        // Handle specific error responses from backend
+        let errorMessage = "Failed to create profile";
+
+        if (data.error) {
+          errorMessage = data.error;
+        } else if (data.details) {
+          // Format validation errors from backend
+          const detailErrors = [];
+          Object.keys(data.details).forEach((field) => {
+            const fieldError = Array.isArray(data.details[field])
+              ? data.details[field].join(", ")
+              : data.details[field];
+            detailErrors.push(`${field}: ${fieldError}`);
+          });
+          errorMessage = detailErrors.join(". ");
+        }
+
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
       setMessage({
         type: "success",
         text: "Profile created successfully! Redirecting...",
@@ -100,7 +157,11 @@ const SetupEmployerProfile = () => {
       }, 1500);
     } catch (error) {
       console.error("Error creating profile:", error);
-      setMessage({ type: "error", text: error.message });
+      setMessage({
+        type: "error",
+        text:
+          error.message || "An unexpected error occurred. Please try again.",
+      });
       setLoading(false);
     }
   };

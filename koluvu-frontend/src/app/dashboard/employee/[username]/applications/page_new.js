@@ -129,44 +129,44 @@ export default function MyApplicationsPage() {
             <div className="text-center">
               <p className="text-[10px] sm:text-xs text-gray-500 mb-1 truncate">Total</p>
               <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
-                  {statistics.total}
-                </p>
-              </div>
+                {statistics.total}
+              </p>
             </div>
+          </div>
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3 md:p-4">
             <div className="text-center">
               <p className="text-[10px] sm:text-xs text-gray-500 mb-1 truncate">Pending</p>
               <p className="text-lg sm:text-xl md:text-2xl font-bold text-gray-600">
-                  {statistics.pending}
-                </p>
-              </div>
-            </div>
-            <div className="bg-white rounded shadow-sm border border-gray-200 p-1 sm:p-3 md:p-4">
-              <div className="text-center">
-                <p className="text-[7px] sm:text-xs text-gray-500 mb-0.5 truncate leading-tight">Reviewed</p>
-                <p className="text-xs sm:text-xl md:text-2xl font-bold text-blue-600">
-                  {statistics.reviewed}
-                </p>
-              </div>
-            </div>
-            <div className="bg-white rounded shadow-sm border border-gray-200 p-1 sm:p-3 md:p-4">
-              <div className="text-center">
-                <p className="text-[7px] sm:text-xs text-gray-500 mb-0.5 truncate leading-tight">Shortlist</p>
-                <p className="text-xs sm:text-xl md:text-2xl font-bold text-green-600">
-                  {statistics.shortlisted}
-                </p>
-              </div>
-            </div>
-            <div className="bg-white rounded shadow-sm border border-gray-200 p-1 sm:p-3 md:p-4">
-              <div className="text-center">
-                <p className="text-[7px] sm:text-xs text-gray-500 mb-0.5 truncate leading-tight">Rejected</p>
-                <p className="text-xs sm:text-xl md:text-2xl font-bold text-red-600">
-                  {statistics.rejected}
-                </p>
-              </div>
+                {statistics.pending}
+              </p>
             </div>
           </div>
-        )}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3 md:p-4">
+            <div className="text-center">
+              <p className="text-[10px] sm:text-xs text-gray-500 mb-1 truncate">Reviewed</p>
+              <p className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600">
+                {statistics.reviewed}
+              </p>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3 md:p-4">
+            <div className="text-center">
+              <p className="text-[10px] sm:text-xs text-gray-500 mb-1 truncate">Shortlisted</p>
+              <p className="text-lg sm:text-xl md:text-2xl font-bold text-green-600">
+                {statistics.shortlisted}
+              </p>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 sm:p-3 md:p-4">
+            <div className="text-center">
+              <p className="text-[10px] sm:text-xs text-gray-500 mb-1 truncate">Rejected</p>
+              <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-600">
+                {statistics.rejected}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 sm:mb-6 overflow-hidden">
@@ -182,16 +182,16 @@ export default function MyApplicationsPage() {
               key={tab.key}
               onClick={() => setFilter(tab.key)}
               className={`px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
-                  filter === tab.key
-                    ? "border-b-2 border-blue-600 text-blue-600"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+                filter === tab.key
+                  ? "border-b-2 border-blue-600 text-blue-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
+      </div>
 
       {/* Applications Grid */}
       {filteredApplications.length === 0 ? (
@@ -207,8 +207,8 @@ export default function MyApplicationsPage() {
       ) : (
         <div className="space-y-4">
           {filteredApplications.map((application) => {
-              const statusConfig = getStatusConfig(application.status);
-              const StatusIcon = statusConfig.icon;
+            const statusConfig = getStatusConfig(application.status);
+            const StatusIcon = statusConfig.icon;
 
             return (
               <div

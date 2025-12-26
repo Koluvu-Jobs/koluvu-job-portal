@@ -12,6 +12,7 @@ export default function CaptchaVerification({
   className = "",
 }) {
   const [captcha, setCaptcha] = useState("");
+  const [captchaImage, setCaptchaImage] = useState("");
   const [captchaInput, setCaptchaInput] = useState(captchaValue || "");
   const [captchaKey, setCaptchaKey] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -19,26 +20,50 @@ export default function CaptchaVerification({
   const [isVerified, setIsVerified] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
 
-  // Generate simple CAPTCHA (minimum 8 characters)
-  const generateSimpleCaptcha = () => {
-    const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    let newCaptcha = "";
-    for (let i = 0; i < 8; i++) {
-      newCaptcha += chars[Math.floor(Math.random() * chars.length)];
-    }
-    setCaptcha(newCaptcha);
-    const newKey = "simple_" + Date.now();
-    setCaptchaKey(newKey);
-    setCaptchaInput("");
-    setIsVerified(false);
+  // Fetch CAPTCHA from backend
+  const fetchCaptcha = async () => {
+    setIsLoading(true);
     setError("");
+    try {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL ||
+        process.env.NEXT_PUBLIC_API_URL ||
+        "http://127.0.0.1:8000";
+      const response = await fetch(`${backendUrl}/api/auth/captcha/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-    // Don't call onCaptchaChange with empty values when generating a new CAPTCHA
-    // Only call it when CAPTCHA is actually verified
+      if (!response.ok) {
+        throw new Error(`Failed to fetch CAPTCHA: ${response.status}`);
+      }
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server returned non-JSON response");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setCaptchaKey(data.captcha_key);
+        setCaptchaImage(data.captcha_image);
+        setCaptchaInput("");
+        setIsVerified(false);
+      } else {
+        setError("Failed to load CAPTCHA. Please refresh.");
+      }
+    } catch (error) {
+      console.error("Error fetching CAPTCHA:", error);
+      setError("Failed to load CAPTCHA. Please refresh.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
-    generateSimpleCaptcha();
+    fetchCaptcha();
   }, []);
 
   const handleInputChange = (e) => {
@@ -49,7 +74,7 @@ export default function CaptchaVerification({
   };
 
   const refreshCaptcha = () => {
-    generateSimpleCaptcha();
+    fetchCaptcha();
   };
 
   const verifyCaptcha = async () => {
@@ -61,21 +86,53 @@ export default function CaptchaVerification({
     setIsVerifying(true);
     setError("");
 
-    // Simple verification for the generated CAPTCHA
-    const isValid = captchaInput.toUpperCase() === captcha.toUpperCase();
+    // Verify with backend
+    try {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL ||
+        process.env.NEXT_PUBLIC_API_URL ||
+        "http://127.0.0.1:8000";
+      const response = await fetch(`${backendUrl}/api/auth/captcha/verify/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          captcha_key: captchaKey,
+          captcha_value: captchaInput,
+        }),
+      });
 
-    setTimeout(() => {
-      if (isValid) {
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server returned non-JSON response");
+      }
+
+      const data = await response.json();
+
+      if (response.ok && data.success && data.verified) {
         setIsVerified(true);
         if (onCaptchaChange) {
           onCaptchaChange(captchaInput, captchaKey);
         }
       } else {
-        setError("Invalid CAPTCHA. Please try again.");
-        generateSimpleCaptcha();
+        // Handle specific error messages from backend
+        const errorMsg = data.error || "Invalid CAPTCHA. Please try again.";
+        setError(errorMsg);
+        // Auto-refresh CAPTCHA for expired or invalid cases
+        if (errorMsg.includes("expired") || !response.ok) {
+          setCaptchaInput("");
+          fetchCaptcha();
+        }
       }
+    } catch (error) {
+      console.error("CAPTCHA verification error:", error);
+      setError("Verification failed. Please try again.");
+      setCaptchaInput("");
+      fetchCaptcha();
+    } finally {
       setIsVerifying(false);
-    }, 500); // Small delay to show verification animation
+    }
   };
 
   const isMobile = deviceType === "mobile";
@@ -126,25 +183,34 @@ export default function CaptchaVerification({
         <div
           style={{
             flex: 1,
-            minHeight: isMobile ? "40px" : "45px",
-            background: "linear-gradient(to right, #3b82f6, #6366f1)",
-            color: "#fff",
-            fontFamily: "monospace",
-            fontSize: isMobile ? "1rem" : "1.1rem",
-            fontWeight: "bold",
-            textAlign: "center",
-            letterSpacing: "0.2em",
+            minHeight: isMobile ? "50px" : "60px",
+            background: "#fff",
             borderRadius: "8px",
             border: isVerified
               ? "2px solid #10b981"
-              : "1px solid rgba(255, 255, 255, 0.2)",
+              : "1px solid rgba(148, 163, 184, 0.3)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             userSelect: "none",
+            overflow: "hidden",
           }}
         >
-          {captcha}
+          {isLoading ? (
+            <div style={{ color: "#64748b" }}>Loading...</div>
+          ) : captchaImage ? (
+            <img
+              src={captchaImage}
+              alt="CAPTCHA"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+              }}
+            />
+          ) : (
+            <div style={{ color: "#64748b" }}>No CAPTCHA</div>
+          )}
         </div>
 
         <button
@@ -176,9 +242,8 @@ export default function CaptchaVerification({
         type="text"
         value={captchaInput}
         onChange={handleInputChange}
-        placeholder="Enter the above code *"
+        placeholder="Enter the code shown above *"
         required={required}
-        maxLength={8}
         style={{
           width: "100%",
           padding: isMobile ? "0.6rem 1rem" : "0.7rem 1.25rem",
@@ -262,12 +327,10 @@ export default function CaptchaVerification({
 // Export a verification function for forms
 export const verifyCaptchaValue = async (captchaValue, captchaKey) => {
   try {
-    if (captchaKey.startsWith("simple_")) {
-      return { valid: true, error: null };
-    }
-
     const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      "http://127.0.0.1:8000";
     const response = await fetch(`${backendUrl}/api/auth/captcha/verify/`, {
       method: "POST",
       headers: {
@@ -280,7 +343,7 @@ export const verifyCaptchaValue = async (captchaValue, captchaKey) => {
     });
 
     const data = await response.json();
-    return { valid: data.valid || false, error: data.error };
+    return { valid: data.verified || false, error: data.error };
   } catch (error) {
     console.error("CAPTCHA verification error:", error);
     return { valid: false, error: "Verification failed" };

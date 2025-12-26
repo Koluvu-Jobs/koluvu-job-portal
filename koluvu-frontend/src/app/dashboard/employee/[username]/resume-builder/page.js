@@ -66,21 +66,21 @@ export default function ResumeBuilderPage({ params }) {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+    <div className="max-w-7xl mx-auto p-2 xs:p-3 sm:p-4 md:p-6">
+      <div className="mb-4 xs:mb-5 sm:mb-6 md:mb-8">
+        <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 xs:mb-2">
           Resume Builder for {username}
         </h1>
-        <p className="text-sm sm:text-base text-gray-600">
+        <p className="text-xs xs:text-sm md:text-base text-gray-600">
           Create and manage your professional resumes
         </p>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 xs:gap-4 sm:gap-5 md:gap-6 mb-4 xs:mb-5 sm:mb-6 md:mb-8">
         <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-          <CardContent className="p-4 sm:p-6 text-center">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 bg-blue-100 rounded-lg flex items-center justify-center">
+          <CardContent className="p-3 xs:p-4 sm:p-5 md:p-6 text-center">
+            <div className="w-10 h-10 xs:w-11 xs:h-11 sm:w-12 sm:h-12 mx-auto mb-2 xs:mb-3 sm:mb-4 bg-blue-100 rounded-lg flex items-center justify-center">
               <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
             </div>
             <h3 className="font-semibold text-sm sm:text-base mb-2">Create New Resume</h3>
@@ -123,12 +123,12 @@ export default function ResumeBuilderPage({ params }) {
       </div>
 
       {/* My Resumes */}
-      <div className="mb-6 sm:mb-8">
-        <h2 className="text-xl sm:text-2xl font-bold mb-4">My Resumes</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="mb-4 xs:mb-5 sm:mb-6 md:mb-8">
+        <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold mb-3 xs:mb-4">My Resumes</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 xs:gap-4 sm:gap-5 md:gap-6">
           {resumes.map((resume) => (
             <Card key={resume.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="p-4 sm:p-6">
+              <CardHeader className="p-3 xs:p-4 sm:p-5 md:p-6">
                 <div className="flex justify-between items-start">
                   <div className="max-w-[70%]">
                     <CardTitle className="text-base sm:text-lg truncate">
@@ -149,8 +149,8 @@ export default function ResumeBuilderPage({ params }) {
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-0">
-                <div className="mb-3 sm:mb-4">
+              <CardContent className="p-3 xs:p-4 sm:p-5 md:p-6 pt-0">
+                <div className="mb-2 xs:mb-3 sm:mb-4">
                   <p className="text-xs sm:text-sm text-gray-600">
                     Last modified: {resume.lastModified}
                   </p>
@@ -158,8 +158,8 @@ export default function ResumeBuilderPage({ params }) {
                     Downloads: {resume.downloads}
                   </p>
                 </div>
-                <div className="flex gap-1 sm:gap-2">
-                  <Button size="sm" variant="outline" className="flex-1 text-xs">
+                <div className="flex gap-1 xs:gap-1.5 sm:gap-2">
+                  <Button size="sm" variant="outline" className="flex-1 text-[10px] xs:text-xs">
                     <Eye className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                     <span className="hidden sm:inline">Preview</span>
                   </Button>
@@ -182,8 +182,8 @@ export default function ResumeBuilderPage({ params }) {
 
       {/* Featured Templates */}
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold mb-4">Featured Templates</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold mb-3 xs:mb-4">Featured Templates</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 xs:gap-4 sm:gap-5 md:gap-6">
           {templates.map((template) => (
             <Card
               key={template.id}
@@ -199,8 +199,8 @@ export default function ResumeBuilderPage({ params }) {
                   </div>
                 )}
               </div>
-              <CardContent className="p-3 sm:p-4">
-                <h3 className="font-semibold text-sm sm:text-base mb-2">{template.name}</h3>
+              <CardContent className="p-2 xs:p-3 sm:p-4">
+                <h3 className="font-semibold text-xs xs:text-sm md:text-base mb-1.5 xs:mb-2">{template.name}</h3>
                 <Button size="sm" className="w-full text-xs sm:text-sm">
                   Use Template
                 </Button>

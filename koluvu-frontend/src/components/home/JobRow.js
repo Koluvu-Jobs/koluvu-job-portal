@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { 
   MapPin, 
   Clock, 
-  DollarSign, 
   ArrowRight, 
   Briefcase, 
   Zap, 
@@ -266,8 +265,8 @@ const JobCard = ({ job, index, onHover, onLeave, onClick }) => {
           </div>
           
           <div className="flex items-center gap-2 text-slate-600 text-xs sm:text-sm group-hover:text-slate-900 transition-colors duration-300">
-            <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 flex-shrink-0" />
-            <span className="truncate font-semibold text-green-600">{job.salary}</span>
+            <span className="text-green-500 font-bold flex-shrink-0">₹</span>
+            <span className="truncate font-semibold text-green-600">{job.salary.replace('₹', '')}</span>
           </div>
         </div>
         
@@ -289,7 +288,6 @@ const JobCard = ({ job, index, onHover, onLeave, onClick }) => {
         <div className={`absolute bottom-16 sm:bottom-20 left-4 right-4 flex gap-2 transition-all duration-500 ${
           isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}>
-          <div className="flex-1 h-1 bg-gradient-to-r from-orange-400/50 to-orange-500/50 rounded-full"></div>
         </div>
       </div>
       

@@ -15,6 +15,7 @@ export default function VerificationForm({
   onVerificationChange = null,
   hideEmailInput = false,
   presetEmail = "",
+  userType = "employee", // Add userType prop with default value
 }) {
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,18 +35,28 @@ export default function VerificationForm({
     }
   }, [countdown]);
 
-  // Auto-send OTP if email is preset and input is hidden
+  // Auto-send OTP if email is preset and input is hidden (but NOT for login - OTP already sent)
   useEffect(() => {
     if (
       hideEmailInput &&
       presetEmail &&
       captchaVerified &&
       !showOTPField &&
-      !isVerified
+      !isVerified &&
+      verificationType !== "login" // Skip auto-send for login type
     ) {
       sendOTP();
     }
   }, [hideEmailInput, presetEmail, captchaVerified]);
+
+  // For login type, show OTP field immediately (OTP already sent by login page)
+  useEffect(() => {
+    if (verificationType === "login" && presetEmail && !showOTPField) {
+      setShowOTPField(true);
+      setMessage("Enter the OTP sent to your email");
+      setMessageType("success");
+    }
+  }, [verificationType, presetEmail]);
 
   const sendOTP = async () => {
     setLoading(true);
@@ -69,8 +80,8 @@ export default function VerificationForm({
         return;
       }
 
-      if (verificationType === "email") {
-        // Email validation
+      if (verificationType === "email" || verificationType === "login") {
+        // Email validation (works for both registration and login)
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(fieldValue)) {
           setMessage("Please enter a valid email address");
@@ -96,6 +107,7 @@ export default function VerificationForm({
               email: fieldValue,
               type: otpType,
               username: username,
+              user_type: userType, // Add user_type to request body
             }),
           }
         );
@@ -204,7 +216,16 @@ export default function VerificationForm({
 
         if (result.success) {
           setIsVerified(true);
-          if (onVerificationChange) onVerificationChange(true);
+          console.log(
+            "✅ Email OTP verified! Calling onVerificationChange(true)"
+          );
+          console.log("onVerificationChange function:", onVerificationChange);
+          if (onVerificationChange) {
+            onVerificationChange(true);
+            console.log("✅ onVerificationChange(true) called successfully");
+          } else {
+            console.warn("⚠️ onVerificationChange is null or undefined!");
+          }
           setMessage("Email verified successfully!");
           setMessageType("success");
           setShowOTPField(false);
@@ -307,10 +328,13 @@ export default function VerificationForm({
       )}
 
       {showOTPField && !isVerified && (
-        <div className="space-y-2">
-          <div className="flex gap-2">
+        <div className="space-y-3 mt-4">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Enter OTP
+          </label>
+          <div className="flex gap-3">
             <input
-              className={`${inputStyle} flex-1`}
+              className={`${inputStyle} flex-[3]`}
               type="text"
               placeholder="Enter 6-digit OTP"
               value={otpValue}
@@ -319,10 +343,11 @@ export default function VerificationForm({
               }
               disabled={isVerified || loading}
               maxLength={6}
+              autoFocus
             />
             <button
               type="button"
-              className={`${btnStyle} whitespace-nowrap ${
+              className={`${btnStyle} flex-[1] px-4 py-2 text-sm ${
                 !otpValue || otpValue.length !== 6
                   ? "opacity-50 cursor-not-allowed"
                   : ""

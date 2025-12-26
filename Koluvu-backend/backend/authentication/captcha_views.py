@@ -26,15 +26,6 @@ class CaptchaView(APIView):
         Generate a new CAPTCHA challenge
         """
         try:
-            # In development mode, return a test CAPTCHA
-            if settings.DEBUG:
-                return Response({
-                    'success': True,
-                    'captcha_key': 'test-captcha-key',
-                    'captcha_image': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
-                    'message': 'Development mode - use "TEST" as captcha value'
-                })
-            
             # Generate CAPTCHA
             captcha_key, captcha_text, captcha_image = self.generate_captcha()
             
@@ -116,21 +107,6 @@ class VerifyCaptchaView(APIView):
                     'success': False,
                     'error': 'CAPTCHA key and value are required'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
-            # In development mode, accept "TEST" as valid
-            if settings.DEBUG:
-                if captcha_value.upper() == 'TEST':
-                    return Response({
-                        'success': True,
-                        'verified': True,
-                        'message': 'Development mode - CAPTCHA verified'
-                    })
-                else:
-                    return Response({
-                        'success': False,
-                        'verified': False,
-                        'error': 'Use "TEST" as captcha value in development mode'
-                    }, status=status.HTTP_400_BAD_REQUEST)
             
             # Verify CAPTCHA from cache
             stored_text = cache.get(f"captcha:{captcha_key}")
@@ -259,13 +235,6 @@ def verify_captcha_required(captcha_key, captcha_value):
     Returns (is_valid, error_message)
     """
     try:
-        # In development mode, accept "TEST"
-        if settings.DEBUG:
-            if captcha_value and captcha_value.upper() == 'TEST':
-                return True, None
-            else:
-                return False, 'Use "TEST" as captcha value in development mode'
-        
         if not captcha_key or not captcha_value:
             return False, "CAPTCHA is required"
         

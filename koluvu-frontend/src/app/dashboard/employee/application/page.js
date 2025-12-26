@@ -21,12 +21,12 @@ import {
 
 const RelatedJobs = ({ jobs, isDarkMode }) => (
   <div
-    className={`rounded-lg shadow-sm p-4 mb-4 md:p-5 lg:p-6 lg:mb-6 ${
+    className={`rounded-md xs:rounded-lg sm:rounded-lg shadow-sm p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6 mb-2 xs:mb-3 sm:mb-4 lg:mb-6 ${
       isDarkMode ? "bg-gray-800" : "bg-white"
     }`}
   >
     <h3
-      className={`text-base font-semibold mb-3 border-b pb-2 md:text-lg ${
+      className={`text-xs xs:text-sm sm:text-base font-semibold mb-2 xs:mb-3 border-b pb-1 xs:pb-1.5 sm:pb-2 md:text-lg ${
         isDarkMode
           ? "text-gray-200 border-gray-700"
           : "text-gray-800 border-gray-200"
@@ -34,17 +34,17 @@ const RelatedJobs = ({ jobs, isDarkMode }) => (
     >
       Related Jobs
     </h3>
-    <div className="space-y-3 md:space-y-4">
+    <div className="space-y-2 xs:space-y-2.5 sm:space-y-3 md:space-y-4">
       {jobs.map((job, index) => (
         <motion.div
           key={index}
           whileHover={{ x: 5 }}
-          className={`border-b pb-3 last:border-b-0 md:pb-4 ${
+          className={`border-b pb-2 xs:pb-2.5 sm:pb-3 last:border-b-0 md:pb-4 ${
             isDarkMode ? "border-gray-700" : "border-gray-100"
           }`}
         >
           <h4
-            className={`text-sm font-medium transition-colors cursor-pointer md:text-base ${
+            className={`text-[10px] xs:text-xs sm:text-sm font-medium transition-colors cursor-pointer md:text-base ${
               isDarkMode
                 ? "text-gray-200 hover:text-blue-400"
                 : "text-gray-800 hover:text-blue-600"
@@ -53,7 +53,7 @@ const RelatedJobs = ({ jobs, isDarkMode }) => (
             {job.title}
           </h4>
           <p
-            className={`text-sm mt-1 ${
+            className={`text-[9px] xs:text-[10px] sm:text-xs md:text-sm mt-0.5 xs:mt-1 ${
               isDarkMode ? "text-gray-400" : "text-gray-600"
             }`}
           >
@@ -61,7 +61,7 @@ const RelatedJobs = ({ jobs, isDarkMode }) => (
           </p>
           <div className="flex items-center mt-1">
             <svg
-              className={`w-3 h-3 mr-1 md:w-4 md:h-4 ${
+              className={`w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 mr-1 ${
                 isDarkMode ? "text-gray-500" : "text-gray-400"
               }`}
               fill="none"
@@ -83,16 +83,16 @@ const RelatedJobs = ({ jobs, isDarkMode }) => (
               />
             </svg>
             <span
-              className={`text-xs md:text-sm ${
+              className={`text-[9px] xs:text-[10px] sm:text-xs md:text-sm ${
                 isDarkMode ? "text-gray-500" : "text-gray-500"
               }`}
             >
               {job.location}
             </span>
           </div>
-          <div className="flex justify-between items-center mt-2 md:mt-3">
+          <div className="flex justify-between items-center mt-1.5 xs:mt-2 md:mt-3 gap-2">
             <span
-              className={`text-xs px-2 py-1 rounded-full md:text-sm ${
+              className={`text-[9px] xs:text-[10px] sm:text-xs md:text-sm px-1.5 xs:px-2 py-0.5 xs:py-1 rounded-full ${
                 isDarkMode
                   ? "bg-blue-900 text-blue-200"
                   : "bg-blue-50 text-blue-600"
@@ -105,7 +105,7 @@ const RelatedJobs = ({ jobs, isDarkMode }) => (
                 console.log(`Applying for ${job.title} at ${job.company}`);
                 router.push(`/jobs?search=${encodeURIComponent(job.title)}`);
               }}
-              className={`text-xs font-medium md:text-sm transition-all duration-300 hover:scale-105 ${
+              className={`text-[9px] xs:text-[10px] sm:text-xs md:text-sm font-medium transition-all duration-300 hover:scale-105 whitespace-nowrap ${
                 isDarkMode
                   ? "text-blue-400 hover:text-blue-300"
                   : "text-blue-600 hover:text-blue-800"
@@ -122,37 +122,37 @@ const RelatedJobs = ({ jobs, isDarkMode }) => (
 
 const InterviewPreparation = ({ isDarkMode }) => (
   <div
-    className={`rounded-lg shadow-sm p-4 mb-4 md:p-5 lg:p-6 lg:mb-6 ${
+    className={`rounded-md xs:rounded-lg sm:rounded-lg shadow-sm p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6 mb-2 xs:mb-3 sm:mb-4 lg:mb-6 ${
       isDarkMode ? "bg-gray-800" : "bg-white"
     }`}
   >
     <h3
-      className={`text-base font-semibold mb-3 border-b pb-2 md:text-lg ${
+      className={`text-xs xs:text-sm sm:text-base font-semibold mb-2 xs:mb-3 border-b pb-1 xs:pb-1.5 sm:pb-2 md:text-lg ${
         isDarkMode
           ? "text-gray-200 border-gray-700"
           : "text-gray-800 border-gray-200"
       }`}
     >
-      <FiTarget className="inline w-5 h-5 mr-2" />
+      <FiTarget className="inline w-4 h-4 xs:w-5 xs:h-5 mr-1.5 xs:mr-2" />
       Interview Preparation
     </h3>
-    <div className="space-y-3">
+    <div className="space-y-2 xs:space-y-2.5 sm:space-y-3">
       <div
-        className={`p-3 rounded-lg border ${
+        className={`p-2 xs:p-2.5 sm:p-3 rounded-md xs:rounded-lg border ${
           isDarkMode
             ? "bg-blue-900/20 border-blue-800"
             : "bg-blue-50 border-blue-200"
         }`}
       >
         <h4
-          className={`font-medium text-sm mb-2 ${
+          className={`font-medium text-[10px] xs:text-xs sm:text-sm mb-1 xs:mb-1.5 sm:mb-2 ${
             isDarkMode ? "text-blue-200" : "text-blue-800"
           }`}
         >
           Common Interview Questions
         </h4>
         <p
-          className={`text-xs ${
+          className={`text-[9px] xs:text-[10px] sm:text-xs ${
             isDarkMode ? "text-blue-300" : "text-blue-600"
           }`}
         >
@@ -160,21 +160,21 @@ const InterviewPreparation = ({ isDarkMode }) => (
         </p>
       </div>
       <div
-        className={`p-3 rounded-lg border ${
+        className={`p-2 xs:p-2.5 sm:p-3 rounded-md xs:rounded-lg border ${
           isDarkMode
             ? "bg-green-900/20 border-green-800"
             : "bg-green-50 border-green-200"
         }`}
       >
         <h4
-          className={`font-medium text-sm mb-2 ${
+          className={`font-medium text-[10px] xs:text-xs sm:text-sm mb-1 xs:mb-1.5 sm:mb-2 ${
             isDarkMode ? "text-green-200" : "text-green-800"
           }`}
         >
           Mock Interviews
         </h4>
         <p
-          className={`text-xs ${
+          className={`text-[9px] xs:text-[10px] sm:text-xs ${
             isDarkMode ? "text-green-300" : "text-green-600"
           }`}
         >
@@ -211,25 +211,25 @@ const ApplicationTimeline = ({ isDarkMode }) => {
 
   return (
     <div
-      className={`rounded-lg shadow-sm p-4 mb-4 md:p-5 lg:p-6 lg:mb-6 ${
+      className={`rounded-md xs:rounded-lg sm:rounded-lg shadow-sm p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6 mb-2 xs:mb-3 sm:mb-4 lg:mb-6 ${
         isDarkMode ? "bg-gray-800" : "bg-white"
       }`}
     >
       <h3
-        className={`text-base font-semibold mb-4 border-b pb-2 md:text-lg ${
+        className={`text-xs xs:text-sm sm:text-base font-semibold mb-2 xs:mb-3 sm:mb-4 border-b pb-1 xs:pb-1.5 sm:pb-2 md:text-lg ${
           isDarkMode
             ? "text-gray-200 border-gray-700"
             : "text-gray-800 border-gray-200"
         }`}
       >
-        <FiClock className="inline w-5 h-5 mr-2" />
+        <FiClock className="inline w-4 h-4 xs:w-5 xs:h-5 mr-1.5 xs:mr-2" />
         Recent Activity
       </h3>
-      <div className="space-y-4">
+      <div className="space-y-2.5 xs:space-y-3 sm:space-y-4">
         {timelineEvents.map((event, index) => (
-          <div key={index} className="flex items-start space-x-3">
+          <div key={index} className="flex items-start space-x-2 xs:space-x-2.5 sm:space-x-3">
             <div
-              className={`w-3 h-3 rounded-full mt-1 ${
+              className={`w-2.5 h-2.5 xs:w-3 xs:h-3 rounded-full mt-0.5 xs:mt-1 flex-shrink-0 ${
                 event.status === "applied"
                   ? "bg-blue-500"
                   : event.status === "interview"
@@ -239,16 +239,16 @@ const ApplicationTimeline = ({ isDarkMode }) => {
                   : "bg-gray-500"
               }`}
             />
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <p
-                className={`text-sm font-medium ${
+                className={`text-[10px] xs:text-xs sm:text-sm font-medium line-clamp-2 ${
                   isDarkMode ? "text-gray-200" : "text-gray-800"
                 }`}
               >
                 {event.event}
               </p>
               <p
-                className={`text-xs mt-1 ${
+                className={`text-[9px] xs:text-[10px] sm:text-xs mt-0.5 xs:mt-1 ${
                   isDarkMode ? "text-gray-400" : "text-gray-500"
                 }`}
               >
@@ -282,12 +282,12 @@ const ApplicationStats = ({ stats, isDarkMode }) => {
 
   return (
     <div
-      className={`rounded-lg shadow-sm p-4 mb-4 md:p-5 lg:p-6 ${
+      className={`rounded-md xs:rounded-lg sm:rounded-lg shadow-sm p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6 mb-2 xs:mb-3 sm:mb-4 ${
         isDarkMode ? "bg-gray-800" : "bg-white"
       }`}
     >
       <h3
-        className={`text-base font-semibold mb-3 border-b pb-2 md:text-lg ${
+        className={`text-xs xs:text-sm sm:text-base font-semibold mb-2 xs:mb-3 border-b pb-1 xs:pb-1.5 sm:pb-2 md:text-lg ${
           isDarkMode
             ? "text-gray-200 border-gray-700"
             : "text-gray-800 border-gray-200"
@@ -295,21 +295,21 @@ const ApplicationStats = ({ stats, isDarkMode }) => {
       >
         Application Stats
       </h3>
-      <div className="grid grid-cols-2 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 gap-2 xs:gap-2.5 sm:gap-3 md:gap-4">
         {statsConfig.map((stat) => {
           const IconComponent = stat.icon;
           return (
             <div
               key={stat.label}
-              className={`p-3 rounded-lg border md:p-4 ${
+              className={`p-2 xs:p-2.5 sm:p-3 md:p-4 rounded-lg border ${
                 isDarkMode
                   ? `bg-${stat.color}-900 border-${stat.color}-800 text-${stat.color}-200`
                   : `bg-${stat.color}-50 border-${stat.color}-100 text-${stat.color}-600`
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1 xs:mb-1.5 sm:mb-2">
                 <p
-                  className={`text-sm font-medium ${
+                  className={`text-[10px] xs:text-xs sm:text-sm font-medium ${
                     isDarkMode ? "text-gray-300" : "text-gray-600"
                   }`}
                 >
@@ -324,7 +324,7 @@ const ApplicationStats = ({ stats, isDarkMode }) => {
                 />
               </div>
               <p
-                className={`text-lg font-bold md:text-xl ${
+                className={`text-base xs:text-lg font-bold md:text-xl ${
                   isDarkMode
                     ? `text-${stat.color}-200`
                     : `text-${stat.color}-600`
@@ -459,10 +459,9 @@ export default function Applications() {
 
   return (
     <div
-      className={`min-h-screen transition-all duration-300 ${
+      className={`min-h-screen transition-all duration-300 p-2 xs:p-3 sm:p-4 md:p-6 lg:p-8 ${
         isDarkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50"
       }`}
-      style={{ padding: "32px" }}
     >
       <div className="flex justify-end items-center mb-4 lg:hidden">
         <button
@@ -506,13 +505,13 @@ export default function Applications() {
           `}</style>
           <div className="w-full lg:w-2/3 responsive-card">
             <div
-              className={`rounded-lg shadow-sm p-4 md:p-5 lg:p-6 responsive-card ${
+              className={`rounded-lg shadow-sm p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6 responsive-card ${
                 isDarkMode ? "bg-gray-800" : "bg-white"
               }`}
             >
-              <div className="flex flex-col mb-4 md:flex-row md:justify-between md:items-center">
+              <div className="flex flex-col mb-3 xs:mb-4 md:flex-row md:justify-between md:items-center">
                 <h2
-                  className={`text-xl font-semibold mb-2 md:text-2xl md:mb-0 ${
+                  className={`text-lg xs:text-xl font-semibold mb-1.5 xs:mb-2 md:text-2xl md:mb-0 ${
                     isDarkMode ? "text-white" : "text-gray-800"
                   }`}
                 >
@@ -540,19 +539,19 @@ export default function Applications() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3 justify-start mb-6">
+              <div className="flex flex-wrap gap-2 xs:gap-2.5 sm:gap-3 justify-start mb-4 xs:mb-5 sm:mb-6">
                 <button
                   onClick={() => {
                     console.log("Navigating to jobs...");
                     router.push("/jobs");
                   }}
-                  className={`px-4 py-2 rounded-lg transition-all duration-300 text-base md:px-5 md:py-2.5 font-medium transform hover:scale-105 hover:shadow-lg ${
+                  className={`px-2.5 xs:px-3 sm:px-4 py-1.5 xs:py-2 rounded-lg transition-all duration-300 text-xs xs:text-sm sm:text-base md:px-5 md:py-2.5 font-medium transform hover:scale-105 hover:shadow-lg ${
                     isDarkMode
                       ? "bg-blue-600 hover:bg-blue-700 text-white"
                       : "bg-blue-600 hover:bg-blue-700 text-white"
                   }`}
                 >
-                  <FiBriefcase className="w-4 h-4 mr-2 inline" />
+                  <FiBriefcase className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-1.5 sm:mr-2 inline" />
                   Browse Jobs
                 </button>
                 <button
@@ -560,13 +559,13 @@ export default function Applications() {
                     console.log("Navigating to mock interview...");
                     router.push("/mock-interview");
                   }}
-                  className={`px-4 py-2 rounded-lg transition-all duration-300 text-base md:px-5 md:py-2.5 font-medium border transform hover:scale-105 hover:shadow-lg ${
+                  className={`px-2.5 xs:px-3 sm:px-4 py-1.5 xs:py-2 rounded-lg transition-all duration-300 text-xs xs:text-sm sm:text-base md:px-5 md:py-2.5 font-medium border transform hover:scale-105 hover:shadow-lg ${
                     isDarkMode
                       ? "border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
                       : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
                   }`}
                 >
-                  <FiTarget className="w-4 h-4 mr-2 inline" />
+                  <FiTarget className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-1.5 sm:mr-2 inline" />
                   Practice Interview
                 </button>
                 <button
@@ -574,13 +573,13 @@ export default function Applications() {
                     console.log("Navigating to resume builder...");
                     router.push("/dashboard/employee/resume-builder");
                   }}
-                  className={`px-4 py-2 rounded-lg transition-all duration-300 text-base md:px-5 md:py-2.5 font-medium border transform hover:scale-105 hover:shadow-lg ${
+                  className={`px-2.5 xs:px-3 sm:px-4 py-1.5 xs:py-2 rounded-lg transition-all duration-300 text-xs xs:text-sm sm:text-base md:px-5 md:py-2.5 font-medium border transform hover:scale-105 hover:shadow-lg ${
                     isDarkMode
                       ? "border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500"
                       : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
                   }`}
                 >
-                  <FiUser className="w-4 h-4 mr-2 inline" />
+                  <FiUser className="w-3 h-3 xs:w-4 xs:h-4 mr-1 xs:mr-1.5 sm:mr-2 inline" />
                   Update Resume
                 </button>
               </div>
@@ -609,38 +608,38 @@ export default function Applications() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-2 xs:space-y-3 sm:space-y-4">
                   {applications.map((application) => (
                     <motion.div
                       key={application.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className={`border rounded-lg p-4 ${
+                      className={`border rounded-lg p-2 xs:p-3 sm:p-4 ${
                         isDarkMode
                           ? "border-gray-700 bg-gray-800"
                           : "border-gray-200 bg-white"
                       }`}
                     >
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
-                        <div className="flex-1">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-2 xs:mb-3">
+                        <div className="flex-1 min-w-0">
                           <h4
-                            className={`text-lg font-semibold mb-1 ${
+                            className={`text-sm xs:text-base sm:text-lg font-semibold mb-0.5 xs:mb-1 truncate ${
                               isDarkMode ? "text-gray-200" : "text-gray-800"
                             }`}
                           >
                             {application.title}
                           </h4>
                           <p
-                            className={`text-sm mb-2 ${
+                            className={`text-xs xs:text-sm mb-1.5 xs:mb-2 truncate ${
                               isDarkMode ? "text-gray-400" : "text-gray-600"
                             }`}
                           >
                             {application.company}
                           </p>
                         </div>
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center gap-2 xs:gap-3 sm:gap-4 flex-wrap">
                           <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 ${getStatusColor(
+                            className={`px-2 xs:px-2.5 sm:px-3 py-0.5 xs:py-1 rounded-full text-[10px] xs:text-xs sm:text-sm font-medium transition-all duration-300 ${ getStatusColor(
                               application.status
                             )}`}
                           >
@@ -662,7 +661,7 @@ export default function Applications() {
                                 ).toLocaleDateString()}`
                               );
                             }}
-                            className={`text-sm hover:underline transition-all duration-300 hover:scale-105 ${
+                            className={`text-xs xs:text-sm hover:underline transition-all duration-300 hover:scale-105 ${
                               isDarkMode
                                 ? "text-blue-400 hover:text-blue-300"
                                 : "text-blue-600 hover:text-blue-800"
@@ -673,7 +672,7 @@ export default function Applications() {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-4 text-sm">
+                      <div className="flex flex-wrap items-center gap-2 xs:gap-3 sm:gap-4 text-xs xs:text-sm">
                         <div
                           className={`flex items-center ${
                             isDarkMode ? "text-gray-400" : "text-gray-600"

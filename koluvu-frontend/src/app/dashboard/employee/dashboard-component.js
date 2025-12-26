@@ -1173,7 +1173,7 @@ const Dashboard = ({
   }
 
   return (
-    <div className="space-y-8 p-6">
+    <div className="space-y-4 xs:space-y-5 sm:space-y-6 md:space-y-8 p-3 xs:p-4 sm:p-5 md:p-6">
       {showImageEditor && (
         <ImageEditor
           image={editingImage}
@@ -1223,10 +1223,10 @@ const Dashboard = ({
       `}</style>
 
       {/* Header / Greeting Section */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white font-bold overflow-hidden flex-shrink-0">
+      <div className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-2 xs:p-3 sm:p-4 md:p-6 mb-3 xs:mb-4 sm:mb-6 md:mb-8">
+        <div className="flex flex-col items-start justify-between gap-2 xs:gap-3 sm:gap-4">
+          <div className="flex items-center space-x-2 xs:space-x-3 sm:space-x-4 w-full">
+            <div className="w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white text-sm xs:text-base sm:text-lg font-bold overflow-hidden flex-shrink-0">
               {employee?.avatarImage ? (
                 <img
                   src={employee.avatarImage}
@@ -1237,25 +1237,24 @@ const Dashboard = ({
                 employee?.avatar || user?.first_name?.charAt(0) || "U"
               )}
             </div>
-            <div>
-              <div className="flex items-center space-x-3">
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Welcome back,{" "}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center space-x-1 xs:space-x-2 sm:space-x-3">
+                <h1 className="text-sm xs:text-base sm:text-xl md:text-2xl font-bold text-gray-900 truncate">
+                  Welcome,{" "}
                   {user?.first_name || user?.email?.split("@")[0] || "User"}! 👋
                 </h1>
                 <button
                   onClick={() => window.location.reload()}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 text-gray-500 hover:text-gray-700"
+                  className="p-1 xs:p-1.5 sm:p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 text-gray-500 hover:text-gray-700 text-xs xs:text-sm flex-shrink-0"
                   title="Refresh Dashboard"
                 >
                   🔄
                 </button>
               </div>
-              <p className="text-gray-600">
-                {username ? `@${username} • ` : ""}Here's your summary for
-                today.
+              <p className="text-[10px] xs:text-xs sm:text-sm md:text-base text-gray-600 truncate">
+                {username ? `@${username} • ` : ""}Here's your summary
               </p>
-              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+              <div className="flex flex-wrap items-center gap-1 xs:gap-2 sm:gap-3 mt-1 xs:mt-2 text-[9px] xs:text-xs sm:text-sm text-gray-500">
                 <div className="flex items-center space-x-1">
                   <span>🕒</span>
                   <span className="font-medium">
@@ -1303,11 +1302,11 @@ const Dashboard = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 xs:gap-4 sm:gap-5 md:gap-6 lg:gap-8">
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 sticky top-24 hover:shadow-xl transition-shadow duration-300">
+          <div className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border border-gray-100 lg:sticky lg:top-24 hover:shadow-xl transition-shadow duration-300">
             <div
-              className={`h-28 md:h-32 relative ${isEditMode ? 'cursor-pointer group' : 'cursor-default'}`}
+              className={`h-16 xs:h-20 sm:h-24 md:h-28 lg:h-32 relative ${isEditMode ? 'cursor-pointer group' : 'cursor-default'}`}
               onClick={handleBackgroundImageClick}
               style={{
                 background: backgroundImage
@@ -1348,7 +1347,7 @@ const Dashboard = ({
               {/* Removed the floating remove button in favor of Delete Photo inside the editor UI */}
               <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
                 <div className="relative">
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white text-2xl md:text-3xl font-bold shadow-xl ring-4 ring-white overflow-hidden">
+                  <div className="w-12 h-12 xs:w-16 xs:h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white text-base xs:text-xl sm:text-2xl md:text-3xl font-bold shadow-xl ring-2 xs:ring-3 sm:ring-4 ring-white overflow-hidden">
                     {employee?.avatarImage ? (
                       <img
                         src={employee.avatarImage}
@@ -1359,21 +1358,21 @@ const Dashboard = ({
                       employee?.avatar
                     )}
                   </div>
-                  <div className="absolute bottom-0 right-0 w-6 h-6 md:w-8 md:h-8 bg-green-300 rounded-full border-4 border-white flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 bg-green-300 rounded-full border-2 xs:border-2 sm:border-3 md:border-4 border-white flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 text-white" />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="pt-14 md:pt-16 px-4 md:px-6 pb-6">
-              <div className="text-center mb-6">
+            <div className="pt-8 xs:pt-10 sm:pt-12 md:pt-14 lg:pt-16 px-2 xs:px-3 sm:px-4 md:px-5 lg:px-6 pb-3 xs:pb-4 sm:pb-5 md:pb-6">
+              <div className="text-center mb-3 xs:mb-4 sm:mb-5 md:mb-6">
                 {!isEditingProfile ? (
                   <>
-                    <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-1">
+                    <h2 className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-800 mb-1 px-1 xs:px-2 break-words">
                       {employee?.name}
                     </h2>
-                    <p className="text-blue-400 font-semibold text-sm md:text-base mb-3">
+                    <p className="text-blue-400 font-semibold text-[10px] xs:text-xs sm:text-sm md:text-base mb-2 xs:mb-3 px-1 xs:px-2 break-words">
                       {employee?.role}
                     </p>
                   </>
@@ -1402,30 +1401,30 @@ const Dashboard = ({
 
                 <button
                   onClick={handleAvailabilityChange}
-                  className="inline-flex items-center space-x-2 bg-gradient-to-r from-cyan-300 to-blue-300 text-white px-3 md:px-4 py-1.5 rounded-full text-xs md:text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
+                  className="inline-flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 bg-gradient-to-r from-cyan-300 to-blue-300 text-white px-2 xs:px-2.5 sm:px-3 md:px-4 py-1 xs:py-1.5 rounded-full text-[10px] xs:text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
                 >
-                  <Zap className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
-                  <span>{availabilityStatus}</span>
+                  <Zap className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0" />
+                  <span className="truncate max-w-[120px] xs:max-w-none">{availabilityStatus}</span>
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 md:gap-3 mb-6">
+              <div className="grid grid-cols-2 gap-1.5 xs:gap-2 sm:gap-3 mb-6">
                 {/* Removed Applications, Interviews, Offers, and Profile Views boxes as requested */}
               </div>
 
-              <div className="mb-6">
-                <h3 className="font-bold text-gray-800 mb-4 flex items-center text-sm md:text-base">
-                  <Target className="w-4 h-4 md:w-5 md:h-5 mr-2 text-blue-400 flex-shrink-0" />
+              <div className="mb-3 xs:mb-4 sm:mb-5 md:mb-6">
+                <h3 className="font-bold text-gray-800 mb-2 xs:mb-3 sm:mb-4 flex items-center text-[11px] xs:text-xs sm:text-sm md:text-base">
+                  <Target className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 xs:mr-1.5 sm:mr-2 text-blue-400 flex-shrink-0" />
                   Top Skills
                 </h3>
-                <div className="grid grid-cols-2 gap-2 md:gap-3">
+                <div className="grid grid-cols-2 gap-1 xs:gap-1.5 sm:gap-2 md:gap-3">
                   {employee?.skills && employee.skills.length > 0 ? (
                     employee.skills.map((skill) => (
                       <div
                         key={skill.id}
-                        className={`${skill.bgColor} ${skill.textColor} p-3 md:p-4 rounded-lg text-center hover:shadow-md transition-all duration-200 transform hover:scale-105 cursor-pointer border`}
+                        className={`${skill.bgColor} ${skill.textColor} p-1.5 xs:p-2 sm:p-2.5 md:p-3 lg:p-4 rounded-md xs:rounded-lg text-center hover:shadow-md transition-all duration-200 transform hover:scale-105 cursor-pointer border`}
                       >
-                        <div className="flex items-center justify-center mb-1">
+                        <div className="flex items-center justify-center mb-0.5 xs:mb-1">
                           {skill.icon === "react" && (
                             <Code className="w-5 h-5" />
                           )}
@@ -1445,10 +1444,10 @@ const Dashboard = ({
                             <Database className="w-5 h-5" />
                           )}
                         </div>
-                        <div className="text-xs font-semibold mb-1 truncate">
+                        <div className="text-[10px] xs:text-xs font-semibold mb-0.5 xs:mb-1 truncate">
                           {skill.name}
                         </div>
-                        <div className="text-[10px] uppercase tracking-wide opacity-80 truncate">
+                        <div className="text-[8px] xs:text-[9px] sm:text-[10px] uppercase tracking-wide opacity-80 truncate">
                           {skill.belt}
                         </div>
                       </div>
@@ -1468,9 +1467,9 @@ const Dashboard = ({
               {!isEditingProfile ? (
                 <button
                   onClick={handleEditProfile}
-                  className="w-full bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 text-white py-2.5 md:py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center space-x-2"
+                  className="w-full bg-gradient-to-r from-green-400 to-emerald-400 hover:from-green-500 hover:to-emerald-500 text-white py-2 xs:py-2.5 sm:py-3 rounded-lg xs:rounded-xl font-semibold text-xs xs:text-sm md:text-base transition-all duration-200 shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center space-x-1 xs:space-x-2"
                 >
-                  <Edit3 className="w-4 h-4" />
+                  <Edit3 className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
                   <span>Edit Profile</span>
                 </button>
               ) : (
@@ -1874,7 +1873,7 @@ const Dashboard = ({
 
         <div className="lg:col-span-2">
           {/* Overview Cards Section */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 xs:gap-4 mb-6 xs:mb-8">
             {[
               {
                 label: "Applications",
@@ -1907,7 +1906,7 @@ const Dashboard = ({
             ].map((card, idx) => (
               <div
                 key={card.label}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer group"
+                className="bg-white rounded-lg xs:rounded-xl shadow-sm border border-gray-100 p-4 xs:p-5 sm:p-6 hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer group"
                 onClick={() => {
                   if (card.label === "Notifications") {
                     // Show notifications panel
@@ -1947,22 +1946,22 @@ const Dashboard = ({
           </div>
 
           {/* Quick Actions Bar */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-lg xs:rounded-xl shadow-sm border border-gray-100 p-3 xs:p-4 sm:p-5 md:p-6 mb-4 xs:mb-5 sm:mb-6 md:mb-8">
+            <h3 className="text-base xs:text-lg font-semibold text-gray-900 mb-3 xs:mb-4">
               Quick Actions
             </h3>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-4">
               <button
                 onClick={() => navigateToTab("My Applications")}
-                className="flex flex-col items-center p-4 text-center hover:bg-blue-50 rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md"
+                className="flex flex-col items-center p-2 xs:p-3 sm:p-4 text-center hover:bg-blue-50 rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md"
               >
-                <div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 group-hover:scale-110 transition-all duration-200 mb-2">
-                  <Briefcase className="w-5 h-5 text-blue-600 group-hover:animate-bounce" />
+                <div className="p-2 xs:p-2.5 sm:p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 group-hover:scale-110 transition-all duration-200 mb-1.5 xs:mb-2">
+                  <Briefcase className="w-4 h-4 xs:w-5 xs:h-5 text-blue-600 group-hover:animate-bounce" />
                 </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors duration-200">
+                <span className="text-xs xs:text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors duration-200">
                   View Applications
                 </span>
-                <span className="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <span className="text-[10px] xs:text-xs text-gray-500 mt-0.5 xs:mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   {stats.applications} active
                 </span>
               </button>
@@ -1975,10 +1974,10 @@ const Dashboard = ({
                     handleEditProfile();
                   }
                 }}
-                className="flex flex-col items-center p-4 text-center hover:bg-green-50 rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md relative"
+                className="flex flex-col items-center p-2 xs:p-3 sm:p-4 text-center hover:bg-green-50 rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md relative"
               >
-                <div className="p-3 bg-green-100 rounded-full group-hover:bg-green-200 group-hover:scale-110 transition-all duration-200 mb-2">
-                  <User className="w-5 h-5 text-green-600 group-hover:animate-pulse" />
+                <div className="p-2 xs:p-2.5 sm:p-3 bg-green-100 rounded-full group-hover:bg-green-200 group-hover:scale-110 transition-all duration-200 mb-1.5 xs:mb-2">
+                  <User className="w-4 h-4 xs:w-5 xs:h-5 text-green-600 group-hover:animate-pulse" />
                 </div>
                 <span className="text-sm font-medium text-gray-700 group-hover:text-green-600 transition-colors duration-200">
                   {profileCompletion < 100
@@ -2001,61 +2000,60 @@ const Dashboard = ({
 
               <button
                 onClick={() => navigateToTab("Resume Builder")}
-                className="flex flex-col items-center p-4 text-center hover:bg-purple-50 rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md"
+                className="flex flex-col items-center p-1.5 xs:p-2 sm:p-3 md:p-4 text-center hover:bg-purple-50 rounded-md xs:rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md"
               >
-                <div className="p-3 bg-purple-100 rounded-full group-hover:bg-purple-200 group-hover:scale-110 transition-all duration-200 mb-2">
-                  <TrendingUp className="w-5 h-5 text-purple-600 group-hover:animate-bounce" />
+                <div className="p-1.5 xs:p-2 sm:p-2.5 md:p-3 bg-purple-100 rounded-full group-hover:bg-purple-200 group-hover:scale-110 transition-all duration-200 mb-1 xs:mb-1.5 sm:mb-2">
+                  <TrendingUp className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-purple-600 group-hover:animate-bounce" />
                 </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-purple-600 transition-colors duration-200">
-                  Resume Builder
+                <span className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-700 group-hover:text-purple-600 transition-colors duration-200 text-center leading-tight">
+                  Resume
                 </span>
-                <span className="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  Create new resume
+                <span className="text-[8px] xs:text-[9px] sm:text-xs text-gray-500 mt-0.5 xs:mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden xs:block">
+                  Build resume
                 </span>
               </button>
 
               <button
                 onClick={() => navigateToTab("Skill Enhancement")}
-                className="flex flex-col items-center p-4 text-center hover:bg-orange-50 rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md"
+                className="flex flex-col items-center p-1.5 xs:p-2 sm:p-3 md:p-4 text-center hover:bg-orange-50 rounded-md xs:rounded-lg transition-all duration-300 group hover:scale-105 hover:shadow-md"
               >
-                <div className="p-3 bg-orange-100 rounded-full group-hover:bg-orange-200 group-hover:scale-110 transition-all duration-200 mb-2">
-                  <Zap className="w-5 h-5 text-orange-600 group-hover:animate-pulse" />
+                <div className="p-1.5 xs:p-2 sm:p-2.5 md:p-3 bg-orange-100 rounded-full group-hover:bg-orange-200 group-hover:scale-110 transition-all duration-200 mb-1 xs:mb-1.5 sm:mb-2">
+                  <Zap className="w-3.5 h-3.5 xs:w-4 xs:h-4 sm:w-5 sm:h-5 text-orange-600 group-hover:animate-pulse" />
                 </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors duration-200">
-                  Skill Enhancement
+                <span className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-700 group-hover:text-orange-600 transition-colors duration-200 text-center leading-tight">
+                  Skills
                 </span>
-                <span className="text-xs text-gray-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  Level up skills
+                <span className="text-[8px] xs:text-[9px] sm:text-xs text-gray-500 mt-0.5 xs:mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden xs:block">
+                  Level up
                 </span>
               </button>
             </div>
           </div>
 
           <div
-            className="bg-white rounded-2xl shadow-lg p-12 mb-24 border border-gray-100"
-            style={{ padding: "62px" }}
+            className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg p-3 xs:p-4 sm:p-6 md:p-8 lg:p-12 mb-6 xs:mb-8 sm:mb-12 md:mb-16 lg:mb-24 border border-gray-100"
           >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <Bell className="w-7 h-7 text-blue-500" />
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between mb-3 xs:mb-4 sm:mb-5 md:mb-6 gap-2 xs:gap-3 sm:gap-4">
+              <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
+                <Bell className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-blue-500" />
+                <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
                   Announcements
                 </h2>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-1 xs:gap-1.5 sm:gap-2">
                 <button
                   onClick={clearAllDismissed}
-                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition"
+                  className="px-1.5 xs:px-2 sm:px-2.5 md:px-3 py-1 xs:py-1.5 sm:py-2 bg-gray-100 text-gray-700 rounded-md xs:rounded-lg text-[9px] xs:text-[10px] sm:text-xs md:text-sm font-medium hover:bg-gray-200 transition"
                   title="Restore all dismissed notifications"
                 >
-                  Restore All
+                  Restore
                 </button>
-                <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-semibold hover:bg-blue-200 transition">
+                <button className="px-2 xs:px-2.5 sm:px-3 md:px-4 py-1 xs:py-1.5 sm:py-2 bg-blue-100 text-blue-700 rounded-md xs:rounded-lg text-[9px] xs:text-[10px] sm:text-xs md:text-sm font-semibold hover:bg-blue-200 transition">
                   View All
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 xs:gap-3 sm:gap-4 md:gap-5 lg:gap-6">
               {notificationsLoading ? (
                 <div className="col-span-full text-center text-gray-500 py-8">
                   <div className="flex items-center justify-center gap-2">
@@ -2071,7 +2069,7 @@ const Dashboard = ({
                 announcements.map((announcement) => (
                   <div
                     key={announcement.id}
-                    className="bg-gradient-to-br from-blue-50 via-white to-cyan-50 border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col gap-2"
+                    className="bg-gradient-to-br from-blue-50 via-white to-cyan-50 border border-gray-200 rounded-md xs:rounded-lg sm:rounded-xl p-2 xs:p-3 sm:p-4 md:p-5 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col gap-1 xs:gap-1.5 sm:gap-2"
                     onClick={() => handleAnnouncementNavigation(announcement)}
                     onKeyDown={(e) =>
                       handleAnnouncementKeyDown(e, announcement)
@@ -2079,25 +2077,25 @@ const Dashboard = ({
                     role="button"
                     tabIndex={0}
                   >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold text-lg">
+                    <div className="flex items-center gap-2 xs:gap-2.5 sm:gap-3 mb-1 xs:mb-1.5 sm:mb-2">
+                      <div className="w-7 h-7 xs:w-8 xs:h-8 sm:w-10 sm:h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold text-xs xs:text-sm sm:text-base md:text-lg flex-shrink-0">
                         {announcement.avatar}
                       </div>
-                      <div className="flex-1">
-                        <span className="font-semibold text-gray-800 text-sm">
+                      <div className="flex-1 min-w-0">
+                        <span className="font-semibold text-gray-800 text-[10px] xs:text-xs sm:text-sm block truncate">
                           {announcement.user}
                         </span>
-                        <span className="ml-2 text-xs text-gray-400">
+                        <span className="text-[8px] xs:text-[9px] sm:text-xs text-gray-400 block">
                           {formatTimeAgo(announcement.time)}
                         </span>
                       </div>
                       <button
                         onClick={(e) => dismissNotification(announcement.id, e)}
-                        className="p-1 hover:bg-red-100 rounded-full transition-colors duration-200 group"
+                        className="p-0.5 xs:p-1 hover:bg-red-100 rounded-full transition-colors duration-200 group flex-shrink-0"
                         title="Dismiss notification"
                       >
                         <svg
-                          className="w-4 h-4 text-gray-400 group-hover:text-red-600 transition-colors duration-200"
+                          className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4 text-gray-400 group-hover:text-red-600 transition-colors duration-200"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -2111,7 +2109,7 @@ const Dashboard = ({
                         </svg>
                       </button>
                     </div>
-                    <div className="text-gray-700 text-sm mb-2">
+                    <div className="text-gray-700 text-[10px] xs:text-xs sm:text-sm mb-1 xs:mb-1.5 sm:mb-2 line-clamp-3">
                       {announcement.message}
                     </div>
                     <div className="flex items-center gap-2 mt-auto">
@@ -2138,81 +2136,81 @@ const Dashboard = ({
         </div>
       </div>
 
-      <div className="mt-8 md:mt-10">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 flex items-center">
-            <Briefcase className="w-8 h-8 md:w-9 md:h-9 mr-3 text-blue-400 flex-shrink-0" />
+      <div className="mt-6 xs:mt-8 md:mt-10">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 xs:mb-5 sm:mb-6 md:mb-8 gap-2 xs:gap-3 sm:gap-4">
+          <h2 className="text-xl xs:text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 flex items-center">
+            <Briefcase className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 mr-2 xs:mr-2.5 sm:mr-3 text-blue-400 flex-shrink-0" />
             <span>Job Tracks</span>
           </h2>
-          <div className="flex gap-3 flex-wrap mt-2">
+          <div className="flex gap-1.5 xs:gap-2 sm:gap-3 flex-wrap">
             <button
               onClick={() => handleViewAll("all")}
-              className="px-5 py-2 bg-gradient-to-r from-blue-400 to-cyan-400 text-white rounded-xl font-semibold text-sm hover:from-blue-500 hover:to-cyan-500 transition"
+              className="px-2.5 xs:px-3 sm:px-4 md:px-5 py-1.5 xs:py-2 bg-gradient-to-r from-blue-400 to-cyan-400 text-white rounded-lg xs:rounded-xl font-semibold text-[10px] xs:text-xs sm:text-sm hover:from-blue-500 hover:to-cyan-500 transition"
             >
-              View All Jobs
+              All Jobs
             </button>
             <button
               onClick={() => handleViewAll("applied")}
-              className="px-5 py-2 bg-blue-100 text-blue-700 rounded-xl font-semibold text-sm hover:bg-blue-200 transition"
+              className="px-2.5 xs:px-3 sm:px-4 md:px-5 py-1.5 xs:py-2 bg-blue-100 text-blue-700 rounded-lg xs:rounded-xl font-semibold text-[10px] xs:text-xs sm:text-sm hover:bg-blue-200 transition"
             >
-              Applied Jobs
+              Applied
             </button>
             <button
               onClick={() => handleViewAll("location")}
-              className="px-5 py-2 bg-cyan-100 text-cyan-700 rounded-xl font-semibold text-sm hover:bg-cyan-200 transition"
+              className="px-2.5 xs:px-3 sm:px-4 md:px-5 py-1.5 xs:py-2 bg-cyan-100 text-cyan-700 rounded-lg xs:rounded-xl font-semibold text-[10px] xs:text-xs sm:text-sm hover:bg-cyan-200 transition"
             >
-              Location Based
+              Location
             </button>
             <button
               onClick={() => handleViewAll("preferences")}
-              className="px-5 py-2 bg-sky-100 text-sky-700 rounded-xl font-semibold text-sm hover:bg-sky-200 transition"
+              className="px-2.5 xs:px-3 sm:px-4 md:px-5 py-1.5 xs:py-2 bg-sky-100 text-sky-700 rounded-lg xs:rounded-xl font-semibold text-[10px] xs:text-xs sm:text-sm hover:bg-sky-200 transition"
             >
-              Job Preferences
+              Preferences
             </button>
           </div>
         </div>
 
         <div
-          className={`grid gap-6 md:gap-8 ${
+          className={`grid gap-2 xs:gap-3 sm:gap-4 md:gap-5 lg:gap-6 xl:gap-8 ${
             expandedJobSection === "applied" || expandedJobSection === "all"
               ? "grid-cols-1"
-              : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
           }`}
         >
           {/* Applied Jobs */}
           <div
-            className={`bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 ${
+            className={`bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 ${
               expandedJobSection === "applied" || expandedJobSection === "all"
                 ? "col-span-full"
                 : "transform hover:-translate-y-1"
             }`}
           >
-            <div className="bg-gradient-to-br from-blue-300 to-cyan-400 text-white p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <h3 className="text-xl font-bold mb-1">Applied Jobs</h3>
-                  <p className="text-blue-100 text-sm opacity-90">
-                    Track your application progress
+            <div className="bg-gradient-to-br from-blue-300 to-cyan-400 text-white p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6">
+              <div className="flex items-center justify-between mb-1 xs:mb-1.5 sm:mb-2">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold mb-0.5 xs:mb-1">Applied Jobs</h3>
+                  <p className="text-blue-100 text-[10px] xs:text-xs sm:text-sm opacity-90">
+                    Track your progress
                   </p>
                 </div>
-                <div className="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold">
+                <div className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-lg rounded-lg xs:rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg xs:text-xl sm:text-2xl font-bold">
                     {appliedJobs.length}
                   </span>
                 </div>
               </div>
-              <div className="flex items-center text-blue-100 text-sm">
-                <TrendingUp className="w-4 h-4 mr-1" />
-                <span>{stats.interviews} interviews scheduled</span>
+              <div className="flex items-center text-blue-100 text-[9px] xs:text-[10px] sm:text-xs md:text-sm">
+                <TrendingUp className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 mr-1 flex-shrink-0" />
+                <span>{stats.interviews} interviews</span>
               </div>
             </div>
 
-            <div className="p-4 space-y-4">
+            <div className="p-2 xs:p-3 sm:p-4 space-y-2 xs:space-y-3">
               {appliedJobs.map((job) => (
                 <div
                   key={job.id}
                   onClick={() => router.push(`/employee/jobs/${job.id}`)}
-                  className="group p-4 rounded-xl bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                  className="group p-2 xs:p-2.5 sm:p-3 md:p-4 rounded-md xs:rounded-lg sm:rounded-xl bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-200 cursor-pointer"
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
@@ -2222,31 +2220,31 @@ const Dashboard = ({
                     }
                   }}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-300 to-cyan-400 rounded-xl flex items-center justify-center text-white font-bold shadow-md text-sm flex-shrink-0">
+                  <div className="flex items-start justify-between mb-1.5 xs:mb-2 sm:mb-3">
+                    <div className="flex items-center space-x-1.5 xs:space-x-2 sm:space-x-2.5 md:space-x-3 flex-1 min-w-0">
+                      <div className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-blue-300 to-cyan-400 rounded-md xs:rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold shadow-md text-[10px] xs:text-xs sm:text-sm flex-shrink-0">
                         {job.logo}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-gray-800 group-hover:text-blue-500 transition-colors text-sm truncate">
+                        <h4 className="font-bold text-gray-800 group-hover:text-blue-500 transition-colors text-[11px] xs:text-xs sm:text-sm truncate">
                           {job.title}
                         </h4>
-                        <p className="text-xs text-gray-600 flex items-center mt-1 truncate">
-                          <Building2 className="w-3 h-3 mr-1 flex-shrink-0" />
+                        <p className="text-[9px] xs:text-[10px] sm:text-xs text-gray-600 flex items-center mt-0.5 xs:mt-1 truncate">
+                          <Building2 className="w-2.5 h-2.5 xs:w-3 xs:h-3 mr-0.5 xs:mr-1 flex-shrink-0" />
                           <span className="truncate">{job.company}</span>
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between text-xs text-gray-600 mb-2 font-medium">
-                      <span>Application Progress</span>
+                  <div className="mb-1.5 xs:mb-2 sm:mb-3">
+                    <div className="flex items-center justify-between text-[9px] xs:text-[10px] sm:text-xs text-gray-600 mb-1 xs:mb-1.5 font-medium">
+                      <span>Progress</span>
                       <span className="font-semibold text-gray-700">
                         {job.progress}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-1 xs:h-1.5 sm:h-2">
                       <div
                         className="h-full bg-gradient-to-r from-blue-300 to-cyan-400 rounded-full transition-all duration-300"
                         style={{ width: `${job.progress}%` }}
@@ -2254,9 +2252,9 @@ const Dashboard = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs mb-3 gap-2">
+                  <div className="flex items-center justify-between text-[9px] xs:text-[10px] sm:text-xs mb-2 xs:mb-2.5 sm:mb-3 gap-1.5 xs:gap-2">
                     <span
-                      className={`px-3 py-1.5 rounded-full font-semibold text-xs whitespace-nowrap ${
+                      className={`px-2 xs:px-2.5 sm:px-3 py-1 xs:py-1.5 rounded-full font-semibold text-[9px] xs:text-[10px] sm:text-xs whitespace-nowrap ${
                         job.statusColor === "cyan"
                           ? "bg-cyan-100 text-cyan-600 border border-cyan-200"
                           : job.statusColor === "blue"
@@ -2268,13 +2266,13 @@ const Dashboard = ({
                     >
                       {job.status}
                     </span>
-                    <span className="text-gray-700 font-semibold text-sm whitespace-nowrap">
+                    <span className="text-gray-700 font-semibold text-[10px] xs:text-xs sm:text-sm whitespace-nowrap">
                       {job.salary}
                     </span>
                   </div>
 
-                  <div className="flex items-center space-x-2 text-xs text-gray-600">
-                    <MapPin className="w-3 h-3 flex-shrink-0" />
+                  <div className="flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 text-[9px] xs:text-[10px] sm:text-xs text-gray-600">
+                    <MapPin className="w-2.5 h-2.5 xs:w-3 xs:h-3 flex-shrink-0" />
                     <span className="truncate">{job.location}</span>
                     <span className="flex-shrink-0">•</span>
                     <span className="truncate">{job.type}</span>
@@ -2283,53 +2281,53 @@ const Dashboard = ({
               ))}
             </div>
 
-            <div className="p-4 border-t border-gray-100">
+            <div className="p-2 xs:p-3 sm:p-4 border-t border-gray-100">
               <button
                 onClick={() => handleViewAll("applied")}
-                className="w-full flex items-center justify-center space-x-2 py-3 text-blue-500 hover:text-blue-600 font-semibold text-sm transition-colors duration-200 hover:bg-blue-50 rounded-xl"
+                className="w-full flex items-center justify-center space-x-1.5 xs:space-x-2 py-2 xs:py-2.5 sm:py-3 text-blue-500 hover:text-blue-600 font-semibold text-[10px] xs:text-xs sm:text-sm transition-colors duration-200 hover:bg-blue-50 rounded-lg xs:rounded-xl"
               >
-                <span>View All Applied Jobs</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>View All Applied</span>
+                <ArrowRight className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
           </div>
 
           {/* Location Based Jobs */}
           <div
-            className={`bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 ${
+            className={`bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 ${
               expandedJobSection === "location" || expandedJobSection === "all"
                 ? "col-span-full"
                 : "transform hover:-translate-y-1"
             }`}
           >
-            <div className="bg-gradient-to-br from-cyan-300 to-sky-400 text-white p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <h3 className="text-xl font-bold mb-1">
-                    Location Based Jobs
+            <div className="bg-gradient-to-br from-cyan-300 to-sky-400 text-white p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6">
+              <div className="flex items-center justify-between mb-1 xs:mb-1.5 sm:mb-2">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold mb-0.5 xs:mb-1">
+                    Location Jobs
                   </h3>
-                  <p className="text-cyan-100 text-sm opacity-90">
-                    Opportunities near you
+                  <p className="text-cyan-100 text-[10px] xs:text-xs sm:text-sm opacity-90">
+                    Near you
                   </p>
                 </div>
-                <div className="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold">
+                <div className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-lg rounded-lg xs:rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg xs:text-xl sm:text-2xl font-bold">
                     {locationJobs.length}
                   </span>
                 </div>
               </div>
-              <div className="flex items-center text-cyan-100 text-sm">
-                <MapPin className="w-4 h-4 mr-1" />
-                <span>Based in {employee?.location}</span>
+              <div className="flex items-center text-cyan-100 text-[9px] xs:text-[10px] sm:text-xs md:text-sm">
+                <MapPin className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 mr-1 flex-shrink-0" />
+                <span className="truncate">Based in {employee?.location}</span>
               </div>
             </div>
 
-            <div className="p-4 space-y-4">
+            <div className="p-2 xs:p-3 sm:p-4 space-y-2 xs:space-y-3 sm:space-y-4">
               {locationJobs.map((job) => (
                 <div
                   key={job.id}
                   onClick={() => router.push(`/employee/jobs/${job.id}`)}
-                  className="p-4 rounded-xl bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:border-cyan-300 hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                  className="p-2 xs:p-2.5 sm:p-3 md:p-4 rounded-md xs:rounded-lg sm:rounded-xl bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:border-cyan-300 hover:shadow-lg transition-all duration-200 cursor-pointer group"
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
@@ -2339,45 +2337,43 @@ const Dashboard = ({
                     }
                   }}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="w-12 h-12 bg-gradient-to-br from-cyan-300 to-sky-400 rounded-xl flex items-center justify-center text-white font-bold shadow-md text-sm flex-shrink-0">
+                  <div className="flex items-start justify-between mb-1.5 xs:mb-2 sm:mb-3">
+                    <div className="flex items-center space-x-1.5 xs:space-x-2 sm:space-x-2.5 md:space-x-3 flex-1 min-w-0">
+                      <div className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-300 to-sky-400 rounded-md xs:rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold shadow-md text-[10px] xs:text-xs sm:text-sm flex-shrink-0">
                         {job.logo}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-gray-800 group-hover:text-cyan-500 transition-colors text-sm truncate">
+                        <h4 className="font-bold text-gray-800 group-hover:text-cyan-500 transition-colors text-[11px] xs:text-xs sm:text-sm truncate">
                           {job.title}
                         </h4>
-                        <p className="text-xs text-gray-600 flex items-center mt-1 truncate">
-                          <Building2 className="w-3 h-3 mr-1 flex-shrink-0" />
+                        <p className="text-[9px] xs:text-[10px] sm:text-xs text-gray-600 flex items-center mt-0.5 xs:mt-1 truncate">
+                          <Building2 className="w-2.5 h-2.5 xs:w-3 xs:h-3 mr-0.5 xs:mr-1 flex-shrink-0" />
                           <span className="truncate">{job.company}</span>
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-1 bg-gradient-to-r from-cyan-400 to-sky-400 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
-                      <Star className="w-3 h-3 fill-current" />
+                    <div className="flex items-center space-x-0.5 xs:space-x-1 bg-gradient-to-r from-cyan-400 to-sky-400 text-white px-1.5 xs:px-2 sm:px-2.5 py-0.5 xs:py-1 rounded-full text-[9px] xs:text-[10px] sm:text-xs font-bold shadow-md flex-shrink-0">
+                      <Star className="w-2.5 h-2.5 xs:w-3 xs:h-3 fill-current" />
                       <span>{job.matchScore}%</span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="w-3 h-3 flex-shrink-0" />
+                  <div className="flex items-center justify-between text-[9px] xs:text-[10px] sm:text-xs text-gray-600 mb-2 xs:mb-2.5 sm:mb-3 gap-1.5 xs:gap-2">
+                    <div className="flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 flex-1 min-w-0">
+                      <MapPin className="w-2.5 h-2.5 xs:w-3 xs:h-3 flex-shrink-0" />
                       <span className="truncate">{job.location}</span>
                     </div>
-                    <div className="flex items-center space-x-2 text-xs">
-                      <span className="text-gray-700 font-semibold whitespace-nowrap">
-                        {job.salary}
-                      </span>
-                    </div>
+                    <span className="text-gray-700 font-semibold whitespace-nowrap text-[10px] xs:text-xs sm:text-sm">
+                      {job.salary}
+                    </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-gray-600">
-                    <div className="flex items-center space-x-2">
-                      <span className="bg-gray-100 px-2 py-1 rounded-lg whitespace-nowrap">
-                        {job.distance} km away
+                  <div className="flex items-center justify-between text-[9px] xs:text-[10px] sm:text-xs text-gray-600 gap-1.5 xs:gap-2">
+                    <div className="flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 flex-wrap gap-1">
+                      <span className="bg-gray-100 px-1.5 xs:px-2 py-0.5 xs:py-1 rounded-md xs:rounded-lg whitespace-nowrap">
+                        {job.distance} km
                       </span>
-                      <span className="bg-gray-100 px-2 py-1 rounded-lg whitespace-nowrap">
+                      <span className="bg-gray-100 px-1.5 xs:px-2 py-0.5 xs:py-1 rounded-md xs:rounded-lg whitespace-nowrap">
                         {job.commute}
                       </span>
                     </div>
@@ -2389,52 +2385,52 @@ const Dashboard = ({
               ))}
             </div>
 
-            <div className="p-4 border-t border-gray-100">
+            <div className="p-2 xs:p-3 sm:p-4 border-t border-gray-100">
               <button
                 onClick={() => handleViewAll("location")}
-                className="w-full flex items-center justify-center space-x-2 py-3 text-cyan-500 hover:text-cyan-600 font-semibold text-sm transition-colors duration-200 hover:bg-cyan-50 rounded-xl"
+                className="w-full flex items-center justify-center space-x-1.5 xs:space-x-2 py-2 xs:py-2.5 sm:py-3 text-cyan-500 hover:text-cyan-600 font-semibold text-[10px] xs:text-xs sm:text-sm transition-colors duration-200 hover:bg-cyan-50 rounded-lg xs:rounded-xl"
               >
-                <span>View All Location Jobs</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>View All Location</span>
+                <ArrowRight className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
           </div>
 
           {/* Job Preferences */}
           <div
-            className={`bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 ${
+            className={`bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 ${
               expandedJobSection === "preferences" ||
               expandedJobSection === "all"
                 ? "col-span-full"
                 : "transform hover:-translate-y-1"
             }`}
           >
-            <div className="bg-gradient-to-br from-sky-300 to-blue-400 text-white p-6">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <h3 className="text-xl font-bold mb-1">Job Preferences</h3>
-                  <p className="text-sky-100 text-sm opacity-90">
-                    Based on your profile
+            <div className="bg-gradient-to-br from-sky-300 to-blue-400 text-white p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6">
+              <div className="flex items-center justify-between mb-1 xs:mb-1.5 sm:mb-2">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold mb-0.5 xs:mb-1">Preferences</h3>
+                  <p className="text-sky-100 text-[10px] xs:text-xs sm:text-sm opacity-90">
+                    Based on profile
                   </p>
                 </div>
-                <div className="w-14 h-14 bg-white/20 backdrop-blur-lg rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-2xl font-bold">
+                <div className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-lg rounded-lg xs:rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-lg xs:text-xl sm:text-2xl font-bold">
                     {preferredJobs.length}
                   </span>
                 </div>
               </div>
-              <div className="flex items-center text-sky-100 text-sm">
-                <Target className="w-4 h-4 mr-1" />
-                <span>High match opportunities</span>
+              <div className="flex items-center text-sky-100 text-[9px] xs:text-[10px] sm:text-xs md:text-sm">
+                <Target className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 mr-1 flex-shrink-0" />
+                <span>High match</span>
               </div>
             </div>
 
-            <div className="p-4 space-y-4">
+            <div className="p-2 xs:p-3 sm:p-4 space-y-2 xs:space-y-3 sm:space-y-4">
               {preferredJobs.map((job) => (
                 <div
                   key={job.id}
                   onClick={() => router.push(`/employee/jobs/${job.id}`)}
-                  className="p-4 rounded-xl bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:border-sky-300 hover:shadow-lg transition-all duration-200 cursor-pointer group"
+                  className="p-2 xs:p-2.5 sm:p-3 md:p-4 rounded-md xs:rounded-lg sm:rounded-xl bg-gradient-to-br from-white to-gray-50 border border-gray-200 hover:border-sky-300 hover:shadow-lg transition-all duration-200 cursor-pointer group"
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
@@ -2444,65 +2440,61 @@ const Dashboard = ({
                     }
                   }}
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center space-x-3 flex-1 min-w-0">
-                      <div className="w-12 h-12 bg-gradient-to-br from-sky-300 to-blue-400 rounded-xl flex items-center justify-center text-white font-bold shadow-md text-sm flex-shrink-0">
+                  <div className="flex items-start justify-between mb-1.5 xs:mb-2 sm:mb-3">
+                    <div className="flex items-center space-x-1.5 xs:space-x-2 sm:space-x-2.5 md:space-x-3 flex-1 min-w-0">
+                      <div className="w-8 h-8 xs:w-9 xs:h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-sky-300 to-blue-400 rounded-md xs:rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold shadow-md text-[10px] xs:text-xs sm:text-sm flex-shrink-0">
                         {job.logo}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="font-bold text-gray-800 group-hover:text-sky-500 transition-colors text-sm truncate">
+                        <h4 className="font-bold text-gray-800 group-hover:text-sky-500 transition-colors text-[11px] xs:text-xs sm:text-sm truncate">
                           {job.title}
                         </h4>
-                        <p className="text-xs text-gray-600 flex items-center mt-1 truncate">
-                          <Building2 className="w-3 h-3 mr-1 flex-shrink-0" />
+                        <p className="text-[9px] xs:text-[10px] sm:text-xs text-gray-600 flex items-center mt-0.5 xs:mt-1 truncate">
+                          <Building2 className="w-2.5 h-2.5 xs:w-3 xs:h-3 mr-0.5 xs:mr-1 flex-shrink-0" />
                           <span className="truncate">{job.company}</span>
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-1 bg-gradient-to-r from-sky-400 to-blue-400 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-md">
-                      <Star className="w-3 h-3 fill-current" />
+                    <div className="flex items-center space-x-0.5 xs:space-x-1 bg-gradient-to-r from-sky-400 to-blue-400 text-white px-1.5 xs:px-2 sm:px-2.5 py-0.5 xs:py-1 rounded-full text-[9px] xs:text-[10px] sm:text-xs font-bold shadow-md flex-shrink-0">
+                      <Star className="w-2.5 h-2.5 xs:w-3 xs:h-3 fill-current" />
                       <span>{job.matchScore}%</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-1 mb-3">
+                  <div className="flex flex-wrap gap-0.5 xs:gap-1 mb-1.5 xs:mb-2 sm:mb-3">
                     {job.skills.slice(0, 3).map((skill, index) => (
                       <span
                         key={`${job.id}-skill-${skill}`}
-                        className="px-2 py-1 bg-sky-50 text-sky-600 text-xs rounded-lg border border-sky-100 font-medium"
+                        className="px-1.5 xs:px-2 py-0.5 xs:py-1 bg-sky-50 text-sky-600 text-[9px] xs:text-[10px] sm:text-xs rounded-md xs:rounded-lg border border-sky-100 font-medium"
                       >
                         {skill}
                       </span>
                     ))}
                     {job.skills.length > 3 && (
-                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-lg font-medium">
-                        +{job.skills.length - 3} more
+                      <span className="px-1.5 xs:px-2 py-0.5 xs:py-1 bg-gray-100 text-gray-600 text-[9px] xs:text-[10px] sm:text-xs rounded-md xs:rounded-lg font-medium">
+                        +{job.skills.length - 3}
                       </span>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-gray-600 mb-3">
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="w-3 h-3 flex-shrink-0" />
+                  <div className="flex items-center justify-between text-[9px] xs:text-[10px] sm:text-xs text-gray-600 mb-1.5 xs:mb-2 sm:mb-3 gap-1.5 xs:gap-2">
+                    <div className="flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 flex-1 min-w-0">
+                      <MapPin className="w-2.5 h-2.5 xs:w-3 xs:h-3 flex-shrink-0" />
                       <span className="truncate">{job.location}</span>
                     </div>
-                    <div className="flex items-center space-x-2 text-xs">
-                      <span className="text-gray-700 font-semibold whitespace-nowrap">
-                        {job.salary}
-                      </span>
-                    </div>
+                    <span className="text-gray-700 font-semibold whitespace-nowrap text-[10px] xs:text-xs sm:text-sm">
+                      {job.salary}
+                    </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-gray-600">
-                    <div className="flex items-center space-x-1">
+                  <div className="flex items-center justify-between text-[9px] xs:text-[10px] sm:text-xs text-gray-600 gap-1.5 xs:gap-2">
+                    <span className="text-gray-700 font-semibold whitespace-nowrap">
+                      {job.type}
+                    </span>
+                    <div className="flex items-center space-x-0.5 xs:space-x-1">
+                      <Eye className="w-2.5 h-2.5 xs:w-3 xs:h-3 flex-shrink-0" />
                       <span className="text-gray-700 font-semibold whitespace-nowrap">
-                        {job.type}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Eye className="w-3 h-3 flex-shrink-0" />
-                      <span className="text-gray-700 font-semibold whitespace-nowrap">
-                        {job.applicants} applicants
+                        {job.applicants}
                       </span>
                     </div>
                   </div>
@@ -2510,13 +2502,13 @@ const Dashboard = ({
               ))}
             </div>
 
-            <div className="p-4 border-t border-gray-100">
+            <div className="p-2 xs:p-3 sm:p-4 border-t border-gray-100">
               <button
                 onClick={() => handleViewAll("preferences")}
-                className="w-full flex items-center justify-center space-x-2 py-3 text-sky-500 hover:text-sky-600 font-semibold text-sm transition-colors duration-200 hover:bg-sky-50 rounded-xl"
+                className="w-full flex items-center justify-center space-x-1.5 xs:space-x-2 py-2 xs:py-2.5 sm:py-3 text-sky-500 hover:text-sky-600 font-semibold text-[10px] xs:text-xs sm:text-sm transition-colors duration-200 hover:bg-sky-50 rounded-lg xs:rounded-xl"
               >
-                <span>View All Preferred Jobs</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>View All Preferred</span>
+                <ArrowRight className="w-3 h-3 xs:w-3.5 xs:h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
           </div>

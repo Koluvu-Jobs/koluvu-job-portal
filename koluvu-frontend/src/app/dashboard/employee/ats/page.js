@@ -282,15 +282,15 @@ const ATSScoreSystem = () => {
 
     return (
       <div className="w-full max-w-full md:max-w-6xl relative">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-orange-50/40 via-white to-green-50/40 rounded-2xl" />
-        <div className="rounded-2xl border border-orange-100/60 shadow-sm bg-white/80 backdrop-blur-sm p-8 md:p-10">
-          <h2 className="font-bold mb-8">
-            <span className="inline-block text-[30px] md:text-[40px] font-semibold tracking-tight bg-gradient-to-r from-[#f6a21e] via-[#e55b13] to-[#104210] bg-clip-text text-transparent drop-shadow-sm">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-orange-50/40 via-white to-green-50/40 rounded-xl xs:rounded-2xl" />
+        <div className="rounded-lg xs:rounded-xl sm:rounded-2xl border border-orange-100/60 shadow-sm bg-white/80 backdrop-blur-sm p-2 xs:p-3 sm:p-4 md:p-6 lg:p-8 xl:p-10">
+          <h2 className="font-bold mb-3 xs:mb-4 sm:mb-5 md:mb-6 lg:mb-8">
+            <span className="inline-block text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-semibold tracking-tight bg-gradient-to-r from-[#f6a21e] via-[#e55b13] to-[#104210] bg-clip-text text-transparent drop-shadow-sm">
               {greeting}! Explore the ATS
             </span>
           </h2>
 
-          <p className="text-gray-600 max-w-2xl leading-relaxed mb-6 text-sm md:text-base">
+          <p className="text-gray-600 max-w-2xl leading-relaxed mb-3 xs:mb-4 sm:mb-5 md:mb-6 text-[10px] xs:text-xs sm:text-sm md:text-base">
             Understand how the Applicant Tracking System evaluates your profile.
             Swipe / use arrows to explore each part of the scoring process.
           </p>
@@ -299,26 +299,26 @@ const ATSScoreSystem = () => {
           <div className="relative">
             {/* Removed manual arrow buttons; carousel auto-advances */}
 
-            {/* Track */}
+            {/* Track - Vertical on Mobile, Horizontal on Desktop */}
             <div
               ref={trackRef}
               onScroll={handleScroll}
-              className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 px-6 md:px-12 -mx-2 hide-scrollbar"
+              className="flex flex-col md:flex-row gap-2 xs:gap-2.5 sm:gap-3 md:gap-4 lg:gap-5 xl:gap-6 md:overflow-x-auto scroll-smooth md:snap-x snap-mandatory pb-2 px-1 xs:px-2 sm:px-3 md:px-4 lg:px-6 xl:px-12 -mx-1 xs:-mx-2 hide-scrollbar"
               style={{ scrollBehavior: "smooth" }}
             >
               {featureCards.map((card, i) => (
                 <div
                   key={card.title}
-                  className={`snap-center shrink-0 w-[300px] md:w-[340px] rounded-2xl p-5 bg-gradient-to-br ${
+                  className={`snap-center md:shrink-0 w-full md:w-[240px] lg:w-[280px] xl:w-[320px] rounded-lg xs:rounded-xl sm:rounded-2xl p-3 xs:p-4 sm:p-5 md:p-4 lg:p-5 bg-gradient-to-br ${
                     card.color
                   } text-white relative shadow-sm ring-1 ring-black/5 transition transform duration-300 ${
                     activeIndex === i
-                      ? "scale-[1.03]"
-                      : "scale-[0.97] opacity-90"
+                      ? "md:scale-[1.03]"
+                      : "md:scale-[0.97] md:opacity-90"
                   }`}
                 >
-                  <div className="absolute inset-0 rounded-2xl bg-white/10 mix-blend-overlay pointer-events-none" />
-                  <h3 className="font-semibold text-lg mb-2 tracking-tight">
+                  <div className="absolute inset-0 rounded-lg xs:rounded-xl sm:rounded-2xl bg-white/10 mix-blend-overlay pointer-events-none" />
+                  <h3 className="font-semibold text-sm xs:text-base sm:text-lg md:text-base lg:text-lg mb-1.5 xs:mb-2 sm:mb-2.5 tracking-tight">
                     {card.title.split(" ").map((word, idx) => (
                       <span
                         key={idx}
@@ -332,44 +332,43 @@ const ATSScoreSystem = () => {
                       </span>
                     ))}
                   </h3>
-                  <p className="text-sm leading-relaxed text-white/90">
+                  <p className="text-xs xs:text-sm sm:text-base md:text-xs lg:text-sm leading-relaxed text-white/90">
                     {card.description}
                   </p>
                 </div>
               ))}
             </div>
 
-            {/* Dots */}
-            <div className="flex items-center justify-center gap-2 mt-5">
+            {/* Dots - Only show on desktop */}
+            <div className="hidden md:flex items-center justify-center gap-1.5 xs:gap-2 mt-3 xs:mt-4 sm:mt-5">
               {featureCards.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => scrollTo(i)}
                   aria-label={`Go to slide ${i + 1}`}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                  className={`h-2 xs:h-2.5 rounded-full transition-all duration-300 ${
                     activeIndex === i
-                      ? "bg-[#104210] w-8"
-                      : "bg-gray-300 hover:bg-gray-400 w-2.5"
+                      ? "bg-[#104210] w-6 xs:w-8"
+                      : "bg-gray-300 hover:bg-gray-400 w-2 xs:w-2.5"
                   }`}
                 />
               ))}
             </div>
           </div>
 
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 items-center justify-center">
+          <div className="mt-4 xs:mt-5 sm:mt-6 md:mt-8 lg:mt-10 flex flex-col sm:flex-row gap-2 xs:gap-2.5 sm:gap-3 md:gap-4 items-center justify-center">
             <button
               onClick={() => {
                 setSelectedCandidate(candidates[0]);
                 updateView("applied");
               }}
-              className="group relative inline-flex items-center gap-2 bg-[#104210] hover:bg-[#0b320b] text-white font-medium py-2.5 px-8 rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#104210]/60"
-            >
-              <span className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-r from-[#104210] via-[#7a871e] to-[#f6a21e] opacity-0 group-hover:opacity-100 transition-opacity" />
+              className="group relative inline-flex items-center justify-center gap-1 xs:gap-1.5 sm:gap-2 bg-[#104210] hover:bg-[#0b320b] text-white font-medium py-1.5 xs:py-2 sm:py-2.5 px-4 xs:px-5 sm:px-6 md:px-8 rounded-lg xs:rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#104210]/60 text-xs xs:text-sm sm:text-base w-full sm:w-auto">
+              <span className="absolute inset-0 -z-10 rounded-lg xs:rounded-xl bg-gradient-to-r from-[#104210] via-[#7a871e] to-[#f6a21e] opacity-0 group-hover:opacity-100 transition-opacity" />
               Get My Score
             </button>
             <button
               onClick={() => scrollTo(featureCards.length - 1)}
-              className="px-6 py-2.5 rounded-xl bg-[#f6a21e] text-[#141414] font-semibold shadow-sm hover:bg-[#e59205] transition-colors"
+              className="px-4 xs:px-5 sm:px-6 py-1.5 xs:py-2 sm:py-2.5 rounded-lg xs:rounded-xl bg-[#f6a21e] text-[#141414] font-semibold shadow-sm hover:bg-[#e59205] transition-colors text-xs xs:text-sm sm:text-base w-full sm:w-auto"
             >
               Last Feature
             </button>
@@ -380,48 +379,48 @@ const ATSScoreSystem = () => {
   };
 
   const AppliedView = () => (
-    <div className="w-full max-w-5xl space-y-8">
+    <div className="w-full max-w-5xl mx-auto px-2 xs:px-3 sm:px-4 space-y-4 xs:space-y-5 sm:space-y-6 md:space-y-8">
       <div className="flex items-center justify-between">
         <button
           onClick={() => updateView("home")}
-          className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm text-gray-800"
+          className="px-3 xs:px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-xs xs:text-sm text-gray-800 font-medium"
         >
           ← Back
         </button>
       </div>
-      <div className="rounded-2xl border border-green-100/70 bg-white/80 backdrop-blur-sm p-6 md:p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4 tracking-tight">
+      <div className="rounded-xl xs:rounded-2xl border border-green-100/70 bg-white/80 backdrop-blur-sm p-3 xs:p-4 sm:p-5 md:p-6 lg:p-8 shadow-sm">
+        <h1 className="text-base xs:text-lg sm:text-xl md:text-2xl font-bold text-gray-800 mb-3 xs:mb-4 tracking-tight">
           Application Summary
         </h1>
-        <div className="rounded-xl border border-green-200/70 bg-gradient-to-r from-green-50 to-emerald-50 p-5">
-          <h2 className="text-xl font-semibold text-[#104210] flex flex-wrap items-center gap-2">
+        <div className="rounded-xl border border-green-200/70 bg-gradient-to-r from-green-50 to-emerald-50 p-3 xs:p-4 sm:p-5">
+          <h2 className="text-base xs:text-lg sm:text-xl font-semibold text-[#104210] flex flex-wrap items-center gap-2">
             {selectedCandidate.name} - {jobRequirements.title}
           </h2>
-          <p className="text-sm text-[#104210]/80">
+          <p className="text-xs xs:text-sm text-[#104210]/80 mt-1">
             Application submitted successfully!
           </p>
         </div>
       </div>
-      <div className="grid md:grid-cols-5 gap-6">
-        <div className="md:col-span-3 rounded-2xl border border-orange-100/70 bg-white p-5 shadow-sm">
-          <div className="flex items-center mb-4">
-            <CheckCircle className="w-5 h-5 text-[#104210] mr-2" />
-            <h3 className="text-lg font-semibold text-gray-800 tracking-tight">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 xs:gap-5 sm:gap-6">
+        <div className="md:col-span-3 rounded-xl xs:rounded-2xl border border-orange-100/70 bg-white p-3 xs:p-4 sm:p-5 shadow-sm">
+          <div className="flex items-center mb-3 xs:mb-4">
+            <CheckCircle className="w-4 h-4 xs:w-5 xs:h-5 text-[#104210] mr-2" />
+            <h3 className="text-sm xs:text-base sm:text-lg font-semibold text-gray-800 tracking-tight">
               Skills Match
             </h3>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2 xs:space-y-3">
             {getSkillMatch(
               selectedCandidate.skills,
               jobRequirements.skills
             ).map((item) => (
               <div
                 key={item.skill}
-                className="flex items-center justify-between text-sm"
+                className="flex items-center justify-between text-xs xs:text-sm"
               >
                 <span className="font-medium text-gray-700">{item.skill}</span>
                 <span
-                  className={`px-2 py-1 rounded-md text-xs font-medium tracking-wide ${
+                  className={`px-2 py-1 rounded-md text-[10px] xs:text-xs font-medium tracking-wide ${
                     item.matched
                       ? "bg-[#104210]/10 text-[#104210]"
                       : "bg-[#e55b13]/10 text-[#e55b13]"
@@ -433,56 +432,56 @@ const ATSScoreSystem = () => {
             ))}
           </div>
         </div>
-        <div className="md:col-span-2 rounded-2xl border border-lime-200/70 bg-white p-5 shadow-sm">
-          <div className="flex items-center mb-4">
-            <TrendingUp className="w-5 h-5 text-[#7a871e] mr-2" />
-            <h3 className="text-lg font-semibold text-gray-800 tracking-tight">
+        <div className="md:col-span-2 rounded-xl xs:rounded-2xl border border-lime-200/70 bg-white p-3 xs:p-4 sm:p-5 shadow-sm">
+          <div className="flex items-center mb-3 xs:mb-4">
+            <TrendingUp className="w-4 h-4 xs:w-5 xs:h-5 text-[#7a871e] mr-2" />
+            <h3 className="text-sm xs:text-base sm:text-lg font-semibold text-gray-800 tracking-tight">
               Quick Stats
             </h3>
           </div>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between text-sm">
+          <div className="space-y-3 xs:space-y-4">
+            <div className="flex items-center justify-between text-xs xs:text-sm">
               <div className="flex items-center">
-                <Clock className="w-4 h-4 text-gray-400 mr-2" />
+                <Clock className="w-3 h-3 xs:w-4 xs:h-4 text-gray-400 mr-2" />
                 <span className="text-gray-600">Experience</span>
               </div>
               <span className="font-semibold text-[#104210]">
                 {selectedCandidate.experience}
               </span>
             </div>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-xs xs:text-sm">
               <div className="flex items-center">
-                <MapPin className="w-4 h-4 text-gray-400 mr-2" />
+                <MapPin className="w-3 h-3 xs:w-4 xs:h-4 text-gray-400 mr-2" />
                 <span className="text-gray-600">Location</span>
               </div>
               <span className="font-semibold text-[#104210]">
                 {selectedCandidate.location}
               </span>
             </div>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-xs xs:text-sm">
               <div className="flex items-center">
-                <DollarSign className="w-4 h-4 text-gray-400 mr-2" />
+                <DollarSign className="w-3 h-3 xs:w-4 xs:h-4 text-gray-400 mr-2" />
                 <span className="text-gray-600">Present CTC</span>
               </div>
               <span className="font-medium text-gray-700">
                 {selectedCandidate.presentCTC}
               </span>
             </div>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-xs xs:text-sm">
               <div className="flex items-center">
-                <DollarSign className="w-4 h-4 text-gray-400 mr-2" />
+                <DollarSign className="w-3 h-3 xs:w-4 xs:h-4 text-gray-400 mr-2" />
                 <span className="text-gray-600">Expected CTC</span>
               </div>
               <span className="font-medium text-gray-700">
                 {selectedCandidate.expectedCTC}
               </span>
             </div>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-xs xs:text-sm">
               <div className="flex items-center">
-                <GraduationCap className="w-4 h-4 text-gray-400 mr-2" />
+                <GraduationCap className="w-3 h-3 xs:w-4 xs:h-4 text-gray-400 mr-2" />
                 <span className="text-gray-600">Education</span>
               </div>
-              <span className="font-semibold text-[#104210]">
+              <span className="font-semibold text-[#104210] text-right max-w-[60%]">
                 {selectedCandidate.education}
               </span>
             </div>
@@ -492,7 +491,7 @@ const ATSScoreSystem = () => {
       <div className="flex justify-center">
         <button
           onClick={() => updateView("ats-score")}
-          className="relative inline-flex items-center gap-2 bg-[#f6a21e] hover:bg-[#e59205] text-[#141414] font-semibold px-8 py-3 rounded-xl shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f6a21e]/60"
+          className="w-full sm:w-auto relative inline-flex items-center justify-center gap-2 bg-[#f6a21e] hover:bg-[#e59205] text-[#141414] font-semibold px-6 xs:px-8 py-2.5 xs:py-3 rounded-xl shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#f6a21e]/60 text-sm xs:text-base"
         >
           View Detailed ATS Score
         </button>
@@ -501,37 +500,37 @@ const ATSScoreSystem = () => {
   );
 
   const ATSScoreView = () => (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full max-w-7xl mx-auto px-2 xs:px-3 sm:px-4 md:px-6 lg:px-8">
       {/* Main ATS Content */}
-      <div className="space-y-6">
-        <div className="rounded-2xl border border-lime-200/70 bg-white/80 backdrop-blur-sm p-4 sm:p-6 md:p-8 shadow-lg">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4 tracking-tight">
+      <div className="space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6">
+        <div className="rounded-xl xs:rounded-2xl border border-lime-200/70 bg-white/80 backdrop-blur-sm p-3 xs:p-4 sm:p-5 md:p-6 lg:p-8 shadow-lg">
+          <h1 className="text-lg xs:text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-3 xs:mb-4 tracking-tight">
             ATS Score Analysis
           </h1>
-          <div className="rounded-xl border border-lime-200/60 bg-gradient-to-r from-lime-50 via-white to-orange-50 p-4 sm:p-6">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+          <div className="rounded-xl border border-lime-200/60 bg-gradient-to-r from-lime-50 via-white to-orange-50 p-3 xs:p-4 sm:p-5 md:p-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 xs:gap-4 sm:gap-6">
               <div className="w-full md:w-auto">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-[#104210]">
+                <h2 className="text-base xs:text-lg sm:text-xl md:text-2xl font-semibold text-[#104210]">
                   {selectedCandidate.name}
                 </h2>
-                <p className="text-xs sm:text-sm text-[#104210]/80 mt-1">
+                <p className="text-xs xs:text-sm text-[#104210]/80 mt-1">
                   {jobRequirements.title}
                 </p>
               </div>
-              <div className="text-center px-4 sm:px-6 py-3 sm:py-4 rounded-xl bg-white border border-lime-100 shadow-md w-full md:w-auto">
-                <div className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#104210] via-[#7a871e] to-[#f6a21e] bg-clip-text text-transparent">
+              <div className="text-center px-4 xs:px-5 sm:px-6 py-3 xs:py-3.5 sm:py-4 rounded-xl bg-white border border-lime-100 shadow-md w-full md:w-auto">
+                <div className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#104210] via-[#7a871e] to-[#f6a21e] bg-clip-text text-transparent">
                   {selectedCandidate.overallScore}%
                 </div>
-                <div className="text-xs sm:text-sm font-medium text-[#104210]/80 mt-1">
+                <div className="text-[10px] xs:text-xs sm:text-sm font-medium text-[#104210]/80 mt-1">
                   Overall Score
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          <div className="lg:col-span-1 xl:col-span-2 space-y-4 sm:space-y-6">
-            <div className="rounded-2xl border border-orange-100/70 bg-white p-4 sm:p-6 shadow-lg">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 xs:gap-4 sm:gap-5 md:gap-6 lg:gap-8">
+          <div className="lg:col-span-1 xl:col-span-2 space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6">
+            <div className="rounded-xl xs:rounded-2xl border border-orange-100/70 bg-white p-3 xs:p-4 sm:p-5 md:p-6 shadow-lg">
               <h3 className="text-base sm:text-lg font-semibold mb-4 sm:mb-5 flex items-center text-gray-800 tracking-tight">
                 <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-[#e55b13] mr-2" />
                 Criteria Breakdown
@@ -629,7 +628,7 @@ const ATSScoreSystem = () => {
             </div>
           </div>
           <div className="space-y-6">
-            <div className="rounded-2xl border border-red-100/70 bg-white p-6 shadow-sm">
+            <div className="rounded-xl xs:rounded-2xl border border-red-100/70 bg-white p-4 xs:p-5 sm:p-6 shadow-sm">
               <h3 className="text-lg font-semibold mb-4 flex items-center text-gray-800 tracking-tight">
                 <AlertCircle className="w-5 h-5 text-[#e55b13] mr-2" />
                 Skill Gaps
@@ -744,7 +743,7 @@ const ATSScoreSystem = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xs:gap-5 sm:gap-6 mb-6 xs:mb-7 sm:mb-8">
             {[
               {
                 name: "CodeTech Academy",
@@ -910,7 +909,7 @@ const ATSScoreSystem = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <main className="flex-1 overflow-auto p-4">
+      <main className="flex-1 overflow-auto p-2 xs:p-3 sm:p-4 md:p-6">
         <div className="flex-1 flex items-start justify-center w-full">
           {currentView === "home" && <HomeView />}
           {currentView === "applied" && selectedCandidate && <AppliedView />}

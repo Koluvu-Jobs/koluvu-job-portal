@@ -232,23 +232,23 @@ const InterviewFeedbackContent = () => {
 
   return (
     <div className="min-h-screen transition-colors duration-300 bg-gray-50">
-      <div className="p-4 lg:p-8">
-        <div className="mb-6 text-center md:text-left">
-          <h1 className="text-3xl font-bold text-gray-900">
+      <div className="p-2 xs:p-3 sm:p-4 md:p-6 lg:p-8">
+        <div className="mb-4 xs:mb-5 sm:mb-6 text-center md:text-left">
+          <h1 className="text-xl xs:text-2xl sm:text-3xl font-bold text-gray-900">
             Interview Feedback
           </h1>
-          <p className="text-sm text-gray-500 font-medium">
+          <p className="text-xs xs:text-sm text-gray-500 font-medium">
             Manage your interview feedback submissions
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 xs:gap-3 mb-6 xs:mb-7 sm:mb-8">
           {navItems.map((item) => (
             <button
               key={`nav-box-${item.id}`}
               onClick={() => setActiveSection(item.id)}
               className={`
-                    p-4 rounded-lg border flex flex-col items-center text-center transition-all duration-200 ease-in-out
+                    p-3 xs:p-4 rounded-lg border flex flex-col items-center text-center transition-all duration-200 ease-in-out
                     ${item.bgColor} ${item.textColor} ${item.borderColor}
                     ${
                       activeSection === item.id
@@ -257,26 +257,26 @@ const InterviewFeedbackContent = () => {
                     }
                   `}
             >
-              <item.icon className="w-5 h-5 mb-2" />
-              <span className="text-sm font-semibold">{item.label}</span>
+              <item.icon className="w-4 h-4 xs:w-5 xs:h-5 mb-1.5 xs:mb-2" />
+              <span className="text-xs xs:text-sm font-semibold">{item.label}</span>
             </button>
           ))}
         </div>
 
         {activeSection === "dashboard" && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">
+          <div className="space-y-4 xs:space-y-5 sm:space-y-6">
+            <h2 className="text-lg xs:text-xl sm:text-2xl font-bold text-gray-800">
               Interview Status Dashboard
             </h2>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-bold text-gray-800 mb-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 xs:p-4 sm:p-5 md:p-6">
+              <h3 className="text-base xs:text-lg font-bold text-gray-800 mb-3 xs:mb-4">
                 Have you attended an interview?
               </h3>
-              <div className="flex gap-4">
+              <div className="flex flex-col xs:flex-row gap-2 xs:gap-3 sm:gap-4">
                 <button
                   onClick={() => setHasAttendedInterview(true)}
-                  className={`px-6 py-3 rounded-lg font-bold transition-colors ${
+                  className={`px-4 xs:px-5 sm:px-6 py-2 xs:py-2.5 sm:py-3 rounded-lg font-bold transition-colors text-sm xs:text-base ${
                     hasAttendedInterview
                       ? "bg-green-500 text-white shadow-md"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"

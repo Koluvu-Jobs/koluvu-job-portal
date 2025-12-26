@@ -112,8 +112,40 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         # Check if email already exists
         email = data.get('email')
         if email and User.objects.filter(email=email).exists():
+            # Determine where the user is registered
+            existing_user = User.objects.get(email=email)
+            user_type = None
+            
+            # Check if user has employer profile
+            try:
+                if existing_user.employerprofile:
+                    user_type = "employer"
+            except:
+                pass
+            
+            # Check if user has employee profile
+            if not user_type:
+                try:
+                    if existing_user.employeeprofile:
+                        user_type = "employee"
+                except:
+                    pass
+            
+            # Check if user has partner profile
+            if not user_type:
+                try:
+                    if existing_user.partnerprofile:
+                        user_type = "partner"
+                except:
+                    pass
+            
+            if user_type:
+                error_msg = f'This email is already registered as an {user_type}. Please login to the {user_type} dashboard or use a different email.'
+            else:
+                error_msg = 'A user with this email already exists. Please login or use a different email.'
+            
             raise serializers.ValidationError({
-                'email': "A user with this email already exists"
+                'email': error_msg
             })
         
         return data

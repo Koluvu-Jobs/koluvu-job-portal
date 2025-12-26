@@ -551,19 +551,30 @@ export default function PostJobPage() {
       }));
 
       if (!res.ok) {
-        // Format detailed error message
+        // Format detailed error message with better structure
         let errorMessage =
           data.error || "Failed to post job. Please try again.";
 
         if (data.details && Object.keys(data.details).length > 0) {
           console.error("Validation errors:", data.details);
-          errorMessage += "\n\nValidation errors:\n";
+          const fieldErrorsList = [];
           Object.keys(data.details).forEach((field) => {
-            const fieldErrors = Array.isArray(data.details[field])
+            const fieldError = Array.isArray(data.details[field])
               ? data.details[field].join(", ")
               : data.details[field];
-            errorMessage += `${field}: ${fieldErrors}\n`;
+
+            // Make field names more readable
+            const readableFieldName = field
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase());
+
+            fieldErrorsList.push(`• ${readableFieldName}: ${fieldError}`);
           });
+
+          if (fieldErrorsList.length > 0) {
+            errorMessage +=
+              "\n\nValidation Errors:\n" + fieldErrorsList.join("\n");
+          }
         }
 
         setApiError(errorMessage);
@@ -1600,11 +1611,34 @@ export default function PostJobPage() {
                   </div>
 
                   {apiError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <h4 className="text-red-900 font-semibold mb-2">Error</h4>
-                      <pre className="text-red-800 text-sm whitespace-pre-wrap font-mono">
-                        {apiError}
-                      </pre>
+                    <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 shadow-sm">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                          <svg
+                            className="h-5 w-5 text-red-400"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <div className="ml-3 flex-1">
+                          <h4 className="text-red-900 font-semibold text-sm mb-2">
+                            Unable to Submit Job Posting
+                          </h4>
+                          <div className="text-red-800 text-sm whitespace-pre-wrap">
+                            {apiError}
+                          </div>
+                          <div className="mt-3 text-xs text-red-700">
+                            💡 Please review the errors above and correct them
+                            before submitting again.
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
 

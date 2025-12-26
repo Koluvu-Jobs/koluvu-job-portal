@@ -1,3 +1,4 @@
+// src/app/kolink/page.js
 import React from "react";
 
 export const metadata = {
@@ -8,10 +9,11 @@ export const metadata = {
 
 export default function KolinkPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4 sm:px-6 lg:px-8" style={{ paddingTop: 0 }}>
+      <style>{`body { padding-top: 0 !important; }`}</style>
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 pt-16">
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
             Kolink
           </h1>
@@ -57,6 +59,12 @@ export default function KolinkPage() {
                   "Connect with industry experts and like-minded professionals",
               },
               {
+                icon: "�‍🏫",
+                title: "Find Mentors",
+                description:
+                  "Connect with experienced mentors to guide your career",
+              },
+              {
                 icon: "💡",
                 title: "Share Insights",
                 description:
@@ -73,12 +81,6 @@ export default function KolinkPage() {
                 title: "Industry Updates",
                 description:
                   "Stay updated with the latest trends in your industry",
-              },
-              {
-                icon: "🏆",
-                title: "Showcase Achievements",
-                description:
-                  "Highlight your accomplishments and build your professional brand",
               },
               {
                 icon: "💼",

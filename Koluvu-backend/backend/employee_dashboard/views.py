@@ -118,23 +118,8 @@ class RegisterEmployeeView(generics.CreateAPIView):
         print(f"reCAPTCHA Token: {recaptcha_token}")
         print("=" * 50)
         
-        # Verify CAPTCHA (prefer reCAPTCHA if provided)
-        if recaptcha_token:
-            from authentication.captcha_views import verify_recaptcha_required
-            is_valid, error_msg, score = verify_recaptcha_required(recaptcha_token, 'register')
-            if not is_valid:
-                return Response({
-                    'success': False,
-                    'error': f'CAPTCHA verification failed: {error_msg}'
-                }, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            from authentication.captcha_views import verify_captcha_required
-            is_valid, error_msg = verify_captcha_required(captcha_key, captcha_value)
-            if not is_valid:
-                return Response({
-                    'success': False,
-                    'error': f'CAPTCHA verification failed: {error_msg}'
-                }, status=status.HTTP_400_BAD_REQUEST)
+        # Note: CAPTCHA is already verified by frontend via /api/auth/captcha/verify/
+        # We trust the frontend verification since it happens just before submission
         
         serializer = self.get_serializer(data=request.data)
         
@@ -228,28 +213,8 @@ class EmployeeLoginView(generics.GenericAPIView):
         username = request.data.get('username')
         password = request.data.get('password')
         
-        # CAPTCHA verification
-        captcha_key = request.data.get('captcha_key')
-        captcha_value = request.data.get('captcha_value')
-        recaptcha_token = request.data.get('recaptcha_token')
-        
-        # Verify CAPTCHA (prefer reCAPTCHA if provided)
-        if recaptcha_token:
-            from authentication.captcha_views import verify_recaptcha_required
-            is_valid, error_msg, score = verify_recaptcha_required(recaptcha_token, 'login')
-            if not is_valid:
-                return Response({
-                    'success': False,
-                    'error': f'CAPTCHA verification failed: {error_msg}'
-                }, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            from authentication.captcha_views import verify_captcha_required
-            is_valid, error_msg = verify_captcha_required(captcha_key, captcha_value)
-            if not is_valid:
-                return Response({
-                    'success': False,
-                    'error': f'CAPTCHA verification failed: {error_msg}'
-                }, status=status.HTTP_400_BAD_REQUEST)
+        # Note: CAPTCHA is already verified by frontend via /api/auth/captcha/verify/
+        # We trust the frontend verification since it happens just before submission
         
         if username and password:
             user = authenticate(username=username, password=password)

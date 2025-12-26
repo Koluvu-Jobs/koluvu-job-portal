@@ -918,13 +918,16 @@ class SendOTPView(APIView):
                     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                     
             elif verification_type == 'login' and email:
+                # Get user_type from request to determine correct dashboard URL
+                user_type = request.data.get('user_type', 'employee')  # Default to employee
+                
                 otp_session = OTPSession.objects.create(
                     email=email,
                     verification_type='login'
                 )
                 
-                # Send login OTP email
-                success = self.send_login_otp(email, otp_session.otp_code)
+                # Send login OTP email with user_type for dashboard URL
+                success = self.send_login_otp(email, otp_session.otp_code, user_type)
                 
                 if success:
                     return Response({
@@ -1100,12 +1103,20 @@ Koluvu Team
             logger.error(f"Failed to send password reset OTP email to {email}: {str(e)}")
             return False
     
-    def send_login_otp(self, email, otp_code):
+    def send_login_otp(self, email, otp_code, user_type='employee'):
         """Send login OTP via email using professional HTML template"""
         try:
             from .email_utils import get_logo_url
             
             subject = 'Koluvu - Login Verification Code'
+            
+            # Set login page URL based on user type (not dashboard - user hasn't logged in yet!)
+            if user_type == 'employer':
+                login_url = f"{settings.FRONTEND_URL}/auth/login/employer"
+            elif user_type == 'partner':
+                login_url = f"{settings.FRONTEND_URL}/auth/login/partner"
+            else:  # Default to employee
+                login_url = f"{settings.FRONTEND_URL}/auth/login/employee"
             
             # Context for the template
             context = {
@@ -1113,7 +1124,8 @@ Koluvu Team
                 'user_email': email,
                 'frontend_url': settings.FRONTEND_URL,
                 'logo_url': get_logo_url(),
-                'login_url': f"{settings.FRONTEND_URL}/auth/login",
+                'login_url': login_url,
+                'user_type': user_type.capitalize(),
                 'current_year': timezone.now().year
             }
             

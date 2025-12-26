@@ -25,12 +25,21 @@ export default function EmployeeLayout({ children }) {
 
   useEffect(() => {
     const previousPaddingTop = document.body.style.paddingTop;
+    const previousOverflow = document.body.style.overflow;
     document.body.style.paddingTop = "0px";
+
+    // Disable body scroll when sidebar is open on mobile
+    if (isSidebarOpen && typeof window !== "undefined" && window.innerWidth < 1024) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
 
     return () => {
       document.body.style.paddingTop = previousPaddingTop;
+      document.body.style.overflow = previousOverflow;
     };
-  }, []);
+  }, [isSidebarOpen]);
 
   if (!mounted) {
     return null;
@@ -67,10 +76,10 @@ export default function EmployeeLayout({ children }) {
           toggleSidebar={toggleSidebar}
         />
         <main
-          className="flex-1 p-2 sm:p-4 lg:p-6 overflow-auto"
+          className="flex-1 p-1.5 sm:p-4 lg:p-6 overflow-auto w-full"
           style={{ marginTop: "var(--header-height)" }}
         >
-          <div className="max-w-7xl mx-auto">{children}</div>
+          <div className="max-w-7xl mx-auto w-full">{children}</div>
         </main>
       </div>
       <Footer />

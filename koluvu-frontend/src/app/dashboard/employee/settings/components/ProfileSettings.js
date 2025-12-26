@@ -56,18 +56,18 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
   ];
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="border-b border-gray-200 pb-4 mb-6">
-        <h3 className="text-lg font-medium text-gray-900">Profile Settings</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Manage your personal information and professional profile.
+        <h3 className="text-lg font-semibold text-gray-900">Profile Settings</h3>
+        <p className="mt-1 text-sm text-gray-600">
+          Manage your personal information and professional profile
         </p>
       </div>
 
       <div className="space-y-6">
         {/* Basic Information */}
         <div>
-          <h4 className="text-md font-medium text-gray-900 mb-4">
+          <h4 className="text-base font-semibold text-gray-900 mb-4">
             Basic Information
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -82,7 +82,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 onChange={(e) =>
                   handleInputChange("display_name", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Your preferred display name"
               />
             </div>
@@ -98,7 +98,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 onChange={(e) =>
                   handleInputChange("phone_number", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Your phone number"
               />
             </div>
@@ -112,7 +112,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 type="text"
                 value={localSettings.location}
                 onChange={(e) => handleInputChange("location", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="City, State, Country"
               />
             </div>
@@ -125,7 +125,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 value={localSettings.bio}
                 onChange={(e) => handleInputChange("bio", e.target.value)}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                 placeholder="Tell us about yourself..."
               />
             </div>
@@ -134,7 +134,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
 
         {/* Professional Information */}
         <div>
-          <h4 className="text-md font-medium text-gray-900 mb-4">
+          <h4 className="text-base font-semibold text-gray-900 mb-4">
             Professional Information
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -147,7 +147,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 onChange={(e) =>
                   handleInputChange("experience_level", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {experienceLevels.map((level) => (
                   <option key={level.value} value={level.value}>
@@ -166,7 +166,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 onChange={(e) =>
                   handleInputChange("education_level", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {educationLevels.map((level) => (
                   <option key={level.value} value={level.value}>
@@ -184,7 +184,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 type="text"
                 value={localSettings.skills}
                 onChange={(e) => handleInputChange("skills", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="JavaScript, React, Node.js, Python..."
               />
             </div>
@@ -193,7 +193,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
 
         {/* Social Links */}
         <div>
-          <h4 className="text-md font-medium text-gray-900 mb-4">
+          <h4 className="text-base font-semibold text-gray-900 mb-4">
             Social Links
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -208,7 +208,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 onChange={(e) =>
                   handleInputChange("linkedin_url", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="https://linkedin.com/in/yourprofile"
               />
             </div>
@@ -224,7 +224,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 onChange={(e) =>
                   handleInputChange("github_url", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="https://github.com/yourusername"
               />
             </div>
@@ -240,7 +240,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 onChange={(e) =>
                   handleInputChange("portfolio_url", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="https://yourportfolio.com"
               />
             </div>
@@ -256,7 +256,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
                 onChange={(e) =>
                   handleInputChange("website_url", e.target.value)
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="https://yourwebsite.com"
               />
             </div>
@@ -265,16 +265,16 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
 
         {/* Privacy Settings */}
         <div>
-          <h4 className="text-md font-medium text-gray-900 mb-4">
+          <h4 className="text-base font-semibold text-gray-900 mb-4">
             Profile Visibility
           </h4>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex-1">
                 <h5 className="text-sm font-medium text-gray-900">
                   Show Profile Publicly
                 </h5>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 mt-1">
                   Allow employers to discover your profile
                 </p>
               </div>
@@ -291,12 +291,12 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
               </label>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex-1">
                 <h5 className="text-sm font-medium text-gray-900">
                   Allow Profile Download
                 </h5>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 mt-1">
                   Let employers download your profile information
                 </p>
               </div>
@@ -323,7 +323,7 @@ const ProfileSettings = ({ settings, onChange, onSave, isSaving }) => {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="inline-flex items-center justify-center px-6 py-2.5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all duration-200"
           >
             <Save
               className={`w-4 h-4 mr-2 ${isSaving ? "animate-spin" : ""}`}

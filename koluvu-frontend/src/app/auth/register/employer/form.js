@@ -275,6 +275,12 @@ export default function EmployerRegistrationForm() {
     }
 
     setErrors(newErrors);
+
+    // Log validation errors if any
+    if (Object.keys(newErrors).length > 0) {
+      console.log("⚠️ Form validation errors:", newErrors);
+    }
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -288,7 +294,16 @@ export default function EmployerRegistrationForm() {
   };
 
   const handleEmailVerification = (isVerified) => {
+    console.log("📧 Email verification callback triggered:", isVerified);
+    console.log("Previous emailVerified state:", emailVerified);
     setEmailVerified(isVerified);
+    console.log("Updated emailVerified state to:", isVerified);
+
+    if (isVerified) {
+      toast.success(
+        "Email verification successful! You can now complete registration."
+      );
+    }
   };
 
   const saveToLocalStorage = async () => {
@@ -326,29 +341,39 @@ export default function EmployerRegistrationForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
 
-    // Note: CAPTCHA verification is now handled within the CaptchaVerification component
-    // The component calls onCaptchaChange when verification is successful
+    console.log("=== EMPLOYER REGISTRATION FORM SUBMIT ===");
+    console.log("Form data:", {
+      ...formData,
+      password: "***",
+      confirmPassword: "***",
+    });
+    console.log("Email verified:", emailVerified);
+    console.log("CAPTCHA value:", captchaValue ? "✓ Set" : "✗ Not set");
+    console.log("CAPTCHA key:", captchaKey ? "✓ Set" : "✗ Not set");
+
+    if (!validateForm()) {
+      console.log("❌ Form validation failed");
+      console.log("Validation errors:", errors);
+      toast.error("Please fill in all required fields correctly.");
+      return;
+    }
+
+    // Verify CAPTCHA is complete
     if (!captchaValue || !captchaKey) {
+      console.log("❌ CAPTCHA not completed");
       toast.error("Please complete and verify the CAPTCHA.");
       return;
     }
 
+    // Verify email is verified (using state variable)
     if (!emailVerified) {
+      console.log("❌ Email not verified");
       toast.error("Please verify your email address before proceeding.");
       return;
     }
 
-    // Check if email is verified
-    const emailVerified = document.querySelector(
-      'input[name="emailVerified"]'
-    )?.value;
-    if (!emailVerified) {
-      toast.error("Please verify your email address before proceeding.");
-      return;
-    }
-
+    console.log("✅ All validations passed, submitting...");
     setIsSubmitting(true);
     setSubmitError("");
 
@@ -368,6 +393,11 @@ export default function EmployerRegistrationForm() {
       formDataToSend.append("company_location", formData.companyLocation);
       formDataToSend.append("linkedin_or_website", formData.linkedinOrWebsite);
       formDataToSend.append("company_type", formData.companyType);
+
+      // Add CAPTCHA verification data
+      formDataToSend.append("captcha_key", captchaKey);
+      formDataToSend.append("captcha_value", captchaValue);
+
       if (formData.companyLogo)
         formDataToSend.append("company_logo", formData.companyLogo);
       if (formData.companyRegistrationDoc)
@@ -775,7 +805,6 @@ export default function EmployerRegistrationForm() {
                   accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
-                  required
                 />
               </label>
             </div>
@@ -912,7 +941,11 @@ export default function EmployerRegistrationForm() {
           <button
             type="submit"
             disabled={isSubmitting || !emailVerified}
-            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium px-3 py-1.5 rounded hover:opacity-90 transition-opacity text-xs"
+            className={`w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium px-3 py-1.5 rounded transition-opacity text-xs ${
+              isSubmitting || !emailVerified
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:opacity-90 cursor-pointer"
+            }`}
           >
             {isSubmitting ? (
               <>

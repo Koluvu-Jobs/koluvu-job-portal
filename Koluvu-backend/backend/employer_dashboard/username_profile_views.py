@@ -180,65 +180,99 @@ class UsernameBasedEmployerProfileCreateView(APIView):
     
     def post(self, request, username):
         """Create profile - only allowed for own profile"""
-        target_user = self.get_user_by_username(username)
-        if not target_user:
-            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        import logging
+        logger = logging.getLogger(__name__)
         
-        # Security check: Users can only create their own profile
-        if target_user != request.user:
-            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-        
-        # Check if profile already exists
-        if EmployerProfile.objects.filter(user=target_user).exists():
-            return Response({'error': 'Profile already exists. Use update endpoint instead.'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Extract email update if provided
-        new_email = request.data.get('email')
-        if new_email and new_email != target_user.email:
-            # Validate email format
-            from django.core.validators import validate_email
-            from django.core.exceptions import ValidationError
-            try:
-                validate_email(new_email)
-            except ValidationError:
-                return Response({'error': 'Invalid email format'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            logger.info(f"Profile creation request for username: {username}")
+            logger.debug(f"Request data keys: {request.data.keys()}")
             
-            # Check if email is already taken
-            if User.objects.filter(email=new_email).exclude(id=target_user.id).exists():
-                return Response({'error': 'Email already in use'}, status=status.HTTP_400_BAD_REQUEST)
+            target_user = self.get_user_by_username(username)
+            if not target_user:
+                logger.warning(f"User not found: {username}")
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
             
-            # Update user email
-            target_user.email = new_email
-            target_user.save()
-        
-        # Remove email from profile data as it's handled at user level
-        profile_data = request.data.copy()
-        if 'email' in profile_data:
-            del profile_data['email']
-        
-        # Validate required fields
-        if not profile_data.get('company_name'):
-            return Response({'error': 'Company name is required'}, status=status.HTTP_400_BAD_REQUEST)
-        if not profile_data.get('employer_name'):
-            return Response({'error': 'Employer name is required'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Set default is_active
-        profile_data['is_active'] = True
-        
-        serializer = EmployerProfileSerializer(data=profile_data)
-        if serializer.is_valid():
-            employer_profile = serializer.save(user=target_user)
-            response_data = serializer.data
-            # Include user email in response
-            response_data['user'] = {
-                'id': target_user.id,
-                'username': target_user.username,
-                'email': target_user.email,
-                'first_name': target_user.first_name,
-                'last_name': target_user.last_name,
-            }
-            return Response(response_data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Security check: Users can only create their own profile
+            if target_user != request.user:
+                logger.warning(f"Permission denied: {request.user.username} tried to create profile for {username}")
+                return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+            
+            # Check if profile already exists
+            if EmployerProfile.objects.filter(user=target_user).exists():
+                logger.info(f"Profile already exists for user: {username}")
+                return Response({'error': 'Profile already exists. Use update endpoint instead.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Extract email update if provided
+            new_email = request.data.get('email')
+            if new_email and new_email != target_user.email:
+                # Validate email format
+                from django.core.validators import validate_email
+                from django.core.exceptions import ValidationError
+                try:
+                    validate_email(new_email)
+                except ValidationError:
+                    logger.warning(f"Invalid email format: {new_email}")
+                    return Response({'error': 'Invalid email format'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                # Check if email is already taken
+                if User.objects.filter(email=new_email).exclude(id=target_user.id).exists():
+                    logger.warning(f"Email already in use: {new_email}")
+                    return Response({'error': 'Email already in use'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                # Update user email
+                target_user.email = new_email
+                target_user.save()
+                logger.info(f"Updated email for user: {username}")
+            
+            # Remove email from profile data as it's handled at user level
+            profile_data = request.data.copy()
+            if 'email' in profile_data:
+                del profile_data['email']
+            
+            # Validate required fields
+            if not profile_data.get('company_name'):
+                logger.warning("Missing required field: company_name")
+                return Response({
+                    'error': 'Company name is required',
+                    'field': 'company_name'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            if not profile_data.get('employer_name'):
+                logger.warning("Missing required field: employer_name")
+                return Response({
+                    'error': 'Employer name is required',
+                    'field': 'employer_name'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Set default is_active
+            profile_data['is_active'] = True
+            
+            serializer = EmployerProfileSerializer(data=profile_data)
+            if serializer.is_valid():
+                employer_profile = serializer.save(user=target_user)
+                logger.info(f"Profile created successfully for user: {username}")
+                response_data = serializer.data
+                # Include user email in response
+                response_data['user'] = {
+                    'id': target_user.id,
+                    'username': target_user.username,
+                    'email': target_user.email,
+                    'first_name': target_user.first_name,
+                    'last_name': target_user.last_name,
+                }
+                return Response(response_data, status=status.HTTP_201_CREATED)
+            
+            logger.error(f"Profile validation failed: {serializer.errors}")
+            return Response({
+                'error': 'Validation failed',
+                'details': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            logger.exception(f"Unexpected error creating profile for {username}: {str(e)}")
+            return Response({
+                'error': 'An unexpected error occurred while creating profile',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UsernameBasedEmployerProfileUpdateView(APIView):
@@ -264,56 +298,84 @@ class UsernameBasedEmployerProfileUpdateView(APIView):
     
     def patch(self, request, username):
         """Update profile - only allowed for own profile"""
-        target_user = self.get_user_by_username(username)
-        if not target_user:
-            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        import logging
+        logger = logging.getLogger(__name__)
         
-        # Security check: Users can only edit their own profile
-        if target_user != request.user:
-            return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-        
-        # Extract email update if provided
-        new_email = request.data.get('email')
-        if new_email and new_email != target_user.email:
-            # Validate email format
-            from django.core.validators import validate_email
-            from django.core.exceptions import ValidationError
-            try:
-                validate_email(new_email)
-            except ValidationError:
-                return Response({'error': 'Invalid email format'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            logger.info(f"Profile update request for username: {username}")
+            logger.debug(f"Request data keys: {request.data.keys()}")
             
-            # Check if email is already taken
-            if User.objects.filter(email=new_email).exclude(id=target_user.id).exists():
-                return Response({'error': 'Email already in use'}, status=status.HTTP_400_BAD_REQUEST)
+            target_user = self.get_user_by_username(username)
+            if not target_user:
+                logger.warning(f"User not found: {username}")
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
             
-            # Update user email
-            target_user.email = new_email
-            target_user.save()
-        
-        # Get or create profile
-        employer_profile, created = EmployerProfile.objects.get_or_create(
-            user=target_user,
-            defaults={
-                'company_name': 'Your Company',
-                'employer_name': target_user.first_name or 'Employer',
-                'is_active': True
-            }
-        )
-        
-        # Remove email from profile data as it's handled at user level
-        profile_data = request.data.copy()
-        if 'email' in profile_data:
-            del profile_data['email']
-        
-        serializer = EmployerProfileSerializer(employer_profile, data=profile_data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            response_data = serializer.data
-            # Include updated user email in response
-            response_data['user']['email'] = target_user.email
-            return Response(response_data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Security check: Users can only edit their own profile
+            if target_user != request.user:
+                logger.warning(f"Permission denied: {request.user.username} tried to update profile for {username}")
+                return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+            
+            # Extract email update if provided
+            new_email = request.data.get('email')
+            if new_email and new_email != target_user.email:
+                # Validate email format
+                from django.core.validators import validate_email
+                from django.core.exceptions import ValidationError
+                try:
+                    validate_email(new_email)
+                except ValidationError:
+                    logger.warning(f"Invalid email format: {new_email}")
+                    return Response({'error': 'Invalid email format'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                # Check if email is already taken
+                if User.objects.filter(email=new_email).exclude(id=target_user.id).exists():
+                    logger.warning(f"Email already in use: {new_email}")
+                    return Response({'error': 'Email already in use'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                # Update user email
+                target_user.email = new_email
+                target_user.save()
+                logger.info(f"Updated email for user: {username}")
+            
+            # Get or create profile
+            employer_profile, created = EmployerProfile.objects.get_or_create(
+                user=target_user,
+                defaults={
+                    'company_name': 'Your Company',
+                    'employer_name': target_user.first_name or 'Employer',
+                    'is_active': True
+                }
+            )
+            
+            if created:
+                logger.info(f"Profile created during update for user: {username}")
+            
+            # Remove email from profile data as it's handled at user level
+            profile_data = request.data.copy()
+            if 'email' in profile_data:
+                del profile_data['email']
+            
+            serializer = EmployerProfileSerializer(employer_profile, data=profile_data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                logger.info(f"Profile updated successfully for user: {username}")
+                response_data = serializer.data
+                # Include updated user email in response
+                response_data['user']['email'] = target_user.email
+                return Response(response_data)
+            
+            logger.error(f"Profile update validation failed: {serializer.errors}")
+            return Response({
+                'error': 'Validation failed',
+                'details': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            logger.exception(f"Unexpected error updating profile for {username}: {str(e)}")
+            return Response({
+                'error': 'An unexpected error occurred while updating profile',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class UsernameBasedCompanyLogoUploadView(APIView):

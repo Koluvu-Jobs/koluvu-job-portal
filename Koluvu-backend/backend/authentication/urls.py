@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from .password_views import ForgotPasswordView, ResetPasswordView
+from .captcha_views import CaptchaView, VerifyCaptchaView
 
 urlpatterns = [
     path('google/', views.GoogleOAuthView.as_view(), name='google_oauth'),
@@ -17,4 +18,6 @@ urlpatterns = [
     path('forgot-password/', ForgotPasswordView.as_view(), name='forgot_password'),
     path('reset-password/', ResetPasswordView.as_view(), name='reset_password'),
     path('user/', views.CurrentUserView.as_view(), name='current_user'),
+    path('captcha/', CaptchaView.as_view(), name='captcha'),
+    path('captcha/verify/', VerifyCaptchaView.as_view(), name='captcha_verify'),
 ]

@@ -7,6 +7,7 @@ import {
   Building,
   Clock,
   Zap,
+  Bell,
 } from "lucide-react";
 
 const JobPreferencesSettings = ({ settings, onChange, onSave, isSaving }) => {

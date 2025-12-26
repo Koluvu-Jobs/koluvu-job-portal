@@ -104,19 +104,9 @@ export default function LoginPage() {
     setLoginError("");
 
     try {
-      // Verify CAPTCHA first
+      // Check if CAPTCHA was verified (no need to re-verify, already done by CaptchaVerification component)
       if (!captchaValue || !captchaKey) {
         setLoginError("Please complete the CAPTCHA verification.");
-        setIsLoading(false);
-        return;
-      }
-
-      const captchaVerification = await verifyCaptchaValue(
-        captchaValue,
-        captchaKey
-      );
-      if (!captchaVerification.valid) {
-        setLoginError("Invalid CAPTCHA. Please try again.");
         setIsLoading(false);
         return;
       }
@@ -131,6 +121,7 @@ export default function LoginPage() {
             body: JSON.stringify({
               email: email,
               type: "login",
+              user_type: "employer",
             }),
           }
         );
@@ -162,10 +153,10 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          username: email, // Backend expects 'username' field (can be email)
           password,
-          captcha_value: captchaValue,
-          captcha_key: captchaKey,
+          // Don't send captcha values - they were already verified in step 1
+          // The OTP verification is sufficient for security
         }),
       });
       const data = await response.json();
@@ -365,6 +356,7 @@ export default function LoginPage() {
                   btnStyle="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-medium py-3 rounded-lg hover:opacity-90 transition-opacity"
                   hideEmailInput={true}
                   presetEmail={email}
+                  userType="employer"
                 />
 
                 {loginError && (

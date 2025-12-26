@@ -151,8 +151,8 @@ const Sidebar = ({
       id: "settings",
       label: "Settings",
       icon: Settings,
-      path: `/dashboard/employee/settings`,
-      external: true,
+      path: `/dashboard/employee/${username}/settings`,
+      tabName: "Settings",
     },
   ];
 
@@ -237,9 +237,7 @@ const Sidebar = ({
 
       // Handle navigation based on item type
       const path =
-        item.id === "settings"
-          ? `/dashboard/employee/${username}/settings` // Use full path for settings
-          : item.external || item.id === "interview"
+        item.external || item.id === "interview"
           ? item.path // Use provided path for external routes
           : `${item.path}`; // Use path as is for internal routes
 
@@ -308,35 +306,50 @@ const Sidebar = ({
       {/* Mobile Sidebar */}
       <AnimatePresence>
         {isSidebarOpen && (
-          <motion.div
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={sidebarVariants}
-            className="fixed inset-0 z-50 lg:hidden border-r border-gray-300"
-            style={{
-              "--sidebar-bg": backgroundGradient,
-              background: "var(--sidebar-bg)",
-              color: "#fff",
-              boxShadow: "10px 0 25px rgba(235, 220, 220, 0.4)",
-              transformStyle: "preserve-3d",
-              perspective: 1000,
-              // Offset mobile sidebar below fixed header so top items are visible
-              top: "var(--header-height)",
-              height: "calc(100dvh - var(--header-height))",
-            }}
-          >
-            <SidebarContent
-              menuItems={menuItems}
-              activeTab={activeTab}
-              setActiveTab={handleItemClick}
-              isMobile={true}
-              toggleSidebar={toggleSidebar}
-              userProfile={userProfile}
-              isExpanded={true}
-              handleLogout={handleLogout}
+          <>
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+              onClick={toggleSidebar}
+              style={{
+                top: "var(--header-height)",
+                height: "calc(100dvh - var(--header-height))",
+              }}
             />
-          </motion.div>
+            <motion.div
+              initial="closed"
+              animate="open"
+              exit="closed"
+              variants={sidebarVariants}
+              className="fixed left-0 z-50 lg:hidden border-r border-gray-300 w-[85vw] xs:w-[80vw] sm:w-[70vw] md:w-96 max-w-[320px]"
+              style={{
+                "--sidebar-bg": backgroundGradient,
+                background: "var(--sidebar-bg)",
+                color: "#fff",
+                boxShadow: "10px 0 25px rgba(235, 220, 220, 0.4)",
+                transformStyle: "preserve-3d",
+                perspective: 1000,
+                top: "var(--header-height)",
+                height: "calc(100dvh - var(--header-height))",
+                overflowY: "auto",
+              }}
+            >
+              <SidebarContent
+                menuItems={menuItems}
+                activeTab={activeTab}
+                setActiveTab={handleItemClick}
+                isMobile={true}
+                toggleSidebar={toggleSidebar}
+                userProfile={userProfile}
+                isExpanded={true}
+                handleLogout={handleLogout}
+              />
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
@@ -423,44 +436,41 @@ const SidebarContent = ({
   return (
     <div
       className={`flex flex-col h-full ${
-        isMobile ? "p-3 m-2" : "px-2 py-4"
+        isMobile ? "p-2 xs:p-3 m-1 xs:m-2" : "px-2 py-4"
       } overflow-y-auto scrollbar-thin scrollbar-thumb-[#e5e7eb] scrollbar-track-transparent`}
     >
       {/* Mobile Header */}
       {isMobile && (
         <motion.button
-          whileHover={{ scale: 0.8 }}
-          whileTap={{ scale: 0.7 }}
+          whileHover={{ scale: 0.9 }}
+          whileTap={{ scale: 0.85 }}
           onClick={toggleSidebar}
-          className="p-2 rounded-lg text-white hover:bg-[#1a2036] self-end"
+          className="p-1.5 xs:p-2 rounded-lg text-white hover:bg-[#1a2036] self-end mb-2"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4 xs:w-5 xs:h-5" />
         </motion.button>
       )}
 
       {/* User Profile */}
       <motion.div
         whileHover={{
-          scale: isMobile ? 1.05 : 1.02,
-          rotateY: isMobile ? 5 : 0,
+          scale: isMobile ? 1.02 : 1.02,
+          rotateY: isMobile ? 2 : 0,
         }}
         transition={{ duration: 0.3 }}
         onClick={() => setActiveTab("profile")}
-        className={`w-full rounded-lg mb-6 cursor-pointer text-center transition-all duration-300 ${
-          isExpanded ? "p-5" : "p-2"
+        className={`w-full rounded-lg mb-4 xs:mb-6 cursor-pointer text-center transition-all duration-300 ${
+          isExpanded ? "p-3 xs:p-4 sm:p-5" : "p-2"
         } ${!isMobile && !isExpanded ? "mt-2" : ""}`}
         style={{
-          // increased opacity for better content visibility
-          //background: "rgba(170, 165, 165, 0.35)",
           backdropFilter: "blur(8px)",
-          // boxShadow: "0 6px 18px rgba(0,0,0,0.26)",
           transformStyle: "preserve-3d",
         }}
       >
         <div className={`flex flex-col items-center ${isExpanded ? "" : ""}`}>
           <div
             className={`rounded-full flex items-center justify-center bg-[#1a2036] relative shadow-lg transition-all duration-300 group ${
-              isExpanded ? "w-20 h-20 m-3" : "w-12 h-12 m-1"
+              isExpanded ? "w-16 xs:w-18 sm:w-20 h-16 xs:h-18 sm:h-20 m-2 xs:m-3" : "w-12 h-12 m-1"
             }`}
           >
             {userProfile.avatar ? (
@@ -475,7 +485,7 @@ const SidebarContent = ({
               <User
                 className={
                   isExpanded
-                    ? "w-10 h-10 text-gray-200"
+                    ? "w-8 xs:w-9 sm:w-10 h-8 xs:h-9 sm:h-10 text-gray-200"
                     : "w-6 h-6 text-gray-200"
                 }
               />
@@ -502,10 +512,10 @@ const SidebarContent = ({
           </div>
           {isExpanded && (
             <>
-              <p className="font-semibold text-lg leading-snug">
+              <p className="font-semibold text-base xs:text-lg leading-snug break-words px-1">
                 {userProfile.name}
               </p>
-              <p className="text-sm opacity-80 mt-0.5">{userProfile.role}</p>
+              <p className="text-xs xs:text-sm opacity-80 mt-0.5 break-words px-1">{userProfile.role}</p>
             </>
           )}
         </div>
@@ -537,7 +547,7 @@ const SidebarContent = ({
       )}
 
       {/* Menu Items */}
-      <nav className="flex-1 space-y-3">
+      <nav className="flex-1 space-y-2 xs:space-y-2.5 sm:space-y-3">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -545,18 +555,18 @@ const SidebarContent = ({
             <motion.button
               key={item.id}
               whileHover={{
-                scale: 1.05,
-                x: isExpanded ? 6 : 0,
-                rotateY: isExpanded ? 5 : 0,
+                scale: 1.03,
+                x: isExpanded ? 4 : 0,
+                rotateY: isExpanded ? 3 : 0,
               }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setActiveTab(item.id)}
               title={!isExpanded ? item.label : undefined}
               aria-label={item.label}
-              className={`relative group w-full flex items-center rounded-xl transition-all duration-300 ease-in-out overflow-hidden
+              className={`relative group w-full flex items-center rounded-lg xs:rounded-xl transition-all duration-300 ease-in-out overflow-hidden
                 ${
                   isExpanded
-                    ? "justify-start px-4 py-2 gap-3"
+                    ? "justify-start px-2.5 xs:px-3 sm:px-4 py-2 xs:py-2.5 gap-2 xs:gap-2.5 sm:gap-3"
                     : "justify-center p-2"
                 }
                 ${
@@ -569,11 +579,11 @@ const SidebarContent = ({
             >
               <Icon
                 className={`flex-shrink-0 ${
-                  isExpanded ? "w-6 h-6" : "w-7 h-7"
+                  isExpanded ? "w-5 h-5 xs:w-5.5 xs:h-5.5 sm:w-6 sm:h-6" : "w-6 h-6 xs:w-7 xs:h-7"
                 } transition-transform duration-300`}
               />
               <span
-                className={`font-medium text-base tracking-tight break-words whitespace-nowrap overflow-hidden transform-gpu origin-left transition-all duration-300
+                className={`font-medium text-xs xs:text-sm sm:text-base tracking-tight break-words whitespace-nowrap overflow-hidden transform-gpu origin-left transition-all duration-300
                                 ${
                                   isExpanded
                                     ? "opacity-100 scale-100"
@@ -591,27 +601,27 @@ const SidebarContent = ({
       {/* Logout Button */}
       <motion.button
         whileHover={{
-          scale: 1.05,
-          x: isExpanded ? 6 : 0,
-          rotateY: isExpanded ? 5 : 0,
+          scale: 1.03,
+          x: isExpanded ? 4 : 0,
+          rotateY: isExpanded ? 3 : 0,
         }}
-        whileTap={{ scale: 0.95 }}
+        whileTap={{ scale: 0.97 }}
         onClick={handleLogout}
         title={!isExpanded ? "Sign Out" : undefined}
         aria-label="Sign Out"
-        className={`relative group w-full flex items-center rounded-xl transition-all duration-300 ease-in-out overflow-hidden mt-4 border-t border-white/20 pt-4
-          ${isExpanded ? "justify-start px-4 py-2 gap-3" : "justify-center p-2"}
+        className={`relative group w-full flex items-center rounded-lg xs:rounded-xl transition-all duration-300 ease-in-out overflow-hidden mt-3 xs:mt-4 border-t border-white/20 pt-3 xs:pt-4
+          ${isExpanded ? "justify-start px-2.5 xs:px-3 sm:px-4 py-2 xs:py-2.5 gap-2 xs:gap-2.5 sm:gap-3" : "justify-center p-2"}
           bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/40
         `}
         style={{ transformStyle: "preserve-3d" }}
       >
         <LogOut
           className={`flex-shrink-0 ${
-            isExpanded ? "w-6 h-6" : "w-7 h-7"
+            isExpanded ? "w-5 h-5 xs:w-5.5 xs:h-5.5 sm:w-6 sm:h-6" : "w-6 h-6 xs:w-7 xs:h-7"
           } transition-transform duration-300`}
         />
         <span
-          className={`font-medium text-base tracking-tight break-words whitespace-nowrap overflow-hidden transform-gpu origin-left transition-all duration-300
+          className={`font-medium text-xs xs:text-sm sm:text-base tracking-tight break-words whitespace-nowrap overflow-hidden transform-gpu origin-left transition-all duration-300
                             ${
                               isExpanded
                                 ? "opacity-100 scale-100"

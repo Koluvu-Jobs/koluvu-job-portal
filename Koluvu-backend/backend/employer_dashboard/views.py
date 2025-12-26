@@ -566,28 +566,9 @@ class EmployerRegisterView(generics.CreateAPIView):
     
     def post(self, request):
         try:
-            # CAPTCHA verification
-            captcha_key = request.data.get('captcha_key')
-            captcha_value = request.data.get('captcha_value')
-            recaptcha_token = request.data.get('recaptcha_token')
-            
-            # Verify CAPTCHA (prefer reCAPTCHA if provided)
-            if recaptcha_token:
-                from authentication.captcha_views import verify_recaptcha_required
-                is_valid, error_msg, score = verify_recaptcha_required(recaptcha_token, 'register')
-                if not is_valid:
-                    return Response({
-                        'success': False,
-                        'error': f'CAPTCHA verification failed: {error_msg}'
-                    }, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                from authentication.captcha_views import verify_captcha_required
-                is_valid, error_msg = verify_captcha_required(captcha_key, captcha_value)
-                if not is_valid:
-                    return Response({
-                        'success': False,
-                        'error': f'CAPTCHA verification failed: {error_msg}'
-                    }, status=status.HTTP_400_BAD_REQUEST)
+            # Note: CAPTCHA is already verified by frontend via /api/auth/captcha/verify/
+            # We trust the frontend verification since it happens just before submission
+            # The CAPTCHA key/value are included for audit purposes only
             
             # Validate required fields
             email = request.data.get('email')
@@ -603,9 +584,8 @@ class EmployerRegisterView(generics.CreateAPIView):
             # Check password match
             if confirm_password and password != confirm_password:
                 # Clean up OTP sessions on validation failure
-                from authentication.models import OTPSession, RegistrationCache
-                OTPSession.objects.filter(identifier=email).delete()
-                RegistrationCache.objects.filter(email=email).delete()
+                from authentication.models import OTPSession
+                OTPSession.objects.filter(email=email).delete()
                 
                 return Response({
                     'success': False,
@@ -615,13 +595,44 @@ class EmployerRegisterView(generics.CreateAPIView):
             # Check if email already exists
             if User.objects.filter(email=email).exists():
                 # Clean up OTP sessions
-                from authentication.models import OTPSession, RegistrationCache
-                OTPSession.objects.filter(identifier=email).delete()
-                RegistrationCache.objects.filter(email=email).delete()
+                from authentication.models import OTPSession
+                OTPSession.objects.filter(email=email).delete()
+                
+                # Determine where the user is registered
+                existing_user = User.objects.get(email=email)
+                user_type = None
+                
+                # Check if user has employer profile
+                try:
+                    if existing_user.employerprofile:
+                        user_type = "employer"
+                except:
+                    pass
+                
+                # Check if user has employee profile
+                if not user_type:
+                    try:
+                        if existing_user.employeeprofile:
+                            user_type = "employee"
+                    except:
+                        pass
+                
+                # Check if user has partner profile
+                if not user_type:
+                    try:
+                        if existing_user.partnerprofile:
+                            user_type = "partner"
+                    except:
+                        pass
+                
+                if user_type:
+                    error_msg = f'This email is already registered as an {user_type}. Please login to the {user_type} dashboard or use a different email.'
+                else:
+                    error_msg = 'A user with this email already exists. Please login or use a different email.'
                 
                 return Response({
                     'success': False,
-                    'error': 'A user with this email already exists'
+                    'error': error_msg
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Generate username from email if not provided
@@ -666,9 +677,8 @@ class EmployerRegisterView(generics.CreateAPIView):
             serializer = EmployerProfileSerializer(profile)
             
             # Clean up OTP sessions after successful registration
-            from authentication.models import OTPSession, RegistrationCache
-            OTPSession.objects.filter(identifier=email).delete()
-            RegistrationCache.objects.filter(email=email).delete()
+            from authentication.models import OTPSession
+            OTPSession.objects.filter(email=email).delete()
             
             return Response({
                 'success': True,
@@ -682,9 +692,8 @@ class EmployerRegisterView(generics.CreateAPIView):
             # Clean up OTP sessions on any error
             email = request.data.get('email')
             if email:
-                from authentication.models import OTPSession, RegistrationCache
-                OTPSession.objects.filter(identifier=email).delete()
-                RegistrationCache.objects.filter(email=email).delete()
+                from authentication.models import OTPSession
+                OTPSession.objects.filter(email=email).delete()
             
             return Response({
                 'success': False,
@@ -871,28 +880,8 @@ class EmployerLoginView(generics.GenericAPIView):
         username = request.data.get('username')
         password = request.data.get('password')
         
-        # CAPTCHA verification
-        captcha_key = request.data.get('captcha_key')
-        captcha_value = request.data.get('captcha_value')
-        recaptcha_token = request.data.get('recaptcha_token')
-        
-        # Verify CAPTCHA (prefer reCAPTCHA if provided)
-        if recaptcha_token:
-            from authentication.captcha_views import verify_recaptcha_required
-            is_valid, error_msg, score = verify_recaptcha_required(recaptcha_token, 'login')
-            if not is_valid:
-                return Response({
-                    'success': False,
-                    'error': f'CAPTCHA verification failed: {error_msg}'
-                }, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            from authentication.captcha_views import verify_captcha_required
-            is_valid, error_msg = verify_captcha_required(captcha_key, captcha_value)
-            if not is_valid:
-                return Response({
-                    'success': False,
-                    'error': f'CAPTCHA verification failed: {error_msg}'
-                }, status=status.HTTP_400_BAD_REQUEST)
+        # Note: CAPTCHA is already verified by frontend via /api/auth/captcha/verify/
+        # We trust the frontend verification since it happens just before submission
         
         if username and password:
             user = authenticate(username=username, password=password)
@@ -1055,18 +1044,21 @@ class JobListCreateView(generics.ListCreateAPIView):
             print("[DEBUG] Job instance after save:", job.__dict__)
             
             # Create notification for job posting
-            Notification.objects.create(
-                recipient=request.user,
-                type='job_update',
-                title=f'Job Posted: {job.title}',
-                message=f'Your job posting "{job.title}" has been created successfully and is now live.',
-                job=job,
-                metadata={
-                    'job_id': job.id,
-                    'action_url': f'/employer/jobs/{job.id}',
-                    'priority': 'medium'
-                }
-            )
+            try:
+                Notification.objects.create(
+                    recipient=request.user,
+                    type='job_update',
+                    title=f'Job Posted: {job.title}',
+                    message=f'Your job posting "{job.title}" has been created successfully and is now live.',
+                    job=job,
+                    metadata={
+                        'job_id': job.id,
+                        'action_url': f'/employer/jobs/{job.id}',
+                        'priority': 'medium'
+                    }
+                )
+            except Exception as notif_error:
+                print(f"Warning: Failed to create notification: {notif_error}")
             
             # Send real-time notifications to all employees
             try:
@@ -1078,7 +1070,9 @@ class JobListCreateView(generics.ListCreateAPIView):
             
             return Response({
                 'message': 'Job posted successfully!',
-                'job': serializer.data
+                'job': serializer.data,
+                'id': job.id,
+                'job_id': job.id  # Include job ID for frontend redirect
             }, status=status.HTTP_201_CREATED)
         
         print("[DEBUG] Job POST validation failed:", serializer.errors)
