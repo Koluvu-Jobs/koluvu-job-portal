@@ -2899,21 +2899,20 @@ const AppContent = ({ username, forceTab }) => {
 
   // Calculate profile completion percentage
   useEffect(() => {
-    if (user && user.employee_profile) {
-      const profile = user.employee_profile;
-
-      // Check required profile fields
+    if (user) {
+      // Only count manually-filled fields, not OAuth auto-populated ones
+      // Exclude first_name, last_name (from OAuth), and google_profile_picture
       const profileFields = [
-        profile.first_name || user.first_name,
-        profile.last_name || user.last_name,
-        profile.current_designation || profile.current_position,
-        profile.location,
-        profile.experience_years || profile.experience,
-        profile.bio,
-        profile.phone_number || profile.phone,
-        profile.linkedin_url || profile.linkedin_profile,
-        profile.image_field_picture || profile.effective_profile_picture,
-        profile.background_image,
+        user.current_designation,
+        user.location,
+        user.experience_years,
+        user.bio,
+        user.phone_number,
+        user.linkedin_url,
+        user.image_field_picture, // Only count manually uploaded picture, not google_profile_picture
+        user.background_image,
+        user.skills, // Added skills to completion
+        user.expected_salary, // Added expected salary
       ];
 
       const completedFields = profileFields.filter(
@@ -2921,13 +2920,18 @@ const AppContent = ({ username, forceTab }) => {
           field !== null &&
           field !== undefined &&
           field !== "" &&
-          field !== "Add your role"
+          field !== "Add your role" &&
+          field !== "Not specified" &&
+          field !== "Not provided" &&
+          field !== "1" && // Default experience_years
+          field !== "1.03" // Default expected_salary
       ).length;
 
       const percentage = Math.round(
         (completedFields / profileFields.length) * 100
       );
       setProfileCompletion(percentage);
+      console.log("Profile completion calculated:", percentage, "% - Completed fields:", completedFields, "/ Total:", profileFields.length);
     } else {
       setProfileCompletion(0);
     }

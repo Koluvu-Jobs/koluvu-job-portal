@@ -43,8 +43,8 @@ export default function DashboardContent() {
         profileComplete:
           authUser.employee_profile?.profile_completion_percentage || 60,
         profilePicture:
-          authUser.employee_profile?.profile_picture ||
-          authUser.google_profile_picture ||
+          authUser.employee_profile?.effective_profile_picture ||
+          authUser.employee_profile?.image_field_picture ||
           "",
         phone: authUser.employee_profile?.phone_number || "",
         location: authUser.employee_profile?.location || "",

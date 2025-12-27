@@ -227,8 +227,8 @@ CSRF_COOKIE_SECURE = not DEBUG  # HTTPS only in production
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
 
-# Rate Limiting
-RATELIMIT_ENABLE = True
+# Rate Limiting - Disabled for localhost development
+RATELIMIT_ENABLE = os.getenv('RATELIMIT_ENABLE', 'False').lower() == 'true'
 RATELIMIT_USE_CACHE = 'default'
 
 # Cache Configuration for Rate Limiting

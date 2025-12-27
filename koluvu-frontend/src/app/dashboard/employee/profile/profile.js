@@ -321,8 +321,9 @@ const Profile = ({
       setLoading(true);
 
       // Fetch main profile data
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
       const profileResponse = await fetch(
-        "http://127.0.0.1:8000/api/employee/dashboard/",
+        `${backendUrl}/api/employee/dashboard/`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
@@ -406,10 +407,11 @@ const Profile = ({
       { url: "skills", key: "keySkills" },
     ];
 
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
     for (const endpoint of endpoints) {
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/api/employee/${endpoint.url}/`,
+          `${backendUrl}/api/employee/${endpoint.url}/`,
           { headers: { Authorization: `Bearer ${accessToken}` } }
         );
 
@@ -628,13 +630,26 @@ const Profile = ({
         console.warn("Failed to refetch profile after save:", e);
       }
 
+      // Update localStorage auth data with new user info
+      try {
+        const storedAuth = JSON.parse(localStorage.getItem("auth") || "{}");
+        if (storedAuth.user) {
+          // Merge updated profile fields into stored user data
+          storedAuth.user = { ...storedAuth.user, ...updateData };
+          localStorage.setItem("auth", JSON.stringify(storedAuth));
+          console.log("Updated auth in localStorage with new profile data");
+        }
+      } catch (e) {
+        console.warn("Failed to update localStorage auth:", e);
+      }
+
       setOriginalData(JSON.parse(JSON.stringify(profileData)));
-      showNotification("Profile saved successfully!", "success");
+      showNotification("Profile saved successfully! Redirecting...", "success");
 
       // Redirect back to dashboard after short delay
       setTimeout(() => {
-        router.push(`/dashboard/employee/${username}`);
-      }, 1200);
+        window.location.href = `/dashboard/employee/${username}`;
+      }, 1500);
     } catch (error) {
       console.error("Error saving profile:", error);
       showNotification("Failed to save profile. Please try again.", "error");

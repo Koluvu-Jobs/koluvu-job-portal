@@ -73,20 +73,16 @@ class EmployeeProfileSerializer(serializers.ModelSerializer):
     
     def get_effective_profile_picture(self, obj):
         """Get the most appropriate profile picture URL"""
-        # Priority: uploaded image > Google profile picture > profile_picture field
+        # Priority: ONLY uploaded image (manual upload takes precedence over Google)
+        # No longer use Google profile picture - users must manually upload after OAuth
         if obj.image_field_picture:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.image_field_picture.url)
             return obj.image_field_picture.url
-        
-        # Check for Google profile picture from social account
-        social_account = obj.user.social_accounts.filter(provider='google').first()
-        if social_account and social_account.profile_picture_url:
-            return social_account.profile_picture_url
             
-        # Fall back to profile_picture field (URL)
-        return obj.profile_picture if obj.profile_picture else None
+        # No fallback to Google - return None if no manual upload
+        return None
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

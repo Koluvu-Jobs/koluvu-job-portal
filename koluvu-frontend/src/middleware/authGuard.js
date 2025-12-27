@@ -49,7 +49,15 @@ export async function authGuardMiddleware(request) {
 
     // Verify JWT token
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
-    const { payload } = await jwtVerify(token, secret);
+    const verifyResult = await jwtVerify(token, secret);
+    
+    // Check if verification result is valid
+    if (!verifyResult || !verifyResult.payload) {
+      console.warn('Auth Guard: Invalid JWT verification result');
+      return NextResponse.next();
+    }
+    
+    const { payload } = verifyResult;
     
     // Check token expiration
     if (payload.exp && payload.exp * 1000 < Date.now()) {
@@ -151,7 +159,15 @@ export async function checkAuthStatus(request) {
 
     // Verify JWT
     const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
-    const { payload } = await jwtVerify(token, secret);
+    const verifyResult = await jwtVerify(token, secret);
+    
+    // Check if verification result is valid
+    if (!verifyResult || !verifyResult.payload) {
+      console.warn('Auth status check: Invalid JWT verification result');
+      return { isAuthenticated: false, user: null, source: 'invalid_token' };
+    }
+    
+    const { payload } = verifyResult;
     
     // Check expiration
     if (payload.exp && payload.exp * 1000 < Date.now()) {

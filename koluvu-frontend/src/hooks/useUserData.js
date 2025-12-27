@@ -42,6 +42,9 @@ export const useUserData = () => {
           email: user.email,
           first_name: data.user.first_name || user.first_name || "",
           last_name: data.user.last_name || user.last_name || "",
+          // Prioritize effective_profile_picture (manual upload) over google_profile_picture
+          effective_profile_picture:
+            data.user.effective_profile_picture || null,
           google_profile_picture:
             data.user.google_profile_picture ||
             user.google_profile_picture ||
@@ -63,6 +66,7 @@ export const useUserData = () => {
             first_name: user.first_name || "User",
             last_name: user.last_name || "",
             email: user.email || "",
+            effective_profile_picture: null, // No manual upload in fallback
             google_profile_picture: user.google_profile_picture || null,
             current_designation: "Software Professional",
             location: "",

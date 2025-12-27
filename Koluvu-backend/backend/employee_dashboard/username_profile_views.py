@@ -230,10 +230,10 @@ class UsernameBasedEmployeeProfilePictureUploadView(APIView):
         employee_profile.image_field_picture = request.FILES['profile_picture']
         employee_profile.save()
         
-        serializer = EmployeeProfileSerializer(employee_profile)
+        serializer = EmployeeProfileSerializer(employee_profile, context={'request': request})
         return Response({
             'message': 'Profile picture uploaded successfully',
-            'profile_picture_url': serializer.data.get('image_field_picture'),
+            'profile_picture_url': serializer.data.get('effective_profile_picture'),
             'profile': serializer.data
         })
 

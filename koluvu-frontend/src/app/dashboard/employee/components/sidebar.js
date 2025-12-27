@@ -19,7 +19,6 @@ import {
   Edit3,
   LogOut,
 } from "lucide-react";
-import Image from "next/image";
 import { useUserData } from "@/hooks/useUserData";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -62,7 +61,9 @@ const Sidebar = ({
             userData.user?.last_name || ""
           }`.trim() || "User",
         role: userData.user?.current_designation || "Software Professional",
-        avatar: userData.user?.google_profile_picture || null,
+        avatar: userData.user?.effective_profile_picture 
+          ? `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}${userData.user.effective_profile_picture}`
+          : null,
         email: userData.user?.email || "",
         location: userData.user?.location || "Not specified",
         profileCompletion: userData.profile_completion || 0,
@@ -262,29 +263,81 @@ const Sidebar = ({
     }
   };
 
-  const handleProfilePictureUpload = (event) => {
+  const handleProfilePictureUpload = async (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-      if (!validTypes.includes(file.type)) {
-        alert("Only image files (JPEG, PNG, GIF, WEBP) are allowed.");
+    if (!file) return;
+
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      alert("Only image files (JPEG, PNG, GIF, WEBP) are allowed.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size should not exceed 5MB.");
+      return;
+    }
+
+    try {
+      // Get access token
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        alert("Please log in again to upload profile picture");
         return;
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        // 5MB limit
-        alert("File size should not exceed 5MB.");
-        return;
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append("profile_picture", file);
+
+      // Upload directly to Django backend (note trailing slash required by Django)
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
+      const response = await fetch(`${backendUrl}/api/employee/${username}/profile/upload-picture/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to upload profile picture");
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (onProfilePictureUpdate) {
-          onProfilePictureUpdate(e.target.result);
+      const data = await response.json();
+      console.log("Profile picture uploaded successfully:", data);
+
+      // Fetch updated dashboard data to get the new effective_profile_picture
+      const dashboardResponse = await fetch(`${backendUrl}/api/employee/dashboard/`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (dashboardResponse.ok) {
+        const dashboardData = await dashboardResponse.json();
+        console.log("Updated dashboard data after upload:", dashboardData);
+        
+        // Update localStorage auth data with new user info including effective_profile_picture
+        const storedAuth = JSON.parse(localStorage.getItem("auth") || "{}");
+        if (storedAuth.user && dashboardData.user) {
+          // Completely replace user object to ensure all fields are updated
+          storedAuth.user = dashboardData.user;
+          localStorage.setItem("auth", JSON.stringify(storedAuth));
+          console.log("✅ Updated localStorage auth with effective_profile_picture:", dashboardData.user.effective_profile_picture);
         }
-        setShowProfilePictureUpload(false);
-      };
-      reader.readAsDataURL(file);
+      }
+
+      // Show success message
+      alert("Profile picture updated successfully!");
+
+      // Hard reload to clear all React state and force fresh data load
+      window.location.href = window.location.href;
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      alert(error.message || "Failed to upload profile picture. Please try again.");
     }
   };
 
@@ -474,12 +527,10 @@ const SidebarContent = ({
             }`}
           >
             {userProfile.avatar ? (
-              <Image
+              <img
                 src={userProfile.avatar}
                 alt={userProfile.name}
-                width={isExpanded ? 80 : 48}
-                height={isExpanded ? 80 : 48}
-                className="object-cover rounded-full"
+                className="object-cover rounded-full w-full h-full"
               />
             ) : (
               <User
@@ -491,18 +542,24 @@ const SidebarContent = ({
               />
             )}
 
-            {/* Camera overlay */}
-            <div
+            {/* Camera overlay with hidden file input */}
+            <label
               className={`absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer`}
               onClick={(e) => {
                 e.stopPropagation();
-                setShowProfilePictureUpload(true);
               }}
             >
               <Camera
                 className={`text-white ${isExpanded ? "w-6 h-6" : "w-4 h-4"}`}
               />
-            </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={onProfilePictureUpload}
+                className="hidden"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </label>
 
             <span
               className={`absolute ${
@@ -520,31 +577,6 @@ const SidebarContent = ({
           )}
         </div>
       </motion.div>
-
-      {/* Profile Picture Upload Modal */}
-      {showProfilePictureUpload && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 w-80 max-w-[90vw]">
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">
-              Update Profile Picture
-            </h3>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={onProfilePictureUpload}
-              className="mb-4"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowProfilePictureUpload(false)}
-                className="px-3 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Menu Items */}
       <nav className="flex-1 space-y-2 xs:space-y-2.5 sm:space-y-3">

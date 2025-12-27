@@ -37,22 +37,36 @@ export const EmployeeHeader = ({
   // Get username for dynamic routing
   const username = user?.username || user?.email?.split("@")[0] || "default";
 
-  // Get employee profile data
+  // Get employee profile data - prioritize user context data over separate profile endpoint
   const getEmployeeProfile = () => {
-    const currentProfile = employeeProfile || user?.employee_profile;
+    // Use user data first (from dashboard endpoint), then fall back to separate profile endpoint
+    const currentProfile = user || employeeProfile;
+    
+    // Build avatar URL from effective_profile_picture (prioritizes manual upload)
+    const effectivePicture = currentProfile?.effective_profile_picture;
+    const avatarUrl = effectivePicture
+      ? (effectivePicture.startsWith('http') 
+          ? effectivePicture 
+          : `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}${effectivePicture}`)
+      : null;
+
+    console.log("Header Avatar Debug:", {
+      userObject: user,
+      currentProfile,
+      effective_profile_picture: effectivePicture,
+      finalAvatarUrl: avatarUrl,
+      timestamp: new Date().toISOString()
+    });
 
     return {
       name:
-        user?.first_name && user?.last_name
-          ? `${user.first_name} ${user.last_name}`
-          : user?.email?.split("@")[0] || "User",
-      title: currentProfile?.job_title || "Job Seeker",
-      avatar:
-        currentProfile?.effective_profile_picture ||
-        user?.google_profile_picture ||
-        null,
+        currentProfile?.first_name && currentProfile?.last_name
+          ? `${currentProfile.first_name} ${currentProfile.last_name}`
+          : currentProfile?.full_name || currentProfile?.email?.split("@")[0] || "User",
+      title: currentProfile?.current_designation || currentProfile?.job_title || "Job Seeker",
+      avatar: avatarUrl,
       location: currentProfile?.location || "Remote",
-      experience: currentProfile?.years_of_experience || "Fresher",
+      experience: currentProfile?.experience_years ? `${currentProfile.experience_years} years` : currentProfile?.years_of_experience || "Fresher",
     };
   };
 
@@ -388,23 +402,22 @@ export const EmployeeHeader = ({
       >
         <div className="relative">
           {employeeData.avatar ? (
-            <Image
-              src={`${employeeData.avatar}?v=${
-                employeeProfile?.updated_at || Date.now()
-              }`}
+            <img
+              src={`${employeeData.avatar}?v=${Date.now()}`}
               alt={employeeData.name}
-              width={32}
-              height={32}
               className="w-8 h-8 rounded-lg object-cover border border-white/30"
-              priority
+              onError={(e) => {
+                console.error("Header avatar image failed to load:", employeeData.avatar);
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
             />
-          ) : (
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center border border-white/30">
-              <span className="text-white font-bold text-base">
-                {employeeData.name.charAt(0)}
-              </span>
-            </div>
-          )}
+          ) : null}
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center border border-white/30" style={{ display: employeeData.avatar ? 'none' : 'flex' }}>
+            <span className="text-white font-bold text-base">
+              {employeeData.name.charAt(0)}
+            </span>
+          </div>
           {profileProgress < 100 && (
             <div className="absolute -bottom-2 -right-2">
               <ProfileProgressRing progress={profileProgress} />
@@ -461,19 +474,21 @@ export const EmployeeHeader = ({
               <div className="relative">
                 {employeeData.avatar ? (
                   <img
-                    src={`${employeeData.avatar}?v=${
-                      employeeProfile?.updated_at || Date.now()
-                    }`}
+                    src={`${employeeData.avatar}?v=${Date.now()}`}
                     alt={employeeData.name}
                     className="w-16 h-16 rounded-2xl object-cover border border-gray-200"
+                    onError={(e) => {
+                      console.error("Dropdown avatar image failed to load:", employeeData.avatar);
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
                   />
-                ) : (
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl flex items-center justify-center">
-                    <span className="text-white font-bold text-2xl">
-                      {employeeData.name.charAt(0)}
-                    </span>
-                  </div>
-                )}
+                ) : null}
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl flex items-center justify-center" style={{ display: employeeData.avatar ? 'none' : 'flex' }}>
+                  <span className="text-white font-bold text-2xl">
+                    {employeeData.name.charAt(0)}
+                  </span>
+                </div>
                 {profileProgress < 100 && (
                   <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
                     <span className="text-xs font-bold text-orange-600">
