@@ -24,7 +24,15 @@ class SafeAddField(migrations.AddField):
         if self.allow_migrate_model(schema_editor.connection.alias, to_model):
             # Check if column already exists
             table_name = to_model._meta.db_table
-            column_name = self.field.db_column or self.name
+            
+            # Get the actual database column name
+            if self.field.db_column:
+                column_name = self.field.db_column
+            elif hasattr(self.field, 'column'):
+                column_name = self.field.column
+            else:
+                # For ForeignKey fields, Django adds _id suffix
+                column_name = self.field.get_attname_column()[1]
             
             if not check_column_exists(table_name, column_name):
                 # Column doesn't exist, proceed with adding it
