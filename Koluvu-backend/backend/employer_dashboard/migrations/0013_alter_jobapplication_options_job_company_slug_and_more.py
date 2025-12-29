@@ -2,41 +2,24 @@
 # Modified to handle existing columns in production
 
 import django.db.models.deletion
-from django.db import migrations, models, connection
-
-
-def check_column_exists(table_name, column_name):
-    """Check if a column exists in a table"""
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT column_name 
-            FROM information_schema.columns 
-            WHERE table_name=%s AND column_name=%s
-        """, [table_name, column_name])
-        return cursor.fetchone() is not None
+from django.db import migrations, models
+from psycopg2 import errors as pg_errors
 
 
 class SafeAddField(migrations.AddField):
     """AddField operation that skips if column already exists"""
     
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
-        to_model = to_state.apps.get_model(app_label, self.model_name)
-        if self.allow_migrate_model(schema_editor.connection.alias, to_model):
-            # Check if column already exists
-            table_name = to_model._meta.db_table
-            
-            # Get the actual database column name
-            if self.field.db_column:
-                column_name = self.field.db_column
-            elif hasattr(self.field, 'column'):
-                column_name = self.field.column
+        try:
+            super().database_forwards(app_label, schema_editor, from_state, to_state)
+        except Exception as e:
+            # Check if it's a duplicate column error
+            if isinstance(e.__cause__, pg_errors.DuplicateColumn):
+                # Column already exists, skip this operation
+                pass
             else:
-                # For ForeignKey fields, Django adds _id suffix
-                column_name = self.field.get_attname_column()[1]
-            
-            if not check_column_exists(table_name, column_name):
-                # Column doesn't exist, proceed with adding it
-                super().database_forwards(app_label, schema_editor, from_state, to_state)
+                # Re-raise if it's a different error
+                raise
 
 
 class Migration(migrations.Migration):
