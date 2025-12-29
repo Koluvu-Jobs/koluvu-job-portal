@@ -11,17 +11,17 @@ class SafeAddField(migrations.AddField):
     
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
         # Use a savepoint to handle duplicate column errors
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 super().database_forwards(app_label, schema_editor, from_state, to_state)
-            except ProgrammingError as e:
-                # Check if it's a duplicate column error
-                if 'already exists' in str(e):
-                    # Column already exists, rollback this savepoint and continue
-                    pass
-                else:
-                    # Re-raise if it's a different error
-                    raise
+        except ProgrammingError as e:
+            # Check if it's a duplicate column error
+            if 'already exists' in str(e):
+                # Column already exists, rollback this savepoint and continue
+                pass
+            else:
+                # Re-raise if it's a different error
+                raise
 
 
 class Migration(migrations.Migration):
