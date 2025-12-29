@@ -53,8 +53,13 @@ def dashboard_data(request):
         completed_fields = sum(1 for field in profile_fields if field)
         profile_completion = int((completed_fields / len(profile_fields)) * 100)
         
-        # Get social account info (Google OAuth data)
-        social_account = request.user.social_accounts.filter(provider='google').first()
+        # Get social account info (Google OAuth data) - safely handle if social accounts don't exist
+        social_account = None
+        try:
+            social_account = request.user.social_accounts.filter(provider='google').first()
+        except AttributeError:
+            # social_accounts relation might not be set up yet
+            pass
         
         # Calculate real stats from database
         # TODO: Implement job application tracking model to get real application count

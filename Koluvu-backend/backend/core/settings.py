@@ -186,7 +186,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
+    'SIGNING_KEY': os.getenv('JWT_SECRET', SECRET_KEY),  # Use JWT_SECRET if available, fallback to SECRET_KEY
 }
 
 # Email Configuration - Mixed Mode (Real SMTP for emails, Console for mobile)
