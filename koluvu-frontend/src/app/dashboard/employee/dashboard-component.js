@@ -1306,7 +1306,9 @@ const Dashboard = ({
         <div className="lg:col-span-1">
           <div className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg overflow-hidden border border-gray-100 lg:sticky lg:top-24 hover:shadow-xl transition-shadow duration-300">
             <div
-              className={`h-16 xs:h-20 sm:h-24 md:h-28 lg:h-32 relative ${isEditMode ? 'cursor-pointer group' : 'cursor-default'}`}
+              className={`h-16 xs:h-20 sm:h-24 md:h-28 lg:h-32 relative ${
+                isEditMode ? "cursor-pointer group" : "cursor-default"
+              }`}
               onClick={handleBackgroundImageClick}
               style={{
                 background: backgroundImage
@@ -1325,8 +1327,20 @@ const Dashboard = ({
                 onChange={handleBackgroundImageUpload}
               />
               {/* Background overlay - only show hover effect in Edit Mode */}
-              <div className={`absolute inset-0 ${isEditMode ? 'bg-black/0 group-hover:bg-black/20' : 'bg-black/0'} transition-colors duration-200`}>
-                <div className={`absolute inset-0 flex items-center justify-center ${isEditMode ? 'opacity-0 group-hover:opacity-100' : 'opacity-0'} transition-opacity duration-200`}>
+              <div
+                className={`absolute inset-0 ${
+                  isEditMode
+                    ? "bg-black/0 group-hover:bg-black/20"
+                    : "bg-black/0"
+                } transition-colors duration-200`}
+              >
+                <div
+                  className={`absolute inset-0 flex items-center justify-center ${
+                    isEditMode
+                      ? "opacity-0 group-hover:opacity-100"
+                      : "opacity-0"
+                  } transition-opacity duration-200`}
+                >
                   <div className="bg-white/90 px-3 py-2 rounded-lg text-sm font-medium text-gray-700">
                     {backgroundImage
                       ? "Click to change background"
@@ -1334,7 +1348,7 @@ const Dashboard = ({
                   </div>
                 </div>
               </div>
-              
+
               {/* View mode message - only show when NOT in Edit Mode and background exists */}
               {!isEditMode && backgroundImage && (
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -1343,7 +1357,7 @@ const Dashboard = ({
                   </div>
                 </div>
               )}
-              
+
               {/* Removed the floating remove button in favor of Delete Photo inside the editor UI */}
               <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
                 <div className="relative">
@@ -1404,7 +1418,9 @@ const Dashboard = ({
                   className="inline-flex items-center space-x-1 xs:space-x-1.5 sm:space-x-2 bg-gradient-to-r from-cyan-300 to-blue-300 text-white px-2 xs:px-2.5 sm:px-3 md:px-4 py-1 xs:py-1.5 rounded-full text-[10px] xs:text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
                 >
                   <Zap className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 flex-shrink-0" />
-                  <span className="truncate max-w-[120px] xs:max-w-none">{availabilityStatus}</span>
+                  <span className="truncate max-w-[120px] xs:max-w-none">
+                    {availabilityStatus}
+                  </span>
                 </button>
               </div>
 
@@ -2030,9 +2046,7 @@ const Dashboard = ({
             </div>
           </div>
 
-          <div
-            className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg p-3 xs:p-4 sm:p-6 md:p-8 lg:p-12 mb-6 xs:mb-8 sm:mb-12 md:mb-16 lg:mb-24 border border-gray-100"
-          >
+          <div className="bg-white rounded-lg xs:rounded-xl sm:rounded-2xl shadow-lg p-3 xs:p-4 sm:p-6 md:p-8 lg:p-12 mb-6 xs:mb-8 sm:mb-12 md:mb-16 lg:mb-24 border border-gray-100">
             <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between mb-3 xs:mb-4 sm:mb-5 md:mb-6 gap-2 xs:gap-3 sm:gap-4">
               <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
                 <Bell className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-blue-500" />
@@ -2188,7 +2202,9 @@ const Dashboard = ({
             <div className="bg-gradient-to-br from-blue-300 to-cyan-400 text-white p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6">
               <div className="flex items-center justify-between mb-1 xs:mb-1.5 sm:mb-2">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold mb-0.5 xs:mb-1">Applied Jobs</h3>
+                  <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold mb-0.5 xs:mb-1">
+                    Applied Jobs
+                  </h3>
                   <p className="text-blue-100 text-[10px] xs:text-xs sm:text-sm opacity-90">
                     Track your progress
                   </p>
@@ -2408,7 +2424,9 @@ const Dashboard = ({
             <div className="bg-gradient-to-br from-sky-300 to-blue-400 text-white p-2 xs:p-3 sm:p-4 md:p-5 lg:p-6">
               <div className="flex items-center justify-between mb-1 xs:mb-1.5 sm:mb-2">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold mb-0.5 xs:mb-1">Preferences</h3>
+                  <h3 className="text-sm xs:text-base sm:text-lg md:text-xl font-bold mb-0.5 xs:mb-1">
+                    Preferences
+                  </h3>
                   <p className="text-sky-100 text-[10px] xs:text-xs sm:text-sm opacity-90">
                     Based on profile
                   </p>
@@ -2931,7 +2949,14 @@ const AppContent = ({ username, forceTab }) => {
         (completedFields / profileFields.length) * 100
       );
       setProfileCompletion(percentage);
-      console.log("Profile completion calculated:", percentage, "% - Completed fields:", completedFields, "/ Total:", profileFields.length);
+      console.log(
+        "Profile completion calculated:",
+        percentage,
+        "% - Completed fields:",
+        completedFields,
+        "/ Total:",
+        profileFields.length
+      );
     } else {
       setProfileCompletion(0);
     }

@@ -61,8 +61,10 @@ const Sidebar = ({
             userData.user?.last_name || ""
           }`.trim() || "User",
         role: userData.user?.current_designation || "Software Professional",
-        avatar: userData.user?.effective_profile_picture 
-          ? `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}${userData.user.effective_profile_picture}`
+        avatar: userData.user?.effective_profile_picture
+          ? `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000"}${
+              userData.user.effective_profile_picture
+            }`
           : null,
         email: userData.user?.email || "",
         location: userData.user?.location || "Not specified",
@@ -291,14 +293,18 @@ const Sidebar = ({
       formData.append("profile_picture", file);
 
       // Upload directly to Django backend (note trailing slash required by Django)
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
-      const response = await fetch(`${backendUrl}/api/employee/${username}/profile/upload-picture/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: formData,
-      });
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
+      const response = await fetch(
+        `${backendUrl}/api/employee/${username}/profile/upload-picture/`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -309,24 +315,30 @@ const Sidebar = ({
       console.log("Profile picture uploaded successfully:", data);
 
       // Fetch updated dashboard data to get the new effective_profile_picture
-      const dashboardResponse = await fetch(`${backendUrl}/api/employee/dashboard/`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const dashboardResponse = await fetch(
+        `${backendUrl}/api/employee/dashboard/`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (dashboardResponse.ok) {
         const dashboardData = await dashboardResponse.json();
         console.log("Updated dashboard data after upload:", dashboardData);
-        
+
         // Update localStorage auth data with new user info including effective_profile_picture
         const storedAuth = JSON.parse(localStorage.getItem("auth") || "{}");
         if (storedAuth.user && dashboardData.user) {
           // Completely replace user object to ensure all fields are updated
           storedAuth.user = dashboardData.user;
           localStorage.setItem("auth", JSON.stringify(storedAuth));
-          console.log("✅ Updated localStorage auth with effective_profile_picture:", dashboardData.user.effective_profile_picture);
+          console.log(
+            "✅ Updated localStorage auth with effective_profile_picture:",
+            dashboardData.user.effective_profile_picture
+          );
         }
       }
 
@@ -337,7 +349,9 @@ const Sidebar = ({
       window.location.href = window.location.href;
     } catch (error) {
       console.error("Error uploading profile picture:", error);
-      alert(error.message || "Failed to upload profile picture. Please try again.");
+      alert(
+        error.message || "Failed to upload profile picture. Please try again."
+      );
     }
   };
 
@@ -523,7 +537,9 @@ const SidebarContent = ({
         <div className={`flex flex-col items-center ${isExpanded ? "" : ""}`}>
           <div
             className={`rounded-full flex items-center justify-center bg-[#1a2036] relative shadow-lg transition-all duration-300 group ${
-              isExpanded ? "w-16 xs:w-18 sm:w-20 h-16 xs:h-18 sm:h-20 m-2 xs:m-3" : "w-12 h-12 m-1"
+              isExpanded
+                ? "w-16 xs:w-18 sm:w-20 h-16 xs:h-18 sm:h-20 m-2 xs:m-3"
+                : "w-12 h-12 m-1"
             }`}
           >
             {userProfile.avatar ? (
@@ -572,7 +588,9 @@ const SidebarContent = ({
               <p className="font-semibold text-base xs:text-lg leading-snug break-words px-1">
                 {userProfile.name}
               </p>
-              <p className="text-xs xs:text-sm opacity-80 mt-0.5 break-words px-1">{userProfile.role}</p>
+              <p className="text-xs xs:text-sm opacity-80 mt-0.5 break-words px-1">
+                {userProfile.role}
+              </p>
             </>
           )}
         </div>
@@ -611,7 +629,9 @@ const SidebarContent = ({
             >
               <Icon
                 className={`flex-shrink-0 ${
-                  isExpanded ? "w-5 h-5 xs:w-5.5 xs:h-5.5 sm:w-6 sm:h-6" : "w-6 h-6 xs:w-7 xs:h-7"
+                  isExpanded
+                    ? "w-5 h-5 xs:w-5.5 xs:h-5.5 sm:w-6 sm:h-6"
+                    : "w-6 h-6 xs:w-7 xs:h-7"
                 } transition-transform duration-300`}
               />
               <span
@@ -642,14 +662,20 @@ const SidebarContent = ({
         title={!isExpanded ? "Sign Out" : undefined}
         aria-label="Sign Out"
         className={`relative group w-full flex items-center rounded-lg xs:rounded-xl transition-all duration-300 ease-in-out overflow-hidden mt-3 xs:mt-4 border-t border-white/20 pt-3 xs:pt-4
-          ${isExpanded ? "justify-start px-2.5 xs:px-3 sm:px-4 py-2 xs:py-2.5 gap-2 xs:gap-2.5 sm:gap-3" : "justify-center p-2"}
+          ${
+            isExpanded
+              ? "justify-start px-2.5 xs:px-3 sm:px-4 py-2 xs:py-2.5 gap-2 xs:gap-2.5 sm:gap-3"
+              : "justify-center p-2"
+          }
           bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/40
         `}
         style={{ transformStyle: "preserve-3d" }}
       >
         <LogOut
           className={`flex-shrink-0 ${
-            isExpanded ? "w-5 h-5 xs:w-5.5 xs:h-5.5 sm:w-6 sm:h-6" : "w-6 h-6 xs:w-7 xs:h-7"
+            isExpanded
+              ? "w-5 h-5 xs:w-5.5 xs:h-5.5 sm:w-6 sm:h-6"
+              : "w-6 h-6 xs:w-7 xs:h-7"
           } transition-transform duration-300`}
         />
         <span

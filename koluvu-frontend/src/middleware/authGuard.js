@@ -36,19 +36,21 @@ export async function authGuardMiddleware(request) {
     return NextResponse.next();
   }
 
-  try {
-    // Check for authentication token
-    const token = request.cookies.get('access_token')?.value ||
-                  request.cookies.get('token')?.value ||
-                  request.headers.get('authorization')?.replace('Bearer ', '');
-    
-    if (!token) {
-      // Not authenticated - allow access to login/register pages
-      return NextResponse.next();
-    }
+  // Check for authentication token
+  const token = request.cookies.get('access_token')?.value ||
+                request.cookies.get('token')?.value ||
+                request.headers.get('authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    // Not authenticated - allow access to login/register pages
+    return NextResponse.next();
+  }
 
-    // Verify JWT token
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
+  // Verify JWT token
+  const jwtSecret = process.env.JWT_SECRET || process.env.DJANGO_SECRET_KEY || '&7$m2vu^z%=eqp*5y(+!7#t*&p6*^q%@t0=(%*!zy$&h9u!6fa';
+  const secret = new TextEncoder().encode(jwtSecret);
+  
+  try {
     const verifyResult = await jwtVerify(token, secret);
     
     // Check if verification result is valid
@@ -58,7 +60,7 @@ export async function authGuardMiddleware(request) {
     }
     
     const { payload } = verifyResult;
-    
+  
     // Check token expiration
     if (payload.exp && payload.exp * 1000 < Date.now()) {
       // Token expired - allow access to login/register pages
@@ -137,28 +139,30 @@ function extractUserTypeFromRoute(pathname) {
  * @returns {Object} - Authentication status and user info
  */
 export async function checkAuthStatus(request) {
-  try {
-    // Check cookies
-    const cookieToken = request.cookies.get('access_token')?.value ||
-                       request.cookies.get('token')?.value;
-    
-    // Check localStorage (client-side only)
-    // Note: This requires client-side implementation
-    
-    // Check session storage (client-side only)
-    // Note: This requires client-side implementation
-    
-    // Check authorization header
-    const headerToken = request.headers.get('authorization')?.replace('Bearer ', '');
-    
-    const token = cookieToken || headerToken;
-    
-    if (!token) {
-      return { isAuthenticated: false, user: null, source: null };
-    }
+  // Check cookies
+  const cookieToken = request.cookies.get('access_token')?.value ||
+                     request.cookies.get('token')?.value;
+  
+  // Check localStorage (client-side only)
+  // Note: This requires client-side implementation
+  
+  // Check session storage (client-side only)
+  // Note: This requires client-side implementation
+  
+  // Check authorization header
+  const headerToken = request.headers.get('authorization')?.replace('Bearer ', '');
+  
+  const token = cookieToken || headerToken;
+  
+  if (!token) {
+    return { isAuthenticated: false, user: null, source: null };
+  }
 
-    // Verify JWT
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret');
+  // Verify JWT
+  const jwtSecret = process.env.JWT_SECRET || process.env.DJANGO_SECRET_KEY || '&7$m2vu^z%=eqp*5y(+!7#t*&p6*^q%@t0=(%*!zy$&h9u!6fa';
+  const secret = new TextEncoder().encode(jwtSecret);
+  
+  try {
     const verifyResult = await jwtVerify(token, secret);
     
     // Check if verification result is valid
@@ -168,7 +172,7 @@ export async function checkAuthStatus(request) {
     }
     
     const { payload } = verifyResult;
-    
+  
     // Check expiration
     if (payload.exp && payload.exp * 1000 < Date.now()) {
       return { isAuthenticated: false, user: null, source: 'expired' };

@@ -56,7 +56,9 @@ const ProfileSection = ({ title, icon: Icon, children, className = "" }) => (
         <div className="p-2 bg-orange-100 rounded-lg">
           <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
         </div>
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+          {title}
+        </h3>
       </div>
     </div>
     <div className="p-4 sm:p-6">{children}</div>
@@ -175,8 +177,12 @@ const NotificationAlert = ({ message, type, onClose }) => {
         } text-white`}
       >
         <div className="flex items-center space-x-2">
-          {type === "success" && <CheckCircle className="w-5 h-5 flex-shrink-0" />}
-          {type === "error" && <AlertTriangle className="w-5 h-5 flex-shrink-0" />}
+          {type === "success" && (
+            <CheckCircle className="w-5 h-5 flex-shrink-0" />
+          )}
+          {type === "error" && (
+            <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+          )}
           <span className="flex-1 text-sm sm:text-base">{message}</span>
           <button onClick={onClose} className="ml-2 flex-shrink-0">
             <X className="w-4 h-4" />
@@ -187,7 +193,13 @@ const NotificationAlert = ({ message, type, onClose }) => {
   );
 };
 
-const MobileSidebar = ({ isOpen, onClose, quickLinks, activeSection, setActiveSection }) => {
+const MobileSidebar = ({
+  isOpen,
+  onClose,
+  quickLinks,
+  activeSection,
+  setActiveSection,
+}) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -200,17 +212,19 @@ const MobileSidebar = ({ isOpen, onClose, quickLinks, activeSection, setActiveSe
             className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
             onClick={onClose}
           />
-          
+
           {/* Sidebar */}
           <motion.div
-            initial={{ x: '-100%' }}
+            initial={{ x: "-100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
+            exit={{ x: "-100%" }}
             transition={{ type: "tween", duration: 0.3 }}
             className="fixed left-0 top-0 h-full w-80 bg-white z-50 lg:hidden overflow-y-auto"
           >
             <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Quick Links</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Quick Links
+              </h3>
               <button onClick={onClose} className="p-2">
                 <X className="w-5 h-5" />
               </button>
@@ -321,7 +335,8 @@ const Profile = ({
       setLoading(true);
 
       // Fetch main profile data
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
       const profileResponse = await fetch(
         `${backendUrl}/api/employee/dashboard/`,
         {
@@ -407,7 +422,8 @@ const Profile = ({
       { url: "skills", key: "keySkills" },
     ];
 
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
+    const backendUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
     for (const endpoint of endpoints) {
       try {
         const response = await fetch(
@@ -471,7 +487,8 @@ const Profile = ({
       const sanitize = (v) => {
         if (typeof v === "string") {
           const trimmed = v.trim();
-          if (trimmed === "Not specified" || trimmed === "Not provided") return "";
+          if (trimmed === "Not specified" || trimmed === "Not provided")
+            return "";
           // Keep 'Immediate' for noticePeriod as it's a valid semantic value
           return trimmed;
         }
@@ -544,13 +561,13 @@ const Profile = ({
       }
 
       // Prefer using the backend URL from env when available; keep localhost as fallback
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ||
-        "http://127.0.0.1:8000";
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
 
-  // Debug: log payload being sent (exclude full tokens)
-  console.log("Profile update payload:", updateData);
+      // Debug: log payload being sent (exclude full tokens)
+      console.log("Profile update payload:", updateData);
 
-  const response = await fetch(`${backendUrl}/api/employee/profile/`, {
+      const response = await fetch(`${backendUrl}/api/employee/profile/`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -618,7 +635,12 @@ const Profile = ({
         } catch (e) {
           parsed = null;
         }
-        console.log("Profile update response:", response.status, "body:", parsed || text);
+        console.log(
+          "Profile update response:",
+          response.status,
+          "body:",
+          parsed || text
+        );
       } catch (e) {
         console.log("Profile update succeeded (no readable body)");
       }
@@ -838,7 +860,15 @@ const Profile = ({
               </div>
             ))}
             <button
-              onClick={() => addListItem("experience", { company: "", title: "", startDate: "", endDate: "", description: "" })}
+              onClick={() =>
+                addListItem("experience", {
+                  company: "",
+                  title: "",
+                  startDate: "",
+                  endDate: "",
+                  description: "",
+                })
+              }
               className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
             >
               Add Experience
@@ -911,7 +941,15 @@ const Profile = ({
               </div>
             ))}
             <button
-              onClick={() => addListItem("internship", { company: "", role: "", startDate: "", endDate: "", description: "" })}
+              onClick={() =>
+                addListItem("internship", {
+                  company: "",
+                  role: "",
+                  startDate: "",
+                  endDate: "",
+                  description: "",
+                })
+              }
               className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
             >
               Add Internship
@@ -974,7 +1012,14 @@ const Profile = ({
               </div>
             ))}
             <button
-              onClick={() => addListItem("education", { degree: "", institution: "", year: "", grade: "" })}
+              onClick={() =>
+                addListItem("education", {
+                  degree: "",
+                  institution: "",
+                  year: "",
+                  grade: "",
+                })
+              }
               className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
             >
               Add Education
@@ -1016,7 +1061,12 @@ const Profile = ({
               </div>
             ))}
             <button
-              onClick={() => addListItem("technicalQualifications", { name: "", details: "" })}
+              onClick={() =>
+                addListItem("technicalQualifications", {
+                  name: "",
+                  details: "",
+                })
+              }
               className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
             >
               Add Technical Qualification
@@ -1070,7 +1120,13 @@ const Profile = ({
               </div>
             ))}
             <button
-              onClick={() => addListItem("projects", { title: "", year: "", description: "" })}
+              onClick={() =>
+                addListItem("projects", {
+                  title: "",
+                  year: "",
+                  description: "",
+                })
+              }
               className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
             >
               Add Project
@@ -1124,7 +1180,13 @@ const Profile = ({
               </div>
             ))}
             <button
-              onClick={() => addListItem("research", { title: "", year: "", description: "" })}
+              onClick={() =>
+                addListItem("research", {
+                  title: "",
+                  year: "",
+                  description: "",
+                })
+              }
               className="px-4 py-2 text-orange-600 hover:bg-orange-50 rounded-lg w-full"
             >
               Add Research
@@ -1274,12 +1336,14 @@ const Profile = ({
             {/* Title and Mobile Menu */}
             <div className="flex items-center justify-between sm:justify-start">
               <div>
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Edit Profile</h1>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                  Edit Profile
+                </h1>
                 <p className="text-gray-600 mt-1 text-sm sm:text-base">
                   Update your professional information
                 </p>
               </div>
-              
+
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileSidebarOpen(true)}
