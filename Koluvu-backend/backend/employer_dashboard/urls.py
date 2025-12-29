@@ -20,6 +20,7 @@ from .views import (
     PublicJobListView,
     PublicJobDetailView,
     PublicJobDetailByIdView,
+    PublicJobDetailBySlugView,
     JobStatsView,
     RecentJobsView,
     JobBulkActionView,
@@ -100,7 +101,8 @@ urlpatterns = [
     path('companies/', CompaniesListView.as_view(), name='companies_list'),
     path('jobs/public/', PublicJobListView.as_view(), name='public_job_list'),
     path('jobs/public/<int:pk>/', PublicJobDetailView.as_view(), name='public_job_detail'),
-    path('jobs/single/', PublicJobDetailByIdView.as_view(), name='public_job_detail_by_id'),
+    path('jobs/single/', PublicJobDetailByIdView.as_view(), name='public_job_detail_by_id'),  # Deprecated
+    path('jobs/<slug:company_slug>/<slug:title_slug>/<int:job_number>/', PublicJobDetailBySlugView.as_view(), name='public_job_detail_by_slug'),
     path('jobs/recent/', RecentJobsView.as_view(), name='recent_jobs'),
     
     # Authentication

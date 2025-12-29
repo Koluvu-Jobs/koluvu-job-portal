@@ -81,10 +81,19 @@ MIDDLEWARE = [
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+# Get production frontend URL from environment
+PRODUCTION_FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://koluvu-ai-job-portal.netlify.app",  # Production frontend
+    PRODUCTION_FRONTEND_URL,  # Dynamic from env
 ]
+
+# Remove duplicates
+CORS_ALLOWED_ORIGINS = list(set(CORS_ALLOWED_ORIGINS))
 
 # Enable automatic slash appending for proper URL matching
 APPEND_SLASH = True

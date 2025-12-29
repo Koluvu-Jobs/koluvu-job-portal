@@ -13,6 +13,11 @@ from django.shortcuts import get_object_or_404
 from datetime import datetime, timedelta
 import re
 import json
+import logging
+
+# Initialize logger
+logger = logging.getLogger(__name__)
+
 from .models import (
     EmployerProfile, Job, JobApplication, Candidate, Interviewer, 
     Interview, InterviewNote, InterviewTimeSlot, ProxyScanSession, 
@@ -1034,48 +1039,65 @@ class JobListCreateView(generics.ListCreateAPIView):
         if 'employer_logo' in request.FILES:
             data['employer_logo'] = request.FILES['employer_logo']
         
-        # DEBUG: Print incoming data after mapping
-        print("[DEBUG] Job POST incoming data:", dict(data))
+        # Convert text fields to arrays for JSON fields
+        text_to_array_fields = ['responsibilities', 'requirements', 'skills', 'benefits']
+        for field in text_to_array_fields:
+            if field in data and isinstance(data[field], str):
+                # Split by newlines or comma, filter empty strings
+                text = data[field].strip()
+                if text:
+                    data[field] = [line.strip() for line in text.split('\n') if line.strip()]
+                else:
+                    data[field] = []
         
         serializer = self.get_serializer(data=data)
-        if serializer.is_valid():
-            job = serializer.save(employer=employer_profile)
-            # DEBUG: Print saved job instance fields
-            print("[DEBUG] Job instance after save:", job.__dict__)
-            
-            # Create notification for job posting
-            try:
-                Notification.objects.create(
-                    recipient=request.user,
-                    type='job_update',
-                    title=f'Job Posted: {job.title}',
-                    message=f'Your job posting "{job.title}" has been created successfully and is now live.',
-                    job=job,
-                    metadata={
-                        'job_id': job.id,
-                        'action_url': f'/employer/jobs/{job.id}',
-                        'priority': 'medium'
-                    }
-                )
-            except Exception as notif_error:
-                print(f"Warning: Failed to create notification: {notif_error}")
-            
-            # Send real-time notifications to all employees
-            try:
-                from backend.shared_services.realtime_notifications import NotificationManager
-                NotificationManager.notify_job_posted(job)
-            except Exception as e:
-                # Log the error but don't fail the job creation
-                print(f"Error sending notifications: {str(e)}")
-            
-            return Response({
-                'message': 'Job posted successfully!',
-                'job': serializer.data,
-                'id': job.id,
-                'job_id': job.id  # Include job ID for frontend redirect
-            }, status=status.HTTP_201_CREATED)
+        try:
+            if serializer.is_valid():
+                try:
+                    job = serializer.save(employer=employer_profile)
+                    
+                    # Create notification for job posting
+                    try:
+                        Notification.objects.create(
+                            recipient=request.user,
+                            type='job_update',
+                            title=f'Job Posted: {job.title}',
+                            message=f'Your job posting "{job.title}" has been created successfully and is now live.',
+                            job=job,
+                            metadata={
+                                'job_id': job.id,
+                                'action_url': f'/employer/jobs/{job.id}',
+                                'priority': 'medium'
+                            }
+                        )
+                    except Exception as notif_error:
+                        logger.warning(f"Failed to create notification: {notif_error}")
+                
+                    # Send real-time notifications to all employees
+                    try:
+                        from backend.shared_services.realtime_notifications import NotificationManager
+                        NotificationManager.notify_job_posted(job)
+                    except Exception as e:
+                        logger.warning(f"Failed to send real-time notifications: {str(e)}")
+                    
+                    return Response({
+                        'message': 'Job posted successfully!',
+                        'job': serializer.data,
+                        'id': job.id,
+                        'job_id': job.id  # Include job ID for frontend redirect
+                    }, status=status.HTTP_201_CREATED)
+                    
+                except Exception as save_error:
+                    logger.error(f"Error saving job: {str(save_error)}", exc_info=True)
+                    return Response({
+                        'error': 'Failed to save job posting',
+                        'details': str(save_error)
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-        print("[DEBUG] Job POST validation failed:", serializer.errors)
+        except Exception as validation_error:
+            logger.error(f"Validation error: {str(validation_error)}", exc_info=True)
+            
+        logger.error(f"Job validation failed: {serializer.errors}")
         return Response({
             'error': 'Validation failed',
             'details': serializer.errors
@@ -1349,7 +1371,7 @@ class PublicJobDetailView(APIView):
 
 
 class PublicJobDetailByIdView(APIView):
-    """Public endpoint to view job details by job ID"""
+    """Public endpoint to view job details by job ID (DEPRECATED - Use PublicJobDetailBySlugView)"""
     permission_classes = [AllowAny]
     
     def get(self, request):
@@ -1391,6 +1413,40 @@ class PublicJobDetailByIdView(APIView):
             return Response(serializer.data)
             
         except Exception as e:
+            return Response({
+                'error': 'Failed to retrieve job',
+                'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PublicJobDetailBySlugView(APIView):
+    """Public endpoint to view job details by SEO-friendly URL slug"""
+    permission_classes = [AllowAny]
+    
+    def get(self, request, company_slug, title_slug, job_number):
+        try:
+            # Get the job by slug components
+            try:
+                job = Job.objects.select_related('employer').get(
+                    company_slug=company_slug,
+                    title_slug=title_slug,
+                    job_number=job_number,
+                    status='active'
+                )
+            except Job.DoesNotExist:
+                return Response({
+                    'error': 'Job not found',
+                    'details': f'No active job found at: jobs/{company_slug}/{title_slug}/{job_number}'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            # Increment view count
+            job.increment_views()
+            
+            serializer = JobSerializer(job)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            logger.error(f"Error retrieving job by slug: {str(e)}", exc_info=True)
             return Response({
                 'error': 'Failed to retrieve job',
                 'details': str(e)

@@ -73,6 +73,23 @@ class EmployeeProfileView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request):
+        """Update profile (full or partial update)"""
+        # Get or create profile
+        employee_profile, created = EmployeeProfile.objects.get_or_create(
+            user=request.user,
+            defaults={
+                'current_designation': '',
+                'is_profile_complete': False
+            }
+        )
+        
+        serializer = EmployeeProfileSerializer(employee_profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UsernameBasedEmployeeProfileView(APIView):

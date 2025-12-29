@@ -86,6 +86,7 @@ class JobSerializer(serializers.ModelSerializer):
     employer_name = serializers.CharField(source='employer.company_name', read_only=True)
     employer_profile_picture = serializers.SerializerMethodField()
     employer_logo_display = serializers.SerializerMethodField()
+    public_url = serializers.SerializerMethodField()
     
     def get_employer_profile_picture(self, obj):
         return obj.employer.get_profile_picture()
@@ -93,12 +94,17 @@ class JobSerializer(serializers.ModelSerializer):
     def get_employer_logo_display(self, obj):
         return obj.get_employer_logo()
     
+    def get_public_url(self, obj):
+        """Return SEO-friendly URL for the job"""
+        return obj.get_public_url()
+    
     class Meta:
         model = Job
         fields = '__all__'
         read_only_fields = [
             'id', 'created_at', 'updated_at', 'views_count', 
-            'applications_count', 'employer'
+            'applications_count', 'employer', 'company_slug', 
+            'title_slug', 'job_number'
         ]
     
     def validate_faqs(self, value):

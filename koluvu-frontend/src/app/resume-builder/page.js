@@ -95,6 +95,8 @@ const ResumeBuilder = () => {
     name: "",
     email: "",
     phone: "",
+    linkedin: "",
+    github: "",
     website: "",
     designation: "",
     address: "",
@@ -202,7 +204,14 @@ const ResumeBuilder = () => {
   const handleAddEducation = () =>
     setEducations((prev) => [
       ...prev,
-      { degree: "", college: "", university: "", startDate: "", endDate: "", cgpa: "" },
+      {
+        degree: "",
+        college: "",
+        university: "",
+        startDate: "",
+        endDate: "",
+        cgpa: "",
+      },
     ]);
   const handleRemoveEducation = (index) =>
     setEducations((prev) => prev.filter((_, i) => i !== index));

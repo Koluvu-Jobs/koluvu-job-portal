@@ -37,6 +37,12 @@ const PersonalInfoSection = ({ personalInfo, onInputChange }) => {
       placeholder: "https://linkedin.com/in/johndoe",
     },
     {
+      key: "github",
+      label: "GitHub Profile",
+      type: "url",
+      placeholder: "https://github.com/johndoe",
+    },
+    {
       key: "website",
       label: "Personal Website",
       type: "url",

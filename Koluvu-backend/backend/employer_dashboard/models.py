@@ -433,6 +433,11 @@ class Job(models.Model):
     # Metrics
     views_count = models.IntegerField(default=0, help_text="Number of Views")
     applications_count = models.IntegerField(default=0, help_text="Number of Applications")
+    
+    # SEO-friendly URL fields
+    company_slug = models.SlugField(max_length=100, blank=True, help_text="Company name slug for URL")
+    title_slug = models.SlugField(max_length=150, blank=True, help_text="Job title slug for URL")
+    job_number = models.IntegerField(default=0, help_text="Sequential job number for this company")
 
     class Meta:
         ordering = ['-created_at']
@@ -446,8 +451,33 @@ class Job(models.Model):
     def __str__(self):
         return f"{self.title} at {self.company_name}"
     
+    def get_public_url(self):
+        """Generate SEO-friendly public URL for job: jobs/{company}/{title}/{number}"""
+        from django.utils.text import slugify
+        company_slug = self.company_slug or slugify(self.company_name)
+        title_slug = self.title_slug or slugify(self.title)
+        return f"jobs/{company_slug}/{title_slug}/{self.job_number}"
+    
+    def get_absolute_url(self):
+        """Get full URL path for the job"""
+        return f"/api/employer/{self.get_public_url()}"
+    
     def save(self, *args, **kwargs):
         """Auto-populate employer details from profile if not provided"""
+        from django.utils.text import slugify
+        
+        # Generate slugs if not set
+        if not self.company_slug and self.company_name:
+            self.company_slug = slugify(self.company_name)
+        
+        if not self.title_slug and self.title:
+            self.title_slug = slugify(self.title)
+        
+        # Set job number if creating new job
+        if not self.pk:  # New job
+            # Get count of jobs from this employer (including all statuses)
+            job_count = Job.objects.filter(employer=self.employer).count()
+            self.job_number = job_count + 1
         if not self.company_name:
             self.company_name = self.employer.company_name
         if not self.employer_name:

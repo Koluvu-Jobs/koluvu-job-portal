@@ -25,10 +25,14 @@ class EmployeeProfileSerializer(serializers.ModelSerializer):
             'id', 'username', 'email', 'first_name', 'last_name', 'full_name',
             'phone_number', 'phone', 'date_of_birth', 'location', 
             'linkedin_url', 'linkedin_profile', 'github_url', 'github_profile', 
-            'portfolio_url', 'bio', 'profile_picture', 'image_field_picture', 
+            'portfolio_url', 'twitter_url', 'website_url', 'bio', 
+            'profile_picture', 'image_field_picture', 
             'background_image', 'google_profile_picture', 'effective_profile_picture',
             'current_designation', 'current_position', 'experience_years', 
-            'expected_salary', 'resume_url', 'is_job_seeker', 'is_profile_complete',
+            'current_salary', 'expected_salary', 'notice_period', 'department',
+            'professional_mission', 'strengths', 'achievements',
+            'nationality', 'marital_status', 'address',
+            'resume_url', 'is_job_seeker', 'is_profile_complete',
             'skills_list', 'created_at', 'updated_at'
         ]
     

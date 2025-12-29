@@ -27,6 +27,8 @@ class EmployeeProfile(models.Model):
     github_url = models.URLField(blank=True, default='')
     github_profile = models.URLField(blank=True, default='')  # Keep for compatibility
     portfolio_url = models.URLField(blank=True, default='')
+    twitter_url = models.URLField(blank=True, default='')  # Twitter profile URL
+    website_url = models.URLField(blank=True, default='')  # Personal website URL
     bio = models.TextField(blank=True, default='')
     profile_picture = models.URLField(blank=True, default='')  # For Google profile pictures
     image_field_picture = models.ImageField(upload_to='employee_photos/', blank=True, null=True)  # For uploaded files
@@ -34,7 +36,23 @@ class EmployeeProfile(models.Model):
     current_designation = models.CharField(max_length=255, blank=True, default='')
     current_position = models.CharField(max_length=255, blank=True, default='')  # Keep for compatibility
     experience_years = models.IntegerField(null=True, blank=True)
+    
+    # Compensation and employment details
+    current_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     expected_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    notice_period = models.CharField(max_length=50, blank=True, default='')  # e.g., "30 Days", "Immediate"
+    department = models.CharField(max_length=255, blank=True, default='')
+    
+    # Professional details
+    professional_mission = models.TextField(blank=True, default='')
+    strengths = models.TextField(blank=True, default='')  # Comma-separated or JSON
+    achievements = models.TextField(blank=True, default='')  # Comma-separated or JSON
+    
+    # Personal information
+    nationality = models.CharField(max_length=100, blank=True, default='')
+    marital_status = models.CharField(max_length=50, blank=True, default='')
+    address = models.TextField(blank=True, default='')
+    
     resume_url = models.URLField(blank=True, default='')
     is_job_seeker = models.BooleanField(default=True)
     is_profile_complete = models.BooleanField(default=False)  # Track onboarding completion

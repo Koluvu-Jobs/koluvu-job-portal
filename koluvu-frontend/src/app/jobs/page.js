@@ -35,8 +35,8 @@ const JobCard = ({ job }) => {
     return null;
   };
 
-  // Build the job detail URL using job ID
-  const jobUrl = `/jobs/${job.id}`;
+  // Build the job detail URL using public_url from API response or generate from slugs
+  const jobUrl = job.public_url ? `/${job.public_url}` : `/jobs/${job.id}`;
 
   return (
     <motion.div
