@@ -24,7 +24,7 @@ class SafeAddField(migrations.AddField):
         if self.allow_migrate_model(schema_editor.connection.alias, to_model):
             # Check if column already exists
             table_name = to_model._meta.db_table
-            column_name = self.field.column
+            column_name = self.field.db_column or self.name
             
             if not check_column_exists(table_name, column_name):
                 # Column doesn't exist, proceed with adding it
