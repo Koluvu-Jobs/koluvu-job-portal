@@ -33,33 +33,68 @@ def dashboard_data(request):
                 status=status.HTTP_403_FORBIDDEN
             )
         
+        print(f"[DEBUG] User authenticated: {request.user.username}")
+        
         # Get or create employee profile
-        profile, created = EmployeeProfile.objects.get_or_create(user=request.user)
+        try:
+            profile, created = EmployeeProfile.objects.get_or_create(user=request.user)
+            print(f"[DEBUG] Profile created/retrieved: {created}")
+        except Exception as e:
+            print(f"[ERROR] Failed to get/create profile: {str(e)}")
+            return Response(
+                {'error': f'Profile creation failed: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         
         # Serialize profile data
-        profile_serializer = EmployeeProfileSerializer(profile)
+        try:
+            profile_serializer = EmployeeProfileSerializer(profile)
+            print("[DEBUG] Profile serialization successful")
+        except Exception as e:
+            print(f"[ERROR] Profile serialization failed: {str(e)}")
+            return Response(
+                {'error': f'Profile serialization failed: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         
         # Get additional data
-        education = Education.objects.filter(employee=profile)
-        experience = Experience.objects.filter(employee=profile)
-        skills = Skill.objects.filter(employee=profile)
-        resumes = Resume.objects.filter(employee=profile)
+        try:
+            education = Education.objects.filter(employee=profile)
+            experience = Experience.objects.filter(employee=profile)
+            skills = Skill.objects.filter(employee=profile)
+            resumes = Resume.objects.filter(employee=profile)
+            print("[DEBUG] Related data fetched successfully")
+        except Exception as e:
+            print(f"[ERROR] Failed to fetch related data: {str(e)}")
+            return Response(
+                {'error': f'Failed to fetch related data: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         
         # Calculate profile completion percentage
-        profile_fields = [
-            profile.phone_number, profile.location, profile.bio,
-            profile.current_designation, profile.linkedin_url
-        ]
-        completed_fields = sum(1 for field in profile_fields if field)
-        profile_completion = int((completed_fields / len(profile_fields)) * 100)
+        try:
+            profile_fields = [
+                profile.phone_number, profile.location, profile.bio,
+                profile.current_designation, profile.linkedin_url
+            ]
+            completed_fields = sum(1 for field in profile_fields if field)
+            profile_completion = int((completed_fields / len(profile_fields)) * 100)
+            print(f"[DEBUG] Profile completion calculated: {profile_completion}%")
+        except Exception as e:
+            print(f"[ERROR] Profile completion calculation failed: {str(e)}")
+            profile_completion = 0
         
         # Get social account info (Google OAuth data) - safely handle if social accounts don't exist
         social_account = None
         try:
             social_account = request.user.social_accounts.filter(provider='google').first()
+            print("[DEBUG] Social account fetched")
         except AttributeError:
             # social_accounts relation might not be set up yet
+            print("[DEBUG] Social accounts not available")
             pass
+        except Exception as e:
+            print(f"[ERROR] Social account fetch failed: {str(e)}")
         
         # Calculate real stats from database
         # TODO: Implement job application tracking model to get real application count
@@ -67,30 +102,40 @@ def dashboard_data(request):
         interviews_count = 0    # Will be dynamic when interview scheduling is added
         profile_views_count = 0  # Will be dynamic when profile view tracking is added
         
-        dashboard_data = {
-            'user': profile_serializer.data,
-            'profile_completion': profile_completion,
-            'stats': {
-                'applications': applications_count,
-                'interviews': interviews_count,
-                'profile_views': profile_views_count,
-            },
-            'education_count': education.count(),
-            'experience_count': experience.count(),
-            'skills_count': skills.count(),
-            'resumes_count': resumes.count(),
-            'social_account': {
-                'provider': social_account.provider if social_account else None,
-                'profile_picture': social_account.profile_picture_url if social_account else None,
-                'connected_at': social_account.created_at if social_account else None
-            } if social_account else None,
-            'onboarding_complete': profile.is_profile_complete,
-            'needs_onboarding': not profile.is_profile_complete
-        }
-        
-        return Response(dashboard_data)
+        try:
+            dashboard_data = {
+                'user': profile_serializer.data,
+                'profile_completion': profile_completion,
+                'stats': {
+                    'applications': applications_count,
+                    'interviews': interviews_count,
+                    'profile_views': profile_views_count,
+                },
+                'education_count': education.count(),
+                'experience_count': experience.count(),
+                'skills_count': skills.count(),
+                'resumes_count': resumes.count(),
+                'social_account': {
+                    'provider': social_account.provider if social_account else None,
+                    'profile_picture': social_account.profile_picture_url if social_account else None,
+                    'connected_at': social_account.created_at if social_account else None
+                } if social_account else None,
+                'onboarding_complete': profile.is_profile_complete,
+                'needs_onboarding': not profile.is_profile_complete
+            }
+            print("[DEBUG] Dashboard data prepared successfully")
+            return Response(dashboard_data)
+        except Exception as e:
+            print(f"[ERROR] Dashboard data preparation failed: {str(e)}")
+            return Response(
+                {'error': f'Dashboard data preparation failed: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         
     except Exception as e:
+        print(f"[ERROR] Unexpected error in dashboard_data: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return Response(
             {'error': f'Failed to fetch dashboard data: {str(e)}'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
