@@ -24,6 +24,31 @@ class SafeAddField(migrations.AddField):
                 raise
 
 
+class SafeAddIndex(migrations.AddIndex):
+    """AddIndex operation that skips if index already exists"""
+    
+    def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        try:
+            with transaction.atomic():
+                super().database_forwards(app_label, schema_editor, from_state, to_state)
+        except ProgrammingError as e:
+            if 'already exists' in str(e):
+                pass
+            else:
+                raise
+
+
+class SafeAlterField(migrations.AlterField):
+    """AlterField operation that skips if it fails (e.g. column doesn't exist yet)"""
+    
+    def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        try:
+            with transaction.atomic():
+                super().database_forwards(app_label, schema_editor, from_state, to_state)
+        except ProgrammingError:
+            pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -118,37 +143,37 @@ class Migration(migrations.Migration):
             name="viewed_by_employer",
             field=models.BooleanField(default=False),
         ),
-        migrations.AlterField(
+        SafeAlterField(
             model_name="jobapplication",
             name="candidate_phone",
             field=models.CharField(blank=True, default="", max_length=20),
         ),
-        migrations.AlterField(
+        SafeAlterField(
             model_name="jobapplication",
             name="cover_letter",
             field=models.TextField(blank=True, default=""),
         ),
-        migrations.AlterField(
+        SafeAlterField(
             model_name="jobapplication",
             name="resume",
             field=models.FileField(
                 blank=True, null=True, upload_to="application_resumes/"
             ),
         ),
-        migrations.AddIndex(
+        SafeAddIndex(
             model_name="jobapplication",
             index=models.Index(
                 fields=["job", "-ats_score"], name="employer_da_job_id_249762_idx"
             ),
         ),
-        migrations.AddIndex(
+        SafeAddIndex(
             model_name="jobapplication",
             index=models.Index(
                 fields=["employee", "-applied_at"],
                 name="employer_da_employe_caa0a8_idx",
             ),
         ),
-        migrations.AddIndex(
+        SafeAddIndex(
             model_name="jobapplication",
             index=models.Index(
                 fields=["status", "-applied_at"], name="employer_da_status_df013f_idx"
