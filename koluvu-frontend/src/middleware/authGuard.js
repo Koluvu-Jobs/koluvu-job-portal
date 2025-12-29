@@ -1,6 +1,6 @@
 // Authentication guard middleware for login/register pages
-import { NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import { NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 
 /**
  * Authentication Guard Middleware
@@ -9,58 +9,62 @@ import { jwtVerify } from 'jose';
  */
 
 const LOGIN_ROUTES = [
-  '/auth/login/employee',
-  '/auth/login/employer', 
-  '/auth/login/partner',
-  '/auth/login/admin'
+  "/auth/login/employee",
+  "/auth/login/employer",
+  "/auth/login/partner",
+  "/auth/login/admin",
 ];
 
 const REGISTER_ROUTES = [
-  '/auth/register/employee',
-  '/auth/register/employer',
-  '/auth/register/partner'
+  "/auth/register/employee",
+  "/auth/register/employer",
+  "/auth/register/partner",
 ];
 
 const DASHBOARD_ROUTES = {
-  employee: '/dashboard/employee',
-  employer: '/dashboard/employer', 
-  partner: '/dashboard/partner',
-  admin: '/dashboard/admin'
+  employee: "/dashboard/employee",
+  employer: "/dashboard/employer",
+  partner: "/dashboard/partner",
+  admin: "/dashboard/admin",
 };
 
 export async function authGuardMiddleware(request) {
   const { pathname } = request.nextUrl;
-  
+
   // Only apply to login/register routes
   if (!LOGIN_ROUTES.includes(pathname) && !REGISTER_ROUTES.includes(pathname)) {
     return NextResponse.next();
   }
 
   // Check for authentication token
-  const token = request.cookies.get('access_token')?.value ||
-                request.cookies.get('token')?.value ||
-                request.headers.get('authorization')?.replace('Bearer ', '');
-  
+  const token =
+    request.cookies.get("access_token")?.value ||
+    request.cookies.get("token")?.value ||
+    request.headers.get("authorization")?.replace("Bearer ", "");
+
   if (!token) {
     // Not authenticated - allow access to login/register pages
     return NextResponse.next();
   }
 
   // Verify JWT token
-  const jwtSecret = process.env.JWT_SECRET || process.env.DJANGO_SECRET_KEY || '&7$m2vu^z%=eqp*5y(+!7#t*&p6*^q%@t0=(%*!zy$&h9u!6fa';
+  const jwtSecret =
+    process.env.JWT_SECRET ||
+    process.env.DJANGO_SECRET_KEY ||
+    "&7$m2vu^z%=eqp*5y(+!7#t*&p6*^q%@t0=(%*!zy$&h9u!6fa";
   const secret = new TextEncoder().encode(jwtSecret);
-  
+
   try {
     const verifyResult = await jwtVerify(token, secret);
-    
+
     // Check if verification result is valid
     if (!verifyResult || !verifyResult.payload) {
-      console.warn('Auth Guard: Invalid JWT verification result');
+      console.warn("Auth Guard: Invalid JWT verification result");
       return NextResponse.next();
     }
-    
+
     const { payload } = verifyResult;
-  
+
     // Check token expiration
     if (payload.exp && payload.exp * 1000 < Date.now()) {
       // Token expired - allow access to login/register pages
@@ -69,12 +73,14 @@ export async function authGuardMiddleware(request) {
 
     const userType = payload.user_type || payload.role;
     const userEmail = payload.email;
-    
-    console.log(`🔒 Auth Guard: Authenticated ${userType} (${userEmail}) trying to access ${pathname}`);
+
+    console.log(
+      `🔒 Auth Guard: Authenticated ${userType} (${userEmail}) trying to access ${pathname}`
+    );
 
     // User is authenticated - determine where to redirect them
     const redirectUrl = determineRedirectUrl(pathname, userType, request);
-    
+
     if (redirectUrl) {
       console.log(`🔄 Auth Guard: Redirecting to ${redirectUrl}`);
       return NextResponse.redirect(new URL(redirectUrl, request.url));
@@ -82,9 +88,8 @@ export async function authGuardMiddleware(request) {
 
     // Allow access (shouldn't reach here in normal flow)
     return NextResponse.next();
-
   } catch (error) {
-    console.error('Auth Guard JWT verification error:', error);
+    console.error("Auth Guard JWT verification error:", error);
     // On token verification error, allow access to login/register
     return NextResponse.next();
   }
@@ -100,24 +105,27 @@ export async function authGuardMiddleware(request) {
 function determineRedirectUrl(pathname, userType, request) {
   // Extract user type from the route they're trying to access
   const routeUserType = extractUserTypeFromRoute(pathname);
-  
+
   // If user is trying to access their own role's login/register page
   if (routeUserType === userType) {
     // Redirect to their dashboard
-    return DASHBOARD_ROUTES[userType] || '/dashboard';
+    return DASHBOARD_ROUTES[userType] || "/dashboard";
   }
-  
+
   // If user is trying to access a different role's login/register page
   if (routeUserType && routeUserType !== userType) {
     // Prevent cross-role access - redirect to their own dashboard with error message
-    const redirectUrl = new URL(DASHBOARD_ROUTES[userType] || '/dashboard', request.url);
-    redirectUrl.searchParams.set('error', 'unauthorized_role_access');
-    redirectUrl.searchParams.set('attempted_role', routeUserType);
+    const redirectUrl = new URL(
+      DASHBOARD_ROUTES[userType] || "/dashboard",
+      request.url
+    );
+    redirectUrl.searchParams.set("error", "unauthorized_role_access");
+    redirectUrl.searchParams.set("attempted_role", routeUserType);
     return redirectUrl.toString();
   }
-  
+
   // Default: redirect to user's dashboard
-  return DASHBOARD_ROUTES[userType] || '/dashboard';
+  return DASHBOARD_ROUTES[userType] || "/dashboard";
 }
 
 /**
@@ -126,10 +134,10 @@ function determineRedirectUrl(pathname, userType, request) {
  * @returns {string|null} - User type or null if not determinable
  */
 function extractUserTypeFromRoute(pathname) {
-  if (pathname.includes('/employee')) return 'employee';
-  if (pathname.includes('/employer')) return 'employer';
-  if (pathname.includes('/partner')) return 'partner';
-  if (pathname.includes('/admin')) return 'admin';
+  if (pathname.includes("/employee")) return "employee";
+  if (pathname.includes("/employer")) return "employer";
+  if (pathname.includes("/partner")) return "partner";
+  if (pathname.includes("/admin")) return "admin";
   return null;
 }
 
@@ -140,42 +148,48 @@ function extractUserTypeFromRoute(pathname) {
  */
 export async function checkAuthStatus(request) {
   // Check cookies
-  const cookieToken = request.cookies.get('access_token')?.value ||
-                     request.cookies.get('token')?.value;
-  
+  const cookieToken =
+    request.cookies.get("access_token")?.value ||
+    request.cookies.get("token")?.value;
+
   // Check localStorage (client-side only)
   // Note: This requires client-side implementation
-  
+
   // Check session storage (client-side only)
   // Note: This requires client-side implementation
-  
+
   // Check authorization header
-  const headerToken = request.headers.get('authorization')?.replace('Bearer ', '');
-  
+  const headerToken = request.headers
+    .get("authorization")
+    ?.replace("Bearer ", "");
+
   const token = cookieToken || headerToken;
-  
+
   if (!token) {
     return { isAuthenticated: false, user: null, source: null };
   }
 
   // Verify JWT
-  const jwtSecret = process.env.JWT_SECRET || process.env.DJANGO_SECRET_KEY || '&7$m2vu^z%=eqp*5y(+!7#t*&p6*^q%@t0=(%*!zy$&h9u!6fa';
+  const jwtSecret =
+    process.env.JWT_SECRET ||
+    process.env.DJANGO_SECRET_KEY ||
+    "&7$m2vu^z%=eqp*5y(+!7#t*&p6*^q%@t0=(%*!zy$&h9u!6fa";
   const secret = new TextEncoder().encode(jwtSecret);
-  
+
   try {
     const verifyResult = await jwtVerify(token, secret);
-    
+
     // Check if verification result is valid
     if (!verifyResult || !verifyResult.payload) {
-      console.warn('Auth status check: Invalid JWT verification result');
-      return { isAuthenticated: false, user: null, source: 'invalid_token' };
+      console.warn("Auth status check: Invalid JWT verification result");
+      return { isAuthenticated: false, user: null, source: "invalid_token" };
     }
-    
+
     const { payload } = verifyResult;
-  
+
     // Check expiration
     if (payload.exp && payload.exp * 1000 < Date.now()) {
-      return { isAuthenticated: false, user: null, source: 'expired' };
+      return { isAuthenticated: false, user: null, source: "expired" };
     }
 
     return {
@@ -184,14 +198,13 @@ export async function checkAuthStatus(request) {
         id: payload.user_id,
         email: payload.email,
         userType: payload.user_type || payload.role,
-        username: payload.username
+        username: payload.username,
       },
-      source: cookieToken ? 'cookie' : 'header'
+      source: cookieToken ? "cookie" : "header",
     };
-
   } catch (error) {
-    console.error('Auth status check error:', error);
-    return { isAuthenticated: false, user: null, source: 'error' };
+    console.error("Auth status check error:", error);
+    return { isAuthenticated: false, user: null, source: "error" };
   }
 }
 
