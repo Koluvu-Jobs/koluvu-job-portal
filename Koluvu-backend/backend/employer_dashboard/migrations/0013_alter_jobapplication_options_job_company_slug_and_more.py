@@ -2,24 +2,26 @@
 # Modified to handle existing columns in production
 
 import django.db.models.deletion
-from django.db import migrations, models
-from psycopg2 import errors as pg_errors
+from django.db import migrations, models, transaction
+from django.db.utils import ProgrammingError
 
 
 class SafeAddField(migrations.AddField):
     """AddField operation that skips if column already exists"""
     
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
-        try:
-            super().database_forwards(app_label, schema_editor, from_state, to_state)
-        except Exception as e:
-            # Check if it's a duplicate column error
-            if isinstance(e.__cause__, pg_errors.DuplicateColumn):
-                # Column already exists, skip this operation
-                pass
-            else:
-                # Re-raise if it's a different error
-                raise
+        # Use a savepoint to handle duplicate column errors
+        with transaction.atomic():
+            try:
+                super().database_forwards(app_label, schema_editor, from_state, to_state)
+            except ProgrammingError as e:
+                # Check if it's a duplicate column error
+                if 'already exists' in str(e):
+                    # Column already exists, rollback this savepoint and continue
+                    pass
+                else:
+                    # Re-raise if it's a different error
+                    raise
 
 
 class Migration(migrations.Migration):
