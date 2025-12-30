@@ -2,6 +2,11 @@
 export const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 console.log("Google Client ID loaded:", GOOGLE_CLIENT_ID);
+console.log(
+  "Current window origin:",
+  typeof window !== "undefined" ? window.location.origin : "SSR"
+);
+console.log("Environment:", process.env.NODE_ENV);
 
 export const initializeGoogleOAuth = () => {
   return new Promise((resolve, reject) => {

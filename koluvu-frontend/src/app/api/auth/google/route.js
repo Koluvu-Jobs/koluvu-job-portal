@@ -4,8 +4,21 @@ export async function POST(request) {
   try {
     const body = await request.json();
     console.log("Received request body:", body);
+    console.log("Environment check:");
+    console.log("- NODE_ENV:", process.env.NODE_ENV);
+    console.log(
+      "- NEXT_PUBLIC_BACKEND_URL:",
+      process.env.NEXT_PUBLIC_BACKEND_URL
+    );
+    console.log(
+      "- All NEXT_PUBLIC vars:",
+      Object.keys(process.env).filter((key) => key.startsWith("NEXT_PUBLIC_"))
+    );
 
-    const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/google/`;
+    const backendUrl = `${
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      "https://koluvu-job-portal.onrender.com"
+    }/api/auth/google/`;
     console.log("Forwarding to backend:", backendUrl);
 
     // Normalize the payload expected by the Django backend.
