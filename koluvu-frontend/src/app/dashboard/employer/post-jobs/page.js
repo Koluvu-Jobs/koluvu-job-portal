@@ -596,13 +596,13 @@ export default function PostJobPage() {
       // Redirect to the proper job detail page using utility function
       const jobId = data.id || data.job_id || data.job?.id;
       const responseJobData = data.job || data;
-      
+
       if (jobId && responseJobData) {
         // Add the ID to responseJobData if it's missing
         if (!responseJobData.id) {
           responseJobData.id = jobId;
         }
-        
+
         const jobUrl = buildJobUrl(responseJobData);
         console.log(`Redirecting to: ${jobUrl}`);
         router.push(jobUrl);
