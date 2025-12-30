@@ -15,7 +15,7 @@ export async function GET(request) {
     }
 
     // Forward request to Django backend
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000';
     const response = await fetch(`${backendUrl}/api/training/dashboard/statistics/`, {
       method: 'GET',
       headers: {

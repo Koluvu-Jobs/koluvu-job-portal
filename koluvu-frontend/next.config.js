@@ -1,5 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Environment-based configuration
+  env: {
+    NEXT_PUBLIC_BACKEND_URL: process.env.NODE_ENV === 'production' 
+      ? (process.env.NEXT_PUBLIC_BACKEND_URL_PROD || 'https://koluvu-job-portal.onrender.com')
+      : (process.env.NEXT_PUBLIC_BACKEND_URL_LOCAL || 'http://127.0.0.1:8000'),
+  },
+
   // Performance optimizations
   experimental: {
     optimizePackageImports: [

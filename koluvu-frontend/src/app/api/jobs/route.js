@@ -28,15 +28,74 @@ export async function POST(request) {
       salary_max: parseFloat(body.salary_max || body.salaryMax) || null,
       salary_currency: body.salary_currency || body.salaryCurrency || "INR",
 
-      // Job description fields
+      // Job description fields with smart array conversion
       description:
         body.description || body.jobDescription || body.jobBrief || "",
       job_brief: body.job_brief || body.jobBrief || "",
-      responsibilities: body.responsibilities || [],
-      requirements: body.requirements || [],
-      benefits: body.benefits || [],
+
+      // Handle responsibilities - convert text to array if needed
+      responsibilities: (() => {
+        if (Array.isArray(body.responsibilities)) {
+          return body.responsibilities;
+        } else if (
+          typeof body.responsibilities === "string" &&
+          body.responsibilities.trim()
+        ) {
+          return body.responsibilities
+            .trim()
+            .split(/\n|;|\*|\u2022|\u2023/)
+            .map((item) => item.trim().replace(/^[-•*]\s*/, ""))
+            .filter((item) => item.length > 0);
+        }
+        return [];
+      })(),
+
+      // Handle requirements - convert text to array if needed
+      requirements: (() => {
+        if (Array.isArray(body.requirements)) {
+          return body.requirements;
+        } else if (
+          typeof body.requirements === "string" &&
+          body.requirements.trim()
+        ) {
+          return body.requirements
+            .trim()
+            .split(/\n|;|\*|\u2022|\u2023/)
+            .map((item) => item.trim().replace(/^[-•*]\s*/, ""))
+            .filter((item) => item.length > 0);
+        }
+        return [];
+      })(),
+
+      // Handle benefits - convert text to array if needed
+      benefits: (() => {
+        if (Array.isArray(body.benefits)) {
+          return body.benefits;
+        } else if (typeof body.benefits === "string" && body.benefits.trim()) {
+          return body.benefits
+            .trim()
+            .split(/\n|;|\*|\u2022|\u2023/)
+            .map((item) => item.trim().replace(/^[-•*]\s*/, ""))
+            .filter((item) => item.length > 0);
+        }
+        return [];
+      })(),
+
       perks: body.perks || [],
-      skills: body.skills || [],
+
+      // Handle skills - convert text to array if needed
+      skills: (() => {
+        if (Array.isArray(body.skills)) {
+          return body.skills;
+        } else if (typeof body.skills === "string" && body.skills.trim()) {
+          return body.skills
+            .trim()
+            .split(/,|\n|;|\*|\u2022|\u2023/)
+            .map((item) => item.trim().replace(/^[-•*]\s*/, ""))
+            .filter((item) => item.length > 0);
+        }
+        return [];
+      })(),
 
       // Advanced fields
       faqs: body.faqs || [],

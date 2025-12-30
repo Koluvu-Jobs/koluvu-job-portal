@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import Header from "@koluvu/components/Header/Header";
 import Footer from "@koluvu/components/Footer/Footer";
 import { AnimatedWrapper } from "@koluvu/styles/employer/menubar/AnimatedWrapper";
+import { buildJobUrl } from "@/utils/jobUrls";
 
 const slugify = (str) =>
   String(str || "")
@@ -35,8 +36,8 @@ const JobCard = ({ job }) => {
     return null;
   };
 
-  // Build the job detail URL using public_url from API response or generate from slugs
-  const jobUrl = job.public_url ? `/${job.public_url}` : `/jobs/${job.id}`;
+  // Build the job detail URL using utility function
+  const jobUrl = buildJobUrl(job);
 
   return (
     <motion.div

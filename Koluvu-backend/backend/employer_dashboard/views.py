@@ -1039,16 +1039,40 @@ class JobListCreateView(generics.ListCreateAPIView):
         if 'employer_logo' in request.FILES:
             data['employer_logo'] = request.FILES['employer_logo']
         
-        # Convert text fields to arrays for JSON fields
+        # Convert text fields to arrays for JSON fields with smarter text processing
         text_to_array_fields = ['responsibilities', 'requirements', 'skills', 'benefits']
         for field in text_to_array_fields:
             if field in data and isinstance(data[field], str):
-                # Split by newlines or comma, filter empty strings
                 text = data[field].strip()
                 if text:
-                    data[field] = [line.strip() for line in text.split('\n') if line.strip()]
+                    # Smart text splitting - try different delimiters
+                    if '\n' in text:
+                        # Split by newlines (most common for multi-line input)
+                        data[field] = [line.strip() for line in text.split('\n') if line.strip()]
+                    elif ';' in text:
+                        # Split by semicolons (common delimiter)
+                        data[field] = [item.strip() for item in text.split(';') if item.strip()]
+                    elif ',' in text and len(text.split(',')) > 1:
+                        # Split by commas (for skills especially)
+                        data[field] = [item.strip() for item in text.split(',') if item.strip()]
+                    elif '•' in text or '*' in text:
+                        # Split by bullet points
+                        import re
+                        items = re.split(r'[•*]\s*', text)
+                        data[field] = [item.strip() for item in items if item.strip()]
+                    else:
+                        # Single long text - treat as one item
+                        data[field] = [text]
                 else:
                     data[field] = []
+        
+        # Debug logging for received data
+        logger.info(f"Job creation request from user: {request.user.username}")
+        logger.info(f"Received data keys: {list(data.keys())}")
+        logger.info(f"Array fields after processing:")
+        for field in ['responsibilities', 'requirements', 'skills', 'benefits']:
+            if field in data:
+                logger.info(f"  {field}: {type(data[field])} = {data[field]}")
         
         serializer = self.get_serializer(data=data)
         try:
@@ -1091,16 +1115,41 @@ class JobListCreateView(generics.ListCreateAPIView):
                     logger.error(f"Error saving job: {str(save_error)}", exc_info=True)
                     return Response({
                         'error': 'Failed to save job posting',
-                        'details': str(save_error)
+                        'details': str(save_error),
+                        'debug_info': {
+                            'user': request.user.username,
+                            'employer_profile_id': employer_profile.id if employer_profile else None,
+                            'data_keys': list(data.keys())
+                        }
                     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         except Exception as validation_error:
             logger.error(f"Validation error: {str(validation_error)}", exc_info=True)
+            return Response({
+                'error': 'Validation error occurred',
+                'details': str(validation_error),
+                'debug_info': {
+                    'user': request.user.username,
+                    'data_snippet': {k: str(v)[:100] if isinstance(v, str) else type(v).__name__ for k, v in data.items()}
+                }
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
-        logger.error(f"Job validation failed: {serializer.errors}")
+        logger.error(f"Job validation failed for user {request.user.username}: {serializer.errors}")
         return Response({
             'error': 'Validation failed',
-            'details': serializer.errors
+            'details': serializer.errors,
+            'debug_info': {
+                'user': request.user.username,
+                'received_fields': list(data.keys()),
+                'array_fields_status': {
+                    field: {
+                        'type': type(data.get(field, None)).__name__,
+                        'length': len(data.get(field, [])) if isinstance(data.get(field), list) else 'N/A',
+                        'sample': str(data.get(field, ''))[:50] + '...' if data.get(field) else 'empty'
+                    }
+                    for field in ['responsibilities', 'requirements', 'skills', 'benefits']
+                }
+            }
         }, status=status.HTTP_400_BAD_REQUEST)
 
 

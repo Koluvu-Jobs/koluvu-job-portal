@@ -118,19 +118,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-# Database
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_LOCAL_NAME', 'koluvu'),
-            'USER': os.getenv('DB_LOCAL_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_LOCAL_PASSWORD', 'mysql'),
-            'HOST': os.getenv('DB_LOCAL_HOST', 'localhost'),
-            'PORT': os.getenv('DB_LOCAL_PORT', '5432'),
-        }
-    }
-else:
+# Database - Auto-detect environment
+# Check if running on Render (server) or localhost
+DATABASE_URL = os.getenv('DATABASE_URL')
+IS_PRODUCTION = bool(DATABASE_URL) or 'render.com' in os.getenv('BACKEND_URL', '')
+
+if IS_PRODUCTION or not DEBUG:
+    # Production database (Neon)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -140,6 +134,22 @@ else:
             'HOST': os.getenv('DB_PROD_HOST', ''),
             'PORT': os.getenv('DB_PROD_PORT', '5432'),
             'OPTIONS': {'sslmode': 'require'},
+        }
+    }
+    # Use DATABASE_URL if available (Render deployment)
+    if DATABASE_URL:
+        import dj_database_url
+        DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
+else:
+    # Local development database (PostgreSQL)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_LOCAL_NAME', 'koluvu'),
+            'USER': os.getenv('DB_LOCAL_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_LOCAL_PASSWORD', 'mysql'),
+            'HOST': os.getenv('DB_LOCAL_HOST', 'localhost'),
+            'PORT': os.getenv('DB_LOCAL_PORT', '5432'),
         }
     }
 

@@ -5,6 +5,7 @@ import { BellIcon } from "@heroicons/react/24/outline";
 import { BellIcon as BellIconSolid } from "@heroicons/react/24/solid";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { formatDistanceToNow } from "date-fns";
+import { buildJobUrl } from "@/utils/jobUrls";
 
 export default function NotificationBell() {
   const {
@@ -67,10 +68,9 @@ export default function NotificationBell() {
     // Handle navigation based on notification type
     switch (notification.type) {
       case "new_job":
-        if (notification.job_data?.public_url) {
-          window.location.href = `/${notification.job_data.public_url}`;
-        } else if (notification.job_data?.id) {
-          window.location.href = `/jobs/${notification.job_data.id}`;
+        if (notification.job_data) {
+          const jobUrl = buildJobUrl(notification.job_data);
+          window.location.href = jobUrl;
         }
         break;
       case "new_application":

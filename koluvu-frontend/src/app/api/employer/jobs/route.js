@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-const DJANGO_BASE_URL = process.env.DJANGO_BASE_URL || "http://localhost:8000";
+const DJANGO_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://127.0.0.1:8000";
 
 export async function GET(request) {
   try {
@@ -89,17 +89,71 @@ export async function POST(request) {
         body.description || body.jobDescription || body.jobBrief || "",
       job_brief: body.job_brief || body.jobBrief || "",
 
-      // Ensure arrays are properly formatted
-      responsibilities: Array.isArray(body.responsibilities)
-        ? body.responsibilities
-        : [],
+      // Handle responsibilities - convert text to array or keep existing array
+      responsibilities: (() => {
+        if (Array.isArray(body.responsibilities)) {
+          return body.responsibilities;
+        } else if (
+          typeof body.responsibilities === "string" &&
+          body.responsibilities.trim()
+        ) {
+          // Convert text to array by splitting on newlines, semicolons, or bullets
+          return body.responsibilities
+            .trim()
+            .split(/\n|;|\*|\u2022|\u2023/)
+            .map((item) => item.trim().replace(/^[-•*]\s*/, ""))
+            .filter((item) => item.length > 0);
+        }
+        return [];
+      })(),
 
-      // Map both requirements and skills fields
-      requirements: Array.isArray(body.requirements) ? body.requirements : [],
-      skills: Array.isArray(body.skills) ? body.skills : [],
+      // Handle requirements - convert text to array or keep existing array
+      requirements: (() => {
+        if (Array.isArray(body.requirements)) {
+          return body.requirements;
+        } else if (
+          typeof body.requirements === "string" &&
+          body.requirements.trim()
+        ) {
+          // Convert text to array by splitting on newlines, semicolons, or bullets
+          return body.requirements
+            .trim()
+            .split(/\n|;|\*|\u2022|\u2023/)
+            .map((item) => item.trim().replace(/^[-•*]\s*/, ""))
+            .filter((item) => item.length > 0);
+        }
+        return [];
+      })(),
 
-      // Map both benefits and company_benefits fields
-      benefits: Array.isArray(body.benefits) ? body.benefits : [],
+      // Handle skills - convert text to array or keep existing array
+      skills: (() => {
+        if (Array.isArray(body.skills)) {
+          return body.skills;
+        } else if (typeof body.skills === "string" && body.skills.trim()) {
+          // Convert text to array by splitting on commas, newlines, semicolons, or bullets
+          return body.skills
+            .trim()
+            .split(/,|\n|;|\*|\u2022|\u2023/)
+            .map((item) => item.trim().replace(/^[-•*]\s*/, ""))
+            .filter((item) => item.length > 0);
+        }
+        return [];
+      })(),
+
+      // Handle benefits - convert text to array or keep existing array
+      benefits: (() => {
+        if (Array.isArray(body.benefits)) {
+          return body.benefits;
+        } else if (typeof body.benefits === "string" && body.benefits.trim()) {
+          // Convert text to array by splitting on newlines, semicolons, or bullets
+          return body.benefits
+            .trim()
+            .split(/\n|;|\*|\u2022|\u2023/)
+            .map((item) => item.trim().replace(/^[-•*]\s*/, ""))
+            .filter((item) => item.length > 0);
+        }
+        return [];
+      })(),
       company_benefits: body.company_benefits || body.companyBenefits || "",
 
       // Convert perks array to JSON string if needed

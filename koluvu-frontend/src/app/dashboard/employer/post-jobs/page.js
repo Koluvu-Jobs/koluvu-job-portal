@@ -3,6 +3,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { buildJobUrl } from "@/utils/jobUrls";
 import {
   FiCheck,
   FiPlus,
@@ -592,10 +593,19 @@ export default function PostJobPage() {
 
       alert("Job posted successfully!");
 
-      // Redirect to the job detail page using the job ID
+      // Redirect to the proper job detail page using utility function
       const jobId = data.id || data.job_id || data.job?.id;
-      if (jobId) {
-        router.push(`/jobs/${jobId}`);
+      const responseJobData = data.job || data;
+      
+      if (jobId && responseJobData) {
+        // Add the ID to responseJobData if it's missing
+        if (!responseJobData.id) {
+          responseJobData.id = jobId;
+        }
+        
+        const jobUrl = buildJobUrl(responseJobData);
+        console.log(`Redirecting to: ${jobUrl}`);
+        router.push(jobUrl);
       } else {
         // Fallback to active jobs page if no ID returned
         console.warn("No job ID returned from API, redirecting to active jobs");
