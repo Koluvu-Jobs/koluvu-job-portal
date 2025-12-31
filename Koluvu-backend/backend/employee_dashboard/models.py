@@ -27,7 +27,6 @@ class EmployeeProfile(models.Model):
     github_url = models.URLField(blank=True, default='')
     github_profile = models.URLField(blank=True, default='')  # Keep for compatibility
     portfolio_url = models.URLField(blank=True, default='')
-    twitter_url = models.URLField(blank=True, default='')  # Twitter profile URL
     website_url = models.URLField(blank=True, default='')  # Personal website URL
     bio = models.TextField(blank=True, default='')
     profile_picture = models.URLField(blank=True, default='')  # For Google profile pictures
